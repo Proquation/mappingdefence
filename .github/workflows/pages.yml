@@ -11,7 +11,7 @@ jobs:
     permissions:
       contents: read
       pages: write
-      id-token: write
+      id-token: write 
 
     steps:
       - uses: actions/checkout@v5
@@ -30,7 +30,7 @@ jobs:
 
       - uses: actions/configure-pages@v4
 
-      - uses: actions/upload-pages-artifact@v1
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: docs
 
