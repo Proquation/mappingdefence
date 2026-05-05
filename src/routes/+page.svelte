@@ -339,7 +339,7 @@
 
 		<p>
 			This map plots defence-related NAICS industries across Canada and sizes points by total sales.
-			Use the filters to focus on specific NAICS codes, provinces, or years.
+			Use the filters to focus on specific NAICS codes, provinces, or years. 
 		</p>
 	</div>
 
@@ -442,6 +442,10 @@
 			<div class="chart-container" bind:this={chartEl}></div>
 		</div>
 	{/if}
+
+	<div class="text">
+		Data is from the University of Toronto Library Data Axle. You can download the data <a href="{base}/data/map_export.csv">here</a>.
+	</div>
 </main>
 
 <Footer />

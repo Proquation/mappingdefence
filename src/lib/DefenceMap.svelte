@@ -80,27 +80,28 @@
 	onMount(() => {
 		map = new maplibregl.Map({
 			container: mapContainer,
-			style: {
-				version: 8,
-				// projection: { name: 'globe' },
+			style: 'https://tiles.openfreemap.org/styles/positron',
+			// style: {
+			// 	version: 8,
+			// 	// projection: { name: 'globe' },
 				
-				sources: {
-					osm: {
-						type: 'vector',
-						tiles: ['https://vector.openstreetmap.org/shortbread_v1/{z}/{x}/{y}.mvt']
-					}
-				},
-				layers: [
-					{ id: 'background', type: 'background', paint: { 'background-color': '#f8f7f3' } },
-					{ id: 'ocean', type: 'fill', source: 'osm', 'source-layer': 'ocean', paint: { 'fill-color': '#dfeef6' } },
-					{ id: 'land', type: 'fill', source: 'osm', 'source-layer': 'land', paint: { 'fill-color': '#f7f4ee' } },
-					{ id: 'boundaries', type: 'line', source: 'osm', 'source-layer': 'boundaries', paint: { 'line-color': '#c6c2b9', 'line-width': 1 } }
-				]
-			},
+			// 	sources: {
+			// 		osm: {
+			// 			type: 'vector',
+			// 			tiles: ['https://vector.openstreetmap.org/shortbread_v1/{z}/{x}/{y}.mvt']
+			// 		}
+			// 	},
+			// 	layers: [
+			// 		{ id: 'background', type: 'background', paint: { 'background-color': '#f8f7f3' } },
+			// 		{ id: 'ocean', type: 'fill', source: 'osm', 'source-layer': 'ocean', paint: { 'fill-color': '#dfeef6' } },
+			// 		{ id: 'land', type: 'fill', source: 'osm', 'source-layer': 'land', paint: { 'fill-color': '#f7f4ee' } },
+			// 		{ id: 'boundaries', type: 'line', source: 'osm', 'source-layer': 'boundaries', paint: { 'line-color': '#c6c2b9', 'line-width': 1 } }
+			// 	]
+			// },
 			center: [-95, 50],
 			zoom: 3.6,
 			minZoom: 2,
-			maxZoom: 8.5,
+			maxZoom: 12,
 			pitch: 0,
 			bearing: 0,
 			scrollZoom: true,
@@ -125,6 +126,44 @@
 					'line-width': 1,
 					'line-opacity': 0.6
 				}
+			});
+
+			map.addSource('city_names', {
+				type: 'geojson',
+				data: `${base}/geojson/populated-places-canada.geojson`
+			});
+
+			map.addLayer({
+				id: 'city_names_big',
+				type: 'symbol',
+				source: 'city_names',
+				layout: {
+					'text-field': ['get', 'name'],
+					'text-font': ['Open Sans Regular'],
+					'text-size': ['interpolate', ['linear'], ['zoom'], 4, 10, 10, 13],
+					'text-anchor': 'center',
+					'symbol-sort-key': ['get', 'scalerank']
+				},
+				paint: { 'text-color': '#333333', 'text-halo-color': '#fff', 'text-halo-width': 1.5, 'text-opacity': 0.8 },
+				filter: ['<', ['get', 'scalerank'], 5],
+				minzoom: 2,
+				maxzoom: 6
+			});
+
+			map.addLayer({
+				id: 'city_names_all',
+				type: 'symbol',
+				source: 'city_names',
+				layout: {
+					'text-field': ['get', 'name'],
+					'text-font': ['Open Sans Regular'],
+					'text-size': ['interpolate', ['linear'], ['zoom'], 4, 10, 10, 13],
+					'text-anchor': 'center',
+					'symbol-sort-key': ['get', 'scalerank']
+				},
+				paint: { 'text-color': '#333333', 'text-halo-color': '#fff', 'text-halo-width': 1.5, 'text-opacity': 0.8 },
+				minzoom: 6,
+				maxzoom: 8
 			});
 
 			map.addSource('companies', {
