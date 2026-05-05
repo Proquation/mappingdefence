@@ -2,6 +2,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import maplibregl from 'maplibre-gl';
 	import 'maplibre-gl/dist/maplibre-gl.css';
+	import { base } from '$app/paths';
 
 	export let data = [];
 	export let maxSales = 1;
@@ -112,7 +113,7 @@
 		map.on('load', () => {
 			map.addSource('province_state_lines', {
 				type: 'geojson',
-				data: '/geojson/province-state-lines.geojson'
+				data: `${base}/geojson/province-state-lines.geojson`
 			});
 
 			map.addLayer({

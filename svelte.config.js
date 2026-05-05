@@ -9,8 +9,7 @@ const config = {
 			fallback: 'index.html'
 		}),
 		paths: {
-			base: '',
-			assets: ''
+			base: '/mappingdefence'
 		}
 	}
 };

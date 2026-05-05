@@ -3,6 +3,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { csvParse } from 'd3-dsv';
+	import { base } from '$app/paths';
 
 	import '$lib/assets/global-styles.css';
 	import Logo from '$lib/LogoTop.svelte';
@@ -116,7 +117,7 @@
 		isLoading = true;
 		loadError = '';
 		try {
-			const response = await fetch('/data/map_export.csv');
+			const response = await fetch((`${base}/map_export.csv`));
 			if (!response.ok) {
 				throw new Error('Failed to load map_export.csv');
 			}
