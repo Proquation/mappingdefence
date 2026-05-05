@@ -11,28 +11,31 @@ jobs:
     permissions:
       contents: read
       pages: write
-      id-token: write 
+      id-token: write
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - run: npm ci
+      - name: Install dependencies
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install
 
-      - run: npm run build
+      - name: Build
+        run: npm run build
 
-      - run: |
-          mkdir -p docs
-          echo "" > docs/.nojekyll
+      - name: Add nojekyll
+        run: echo "" > docs/.nojekyll
 
       - uses: actions/configure-pages@v4
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: docs
+          path: docs        # matches svelte.config.js pages: 'docs'
 
   deploy:
     needs: build-and-deploy
@@ -41,5 +44,11 @@ jobs:
       pages: write
       id-token: write
 
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
-      - uses: actions/deploy-pages@v1
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
