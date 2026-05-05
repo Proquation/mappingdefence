@@ -14,24 +14,24 @@
 	import Password from '$lib/Password.svelte';
 
 	const naicsPalette = [
-		'#2e7d6b',
-		'#c07f2f',
-		'#7a6da6',
-		'#b66a8a',
-		'#4f8a3b',
-		'#b28b1c',
-		'#8a5f2b',
-		'#4c7f8f',
-		'#7f9c6e',
-		'#b7786d',
-		'#a98a5a',
-		'#8e7b9c'
+		'--brandDarkBlue',
+		'--brandMedBlue',
+		'--brandLightBlue',
+		'--brandPurple',
+		'--brandPink',
+		'--brandDarkGreen',
+		'--brandMedGreen',
+		'--brandLightGreen',
+		'--brandRed',
+		'--brandYellow',
+		'--brandOrange',
+		'--brandGray70'
 	];
 
 	const engineeringNaicsCode = '541330';
 	const naicsColorOverrides = {
-		'336411': '#2f5da7',
-		'541330': '#c43d32'
+		'336411': '--brandMedBlue',
+		'541330': '--brandRed'
 	};
 
 	let isLoading = true;
@@ -81,6 +81,15 @@
 		const safeMax = Math.max(1, maxSales);
 		const t = Math.sqrt(Math.max(0, value)) / Math.sqrt(safeMax);
 		return minRadius + (maxRadius - minRadius) * t;
+	}
+
+	function resolveCssColor(token) {
+		if (typeof document === 'undefined') return token;
+		if (token?.startsWith('--')) {
+			const value = getComputedStyle(document.documentElement).getPropertyValue(token).trim();
+			return value || '#999999';
+		}
+		return token;
 	}
 
 	function parseRow(row) {
@@ -148,10 +157,15 @@
 			selectedProvinces = [...provinceOptions];
 			selectedYear = yearOptions.includes(2025) ? 2025 : yearOptions[0] ?? allYearsLabel;
 
+			const resolvedPalette = naicsPalette.map((token) => resolveCssColor(token));
+			const resolvedOverrides = Object.fromEntries(
+				Object.entries(naicsColorOverrides).map(([code, value]) => [code, resolveCssColor(value)])
+			);
+
 			colorByNaics = Object.fromEntries(
 				naicsOptions.map((option, index) => [
 					option.code,
-					naicsColorOverrides[option.code] ?? naicsPalette[index % naicsPalette.length]
+					resolvedOverrides[option.code] ?? resolvedPalette[index % resolvedPalette.length]
 				])
 			);
 
@@ -443,8 +457,8 @@
 		</div>
 	{/if}
 
-	<div class="text">
-		Data is from the University of Toronto Library Data Axle. You can download the data <a href="{base}/data/map_export.csv">here</a>.
+	<div class="text  style=margin-bottom: 0px;">
+		<p>Data is from the University of Toronto Library Data Axle. You can download the data <a href="{base}/data/map_export.csv">here</a>.</p>
 	</div>
 </main>
 
