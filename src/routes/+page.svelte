@@ -117,7 +117,7 @@
 		isLoading = true;
 		loadError = '';
 		try {
-			const response = await fetch((`${base}/map_export.csv`));
+			const response = await fetch((`${base}/data/map_export.csv`));
 			if (!response.ok) {
 				throw new Error('Failed to load map_export.csv');
 			}
