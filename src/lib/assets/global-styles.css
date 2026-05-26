@@ -216,6 +216,10 @@ em {
 	font-family: SourceSerif;
 }
 
+.page .text {
+    width: 100%;
+}
+
 .text a:hover {
 	color: var(--brandMedGreen);
 }

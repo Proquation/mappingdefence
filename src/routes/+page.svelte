@@ -28,10 +28,19 @@
 		'--brandGray70'
 	];
 
-	const engineeringNaicsCode = '541330';
+	// Define codes for the "Secondary" category (e.g., dual-use like engineering and optical instruments)
+	// Any code not in this list is treated as "Primary"
+	const secondaryNaicsCodes = ['541330', '333314'];
+
 	const naicsColorOverrides = {
-		'336411': '--brandMedBlue',
-		'541330': '--brandRed'
+		'541330': '--brandRed',
+		'332992': '--brandDarkBlue',
+		'332994': '--brandMedBlue',
+		'333314': '--brandLightBlue',
+		'334511': '--brandPink',
+		'336411': '--brandYellow',
+		'336414': '--brandOrange',
+		'336992': '--brandMedGreen'
 	};
 
 	let isLoading = true;
@@ -47,21 +56,20 @@
 	let selectedYear = allYearsLabel;
 	let colorByNaics = {};
 	let maxSales = 1;
-	let chartEl;
-	const chartYears = Array.from({ length: 9 }, (_, index) => 2017 + index);
 
 	const minRadius = 3;
 	const maxRadius = 28;
 
 	function formatSales(value) {
 		if (!Number.isFinite(value)) return 'N/A';
-		if (value >= 1000) return `${(value / 1000).toFixed(1)}B`;
+		if (value >= 1000) return `${(value / 1000).toFixed(2)}B`;
 		return `${value.toFixed(1)}M`;
 	}
 
-	function formatSalesLong(value) {
+	function formatEmployees(value) {
 		if (!Number.isFinite(value)) return 'N/A';
-		return `$${value.toFixed(2)}M`;
+		if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
+		return `${value.toFixed(0)}`;
 	}
 
 	function mean(values) {
@@ -151,9 +159,12 @@
 
 			provinceOptions = Array.from(provinces).sort();
 			yearOptions = Array.from(years).sort((a, b) => a - b);
+			
+			// Initialize with Primary codes selected
 			selectedNaics = naicsOptions
 				.map((option) => option.code)
-				.filter((code) => code !== engineeringNaicsCode);
+				.filter((code) => !secondaryNaicsCodes.includes(code));
+				
 			selectedProvinces = [...provinceOptions];
 			selectedYear = yearOptions.includes(2025) ? 2025 : yearOptions[0] ?? allYearsLabel;
 
@@ -187,6 +198,18 @@
 			return;
 		}
 		selectedNaics = naicsOptions.map((option) => option.code);
+	}
+
+	function selectPrimary() {
+		selectedNaics = naicsOptions
+			.map((option) => option.code)
+			.filter((code) => !secondaryNaicsCodes.includes(code));
+	}
+
+	function selectSecondary() {
+		selectedNaics = naicsOptions
+			.map((option) => option.code)
+			.filter((code) => secondaryNaicsCodes.includes(code));
 	}
 
 	function toggleAllProvinces() {
@@ -228,82 +251,10 @@
 	$: totalSales = selectedSales.reduce((sum, value) => sum + value, 0);
 	$: meanSales = mean(selectedSales);
 	$: medianSales = median(selectedSales);
-
-	$: chartSourceData = rawData;
-
-	function buildChartSeries() {
-		const totals = new Map();
-		chartSourceData.forEach((row) => {
-			if (!totals.has(row.naicsCode)) {
-				totals.set(row.naicsCode, {
-					naicsCode: row.naicsCode,
-					naicsDesc: row.naicsDesc,
-					totalsByYear: new Map()
-				});
-			}
-			const entry = totals.get(row.naicsCode);
-			const current = entry.totalsByYear.get(row.year) ?? 0;
-			entry.totalsByYear.set(row.year, current + row.sales);
-		});
-
-		return Array.from(totals.values())
-			.map((entry) => ({
-				name: `${entry.naicsDesc} - ${entry.naicsCode}`,
-				x: chartYears,
-				y: chartYears.map((year) => entry.totalsByYear.get(year) ?? 0),
-				marker: { color: colorByNaics[entry.naicsCode] || '#999999' },
-				type: 'bar'
-			}))
-			.sort((a, b) => b.y.reduce((sum, value) => sum + value, 0) - a.y.reduce((sum, value) => sum + value, 0));
-	}
-
-	let Plotly;
-
-	async function ensurePlotly() {
-		if (Plotly) return Plotly;
-		const module = await import('plotly.js-dist-min');
-		Plotly = module.default ?? module;
-		return Plotly;
-	}
-
-	async function renderChart() {
-		if (!chartEl) return;
-		await ensurePlotly();
-		const data = buildChartSeries();
-		const layout = {
-			barmode: 'stack',
-			height: 400,
-			width: 600,
-			margin: { l: 0, r: 0, t: 0, b: 0 },
-			hoverlabel: {
-				namelength: -1,
-				align: 'left',
-				font: { family: 'OpenSans', size: 12 }
-			},
-			xaxis: {
-				tickvals: chartYears,
-				tickmode: 'array',
-				ticktext: chartYears.map((year) => String(year)),
-				title: ''
-			},
-			yaxis: {
-				tickprefix: '$',
-				ticksuffix: 'M',
-				title: ''
-			},
-			legend: {
-				orientation: 'h',
-				y: -0.25,
-				x: 0,
-				font: { family: 'OpenSans', size: 11 }
-			},
-			font: { family: 'OpenSans' },
-			paper_bgcolor: 'rgba(0,0,0,0)',
-			plot_bgcolor: 'rgba(0,0,0,0)'
-		};
-		const config = { displayModeBar: false, responsive: true };
-		Plotly.react(chartEl, data, layout, config);
-	}
+	$: firmCount = filteredData.length;
+	$: selectedEmployees = filteredData.map((row) => row.employees)
+	$: meanEmployees = mean(selectedEmployees)
+	$: medianEmployees = median(selectedEmployees)
 
 	$: naicsSummaries = (() => {
 		const summaryMap = new Map();
@@ -329,13 +280,34 @@
 			.sort((a, b) => b.total - a.total);
 	})();
 
-	onMount(() => {
-		loadData();
+	$: tableSourceData = rawData.filter((row) => selectedNaics.includes(row.naicsCode));
+	$: tableYears = Array.from(
+		new Set(rawData.map((row) => row.year).filter((year) => Number.isFinite(year)))
+	).sort((a, b) => a - b);
+
+	$: tableRows = naicsSummaries.map((entry) => {
+		const totalsByYear = new Map();
+		tableSourceData.forEach((row) => {
+			if (row.naicsCode !== entry.naicsCode) return;
+			const current = totalsByYear.get(row.year) ?? 0;
+			totalsByYear.set(row.year, current + row.sales);
+		});
+		return {
+			...entry,
+			totalsByYear: tableYears.map((year) => totalsByYear.get(year) ?? 0)
+		};
 	});
 
-	$: if (chartEl && !isLoading) {
-		renderChart();
-	}
+	onMount(() => {
+		loadData();
+		
+	});
+
+	// console.log('NAICS options', naicsOptions)
+	// const opticalinstru = naicsOptions.filter((option) =>
+	// 	option.code === '333314'
+	// );
+	// console.log('opticalinstru', opticalinstru); // it's in diff years essentially.
 </script>
 
 <Password />
@@ -343,14 +315,18 @@
 <Logo logoType="Blue" backgroundColor="var(--brandWhite)" />
 
 <main class="page">
-	<TitleStandard title="Where is defence industry activity concentrated in Canada?" />
+	<TitleStandard title="Where are defence industry sales concentrated in Canada?" />
 	<div class="text">
 		<AuthorDate
-			authors="<a href='https://schoolofcities.utoronto.ca/people/karen-chapple/' target='_blank'>Karen Chapple</a>, <a href='https://www.linkedin.com/in/yihoi-jung-0b95351b5/' target='_blank'>Yihoi Jung</a>, <a href='https://schoolofcities.utoronto.ca/people/jeff-allen/' target='_blank'>Jeff Allen</a>"
+			authors="<a href='https://schoolofcities.utoronto.ca/people/karen-chapple/' target='_blank'>Karen Chapple</a>, <a href='https://discover.research.utoronto.ca/8035-tara-vinodrai' target='_blank'>Tara Vinodrai</a>, <a href='https://www.linkedin.com/in/yihoi-jung-0b95351b5/' target='_blank'>Yihoi Jung</a>, Sarah Gibbons, Andrew Feng"
 			date="May 2026."
 		/>
-
-
+		<p>
+			Defence spending in Canada has historically been difficult to gather. Canada has historically kept defence spending quite low.
+			Recent commitments from the Federal Budget 2025 are to spend $30B in defence over 5 years and to reach 5% of gross domestic product (GDP) spending in defence by 2035.
+			However, it isn't clear as to what the fiscal breakdown is like in what and who they will invest in.
+			This tool aims to tackle historical defence spending based on company sales using the North American Industry Classification System (NAICS).
+		</p>
 		<p>
 			This map plots defence-related NAICS industries across Canada and sizes points by total sales.
 			Use the filters to focus on specific NAICS codes, provinces, or years. 
@@ -364,12 +340,21 @@
 	{:else}
 		<div class="text" style="margin-bottom: 0px;">
 			<h3>Filter the map</h3>
-
 			<div class="filter-group">
 				<span class="filter-label">NAICS codes</span>
-				<button type="button" class="select-all" on:click={toggleAllNaics}>
-					{selectedNaics.length === naicsOptions.length ? 'Clear all' : 'Select all'}
-				</button>
+				<div class="button-group">
+					<button type="button" class="select-all" on:click={toggleAllNaics}>
+						{selectedNaics.length === naicsOptions.length ? 'Clear all' : 'Select all'}
+					</button>
+
+					<button type="button" class="select-all" on:click={selectPrimary}>
+						Select primary
+					</button>
+
+					<button type="button" class="select-all" on:click={selectSecondary}>
+						Select secondary
+					</button>
+				</div>	
 				<div class="button-group">
 					{#each naicsOptions as option}
 						<button
@@ -378,7 +363,7 @@
 							on:click={() => toggleNaics(option.code)}
 						>
 							<span class="filter-swatch" style="background-color: {colorByNaics[option.code]}"></span>
-							<span class="filter-name">{option.desc} - {option.code}</span>
+							<span class="filter-name">{option.desc}</span>
 						</button>
 					{/each}
 				</div>
@@ -431,34 +416,73 @@
 			<DefenceMap data={filteredData} maxSales={maxSales} />
 		</section>
 
-		<div class="text summary-block">
+		<div class="text">
 			<h3>Selected summary</h3>
 			<p>
-				Total sales: <strong>{formatSalesLong(totalSales)}</strong> · Mean sales:
-				<strong>{formatSalesLong(meanSales)}</strong> · Median sales:
-				<strong>{formatSalesLong(medianSales)}</strong>
+				Firms: <strong>{firmCount}</strong> ·
+				Mean employees: <strong>{formatEmployees(meanEmployees)}</strong> ·
+				Median employees: <strong>{formatEmployees(medianEmployees)}</strong>
+			</p>
+			<p>
+				Total sales: <strong>{formatSales(totalSales)}</strong> · Mean sales:
+				<strong>{formatSales(meanSales)}</strong> · Median sales:
+				<strong>{formatSales(medianSales)}</strong>
 			</p>
 			<div class="naics-summary-list">
 				{#each naicsSummaries as entry}
 					<div class="naics-summary-row">
 						<span class="filter-swatch" style="background-color: {entry.color}"></span>
-						<span class="naics-summary-name">{entry.naicsDesc} - {entry.naicsCode}</span>
-						<span class="naics-summary-metric">Total: {formatSalesLong(entry.total)}</span>
-						<span class="naics-summary-metric">Mean: {formatSalesLong(entry.mean)}</span>
-						<span class="naics-summary-metric">Median: {formatSalesLong(entry.median)}</span>
+						<span class="naics-summary-name">{entry.naicsDesc}</span>
+						<span class="naics-summary-metric">Total: {formatSales(entry.total)}</span>
+						<span class="naics-summary-metric">Mean: {formatSales(entry.mean)}</span>
+						<span class="naics-summary-metric">Median: {formatSales(entry.median)}</span>
 					</div>
 				{/each}
 			</div>
 		</div>
 
 		<div class="text chart-block">
-			<h3>NAICS sales by year</h3>
-			<div class="chart-container" bind:this={chartEl}></div>
+			<h3>Selected NAICS sales by year</h3>
+			<div class="table-wrap">
+				<table class="naics-table">
+					<thead>
+						<tr>
+							<th>NAICS</th>
+							{#each tableYears as year}
+								<th>{year}</th>
+							{/each}
+							<th>Total</th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each tableRows as row}
+							<tr>
+								<td class="naics-cell">{row.naicsDesc}</td>
+								{#each row.totalsByYear as value}
+									<td>{formatSales(value)}</td>
+								{/each}
+								<td>{formatSales(row.total)}</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
 		</div>
 	{/if}
 
 	<div class="text  style=margin-bottom: 0px;">
-		<p>Data is from the University of Toronto Library Data Axle. You can download the data <a href="{base}/data/map_export.csv">here</a>.</p>
+		<h3>Data sources and methods</h3>
+		<p>
+			The company sales volume data is from the <a href="https://mdl.library.utoronto.ca/technology/tutorials/working-data-axle-historical-business-location-data">University of Toronto Library Data Axle</a>.
+			In order to identify the companies we wanted to observe from the historical business dataset, we gathered a list of NAICS codes deemed to be at least partially defence related.
+		</p>
+		<p>
+			"Primary defence" is deemed as NAICS codes where the companies' sales are their primarily defence-related. 
+			"Secondary defence" is when defence is not the primary product that these companies produce. 
+			For example, engineering services fall under many different sectors, but companies like <a href="https://www.wsp.com/en-me/sectors/defense">Williams Sale Partnership (WSP)</a> span dozens of different sectors, one of them being defence.
+		</p>
+
+		<p>You can download the data <a href="{base}/data/map_export.csv">here</a>.</p>
 	</div>
 </main>
 
@@ -466,7 +490,7 @@
 
 <style>
 	.page {
-		max-width: 1400px;
+		max-width: 1200px;
 		margin: 0 auto;
 		padding: 20px 24px 80px;
 		display: flex;
@@ -497,7 +521,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
-		margin-bottom: 20px;
+		margin-bottom: 16px;
 	}
 
 	.filter-row {
@@ -533,15 +557,15 @@
 	.button-group {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 10px;
-		margin-top: 4px;
+		gap: 8px;
+		margin-top: 2px;
 	}
 
 	.filter-toggle-button {
 		display: inline-flex;
 		align-items: center;
 		gap: 8px;
-		padding: 6px 10px;
+		padding: 4px 8px;
 		border: 1px solid var(--brandGray);
 		border-radius: 5px;
 		cursor: pointer;
@@ -549,7 +573,7 @@
 		color: var(--brandGray90);
 		user-select: none;
 		font-family: OpenSans;
-		font-size: 13px;
+		font-size: 12px;
 		font-weight: normal;
 		opacity: 0.6;
 		transition: opacity 0.2s ease, border 0.2s ease;
@@ -566,8 +590,8 @@
 	}
 
 	.filter-swatch {
-		height: 15px;
-		width: 5px;
+		height: 12px;
+		width: 4px;
 		border-radius: 0px;
 		flex: 0 0 auto;
 	}
@@ -615,16 +639,51 @@
 	}
 
 	.summary-block {
-		margin-top: 20px;
+		max-width: 100%;
 	}
 
 	.chart-block {
 		margin-top: 24px;
 	}
 
-	.chart-container {
+	.table-wrap {
+		margin-top: 8px;
 		width: 100%;
-		min-height: 360px;
+		overflow-x: auto;
+		border: 1px solid var(--brandGray);
+		background: var(--brandWhite);
+	}
+
+	.naics-table {
+		width: 100%;
+		border-collapse: collapse;
+		font-family: OpenSans;
+		font-size: 12px;
+		min-width: 520px;
+	}
+
+	.naics-table th,
+	.naics-table td {
+		padding: 8px 10px;
+		/* border-bottom: 1px solid var(--brandGray); */
+		text-align: right;
+		white-space: nowrap;
+	}
+
+	.naics-table th {
+		font-family: OpenSansBold;
+		/* color: var(--brandGray90); */
+		/* background: #f6f6f6; */
+	}
+
+	.naics-table td.naics-cell,
+	.naics-table th:first-child {
+		text-align: left;
+		min-width: 240px;
+	}
+
+	.naics-table tbody tr:last-child td {
+		border-bottom: none;
 	}
 
 	.summary-block p {
@@ -635,7 +694,7 @@
 	.naics-summary-list {
 		display: flex;
 		flex-direction: column;
-		gap: 10px;
+		gap: 3px;
 	}
 
 	.naics-summary-row {

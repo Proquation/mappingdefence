@@ -43,7 +43,7 @@
 		margin-top: 0px;
 		padding-bottom: 0px;
 		border-bottom: solid 1px var(--brandGray);
-		margin-bottom: 25px;
+		margin-bottom: 14px;
 	}
 
 	.author-date p {

@@ -11,6 +11,7 @@
 	let mapContainer;
 	let mapLoaded = false;
 	let popup;
+	let selectedFeatureId = null;
 
 	const minRadius = 3;
 	const maxRadius = 28;
@@ -18,8 +19,9 @@
 	function toGeoJson(rows) {
 		return {
 			type: 'FeatureCollection',
-			features: rows.map((row) => ({
+			features: rows.map((row, index) => ({
 				type: 'Feature',
+				id: index,
 				geometry: {
 					type: 'Point',
 					coordinates: [row.lon, row.lat]
@@ -58,6 +60,14 @@
 		}
 	}
 
+	function updateOpacity() {
+		if (!mapLoaded || !map) return;
+		const opacity = selectedFeatureId === null
+			? 0.85
+			: ['case', ['==', ['id'], selectedFeatureId], 0.95, 0.2];
+		map.setPaintProperty('company-circles', 'circle-opacity', opacity);
+	}
+
 	function updateRadius() {
 		if (!mapLoaded || !map) return;
 		const safeMax = Math.max(1, maxSales);
@@ -75,7 +85,8 @@
 	$: if (mapLoaded && data) {
 			updateData();
 			updateRadius();
-		}
+			updateOpacity();
+	}
 
 	onMount(() => {
 		map = new maplibregl.Map({
@@ -184,10 +195,13 @@
 			});
 
 			updateRadius();
+			updateOpacity();
 
 			map.on('click', 'company-circles', (event) => {
 				if (!event.features?.length) return;
 				const props = event.features[0].properties;
+				selectedFeatureId = event.features[0].id ?? null;
+				updateOpacity();
 				if (popup) popup.remove();
 
 				popup = new maplibregl.Popup({ closeButton: true, closeOnClick: true })
@@ -202,6 +216,14 @@
 						</div>`
 					)
 					.addTo(map);
+			});
+
+			map.on('click', (event) => {
+				const features = map.queryRenderedFeatures(event.point, { layers: ['company-circles'] });
+				if (features.length) return;
+				selectedFeatureId = null;
+				updateOpacity();
+				if (popup) popup.remove();
 			});
 
 			map.on('mouseenter', 'company-circles', () => {
@@ -238,11 +260,12 @@
 	.map-wrapper {
 		position: relative;
 		width: 100%;
+		max-width: 1080px;
+		margin: 0 auto;
 		height: 62vh;
 		min-height: 460px;
-		border-radius: 18px;
-		overflow: hidden;
-		box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+		border: 1px solid var(--brandGray);
+		border-radius: 0px;
 	}
 
 	.map {

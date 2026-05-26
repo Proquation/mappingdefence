@@ -38,9 +38,9 @@
 
 	<div class="nav-area">
 		<!-- <a href="./" class="research-link">Mapping Tariffs</a> -->
-		<button class="menu-toggle" on:click={() => (menuOpen = !menuOpen)}>
+		<!-- <button class="menu-toggle" on:click={() => (menuOpen = !menuOpen)}>
 			<span class="research-link">Mapping Tariffs</span> ▾
-		</button>
+		</button> -->
 
 		{#if menuOpen}
 			<div class="dropdown">

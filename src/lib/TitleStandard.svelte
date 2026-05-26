@@ -29,8 +29,8 @@
 		padding-left: 20px;
 		padding-right: 20px;
 		padding-top: 5px;
-		margin-bottom: 45px;
-
+		margin-bottom: 18px;
+		width: 100%;
 	}
 
 	.title-text-container h1 {
@@ -39,7 +39,7 @@
 		font-size: 48px;
 		color: var(--brandGray90);
 		text-decoration: none;
-		margin-bottom: 10px;
+		margin-bottom: 6px;
 		padding: 0px;
 	}
 
