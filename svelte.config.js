@@ -9,7 +9,7 @@ const config = {
 			fallback: 'index.html'
 		}),
 		paths: {
-			base: '/mappingdefence'
+			base: process.env.NODE_ENV === 'production' ? '/mappingdefence' : '',
 		}
 	}
 };
