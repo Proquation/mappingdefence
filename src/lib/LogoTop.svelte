@@ -12,13 +12,8 @@
 
 	const links = [
 		{ name: "Homepage", url: "./" },
-		{ name: "Background and findings", url: "./potential-local-impacts" },
-		{ name: "Canadian travel to the U.S. (05/2026)", url: "./canada-us-visits"},
-		{ name: "Update on lumber tariffs (02/2026)", url: "./lumber" },
-		{ name: "Update on truck tariffs (02/2026)", url: "./trucks" },
-		{ name: "Current tariff landscape", url: "./current-tariffs" },
-		{ name: "National map", url: "./map" },
-		{ name: "Metro area rankings", url: "./cma-ranking-charts" }
+		{ name: "National survey breakdown", url: "./national-survey" },
+		{ name: "Company insights", url: "./company-insights"}
 	];
 </script>
 
@@ -37,10 +32,10 @@
 	</a>
 
 	<div class="nav-area">
-		<!-- <a href="./" class="research-link">Mapping Tariffs</a> -->
-		<!-- <button class="menu-toggle" on:click={() => (menuOpen = !menuOpen)}>
-			<span class="research-link">Mapping Tariffs</span> ▾
-		</button> -->
+		<!-- <a href="./" class="research-link">Mapping Defence</a> -->
+		<button class="menu-toggle" on:click={() => (menuOpen = !menuOpen)}>
+			<span class="research-link">Mapping Defence</span> ▾
+		</button>
 
 		{#if menuOpen}
 			<div class="dropdown">
