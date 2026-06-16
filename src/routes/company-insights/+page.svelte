@@ -10,8 +10,6 @@
 	import TitleStandard from '$lib/TitleStandard.svelte';
 	import DefenceMap from '$lib/DefenceMap.svelte';
 	import Password from '$lib/Password.svelte';
-	import CmaBubbleMap from '$lib/CmaBubbleMap.svelte';
-	import ProvinceCartogram from '$lib/ProvinceCartogram.svelte';
 
 	let isLoading = true;
 	let loadError = '';
@@ -233,14 +231,6 @@
 		<section class="map-block">
 			<DefenceMap geojson={activeGeojson} {recordByUid} {maxValue} {formatSales} />
 		</section>
-
-		<!-- <section class="map-block">
-			<CmaBubbleMap cmaGeojson={}/>
-		</section>
-
-		<section class="map-block">
-			<ProvinceCartogram/>
-		</section> -->
 	{/if}
 
 

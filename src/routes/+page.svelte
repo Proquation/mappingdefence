@@ -146,7 +146,7 @@
 
 		<ul>
 		<li>
-			<a href="./national-survey-comparison">Examine graphs from a national survey</a> on defence expenditures across Canada.
+			<a href="./national-survey">Examine graphs from a national survey</a> on defence expenditures across Canada.
 		</li>
 
 		<li>

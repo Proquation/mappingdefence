@@ -12,7 +12,7 @@
 
 	const links = [
 		{ name: "Homepage", url: "./" },
-		{ name: "National survey breakdown", url: "./national-survey-comparison" },
+		{ name: "National survey breakdown", url: "./national-survey" },
 		{ name: "Company insights", url: "./company-insights"}
 	];
 </script>
