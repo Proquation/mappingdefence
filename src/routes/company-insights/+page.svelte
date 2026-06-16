@@ -1,5 +1,3 @@
-
-
 <script>
 	import { onMount } from 'svelte';
 	import { csvParse } from 'd3-dsv';
@@ -13,305 +11,145 @@
 	import DefenceMap from '$lib/DefenceMap.svelte';
 	import Password from '$lib/Password.svelte';
 
-	const naicsPalette = [
-		'--brandDarkBlue',
-		'--brandMedBlue',
-		'--brandLightBlue',
-		'--brandPurple',
-		'--brandPink',
-		'--brandDarkGreen',
-		'--brandMedGreen',
-		'--brandLightGreen',
-		'--brandRed',
-		'--brandYellow',
-		'--brandOrange',
-		'--brandGray70'
-	];
-
-	// Define codes for the "Secondary" category (e.g., dual-use like engineering and optical instruments)
-	// Any code not in this list is treated as "Primary"
-	const secondaryNaicsCodes = ['541330', '333314'];
-
-	const naicsColorOverrides = {
-		'541330': '--brandRed',
-		'332992': '--brandDarkBlue',
-		'332994': '--brandMedBlue',
-		'333314': '--brandLightBlue',
-		'334511': '--brandPink',
-		'336411': '--brandYellow',
-		'336414': '--brandOrange',
-		'336992': '--brandMedGreen'
-	};
-
 	let isLoading = true;
 	let loadError = '';
-	let rawData = [];
-	let filteredData = [];
-	let naicsOptions = [];
-	let naicsLabelByCode = {};
-	let provinceOptions = [];
-	let yearOptions = [];
-	let selectedNaics = [];
-	let selectedProvinces = [];
-	const allYearsLabel = 'All years';
-	let selectedYear = allYearsLabel;
-	let colorByNaics = {};
-	let maxSales = 1;
+	let mounted = false;
 
-	const minRadius = 3;
-	const maxRadius = 28;
+	// Geometry selection
+	const geometries = [
+		{ id: 'csd', label: 'Census Subdivision' },
+		{ id: 'cma', label: 'Census Metropolitan Area' },
+		{ id: 'prov', label: 'Province' }
+	];
+	let selectedGeometry = 'cma';
+
+	// Mode: ALL / PRIMARY / SECONDARY / a specific NAICS6 code
+	let selectedMode = 'ALL';
+
+	let selectedYear = null;
+	let yearOptions = [];
+	let naicsOptions = []; // [{code, desc}] of individual NAICS codes
+
+	// Per-geometry data + geojson caches
+	const aggData = {}; // { csd: [...rows], cma: [...], prov: [...] }
+	const geojsonCache = {};
 
 	function formatSales(value) {
 		if (!Number.isFinite(value)) return 'N/A';
-		if (value >= 1000) return `${(value / 1000).toFixed(2)}B`;
-		return `${value.toFixed(1)}M`;
+		if (value >= 1000) return `$${(value / 1000).toFixed(2)}B`;
+		return `$${value.toFixed(1)}M`;
 	}
 
-	function formatEmployees(value) {
-		if (!Number.isFinite(value)) return 'N/A';
-		if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
-		return `${value.toFixed(0)}`;
-	}
-
-	function mean(values) {
-		if (!values.length) return 0;
-		return values.reduce((sum, value) => sum + value, 0) / values.length;
-	}
-
-	function median(values) {
-		if (!values.length) return 0;
-		const sorted = [...values].sort((a, b) => a - b);
-		const mid = Math.floor(sorted.length / 2);
-		if (sorted.length % 2 === 0) return (sorted[mid - 1] + sorted[mid]) / 2;
-		return sorted[mid];
-	}
-
-	function sizeToPixels(value) {
-		const safeMax = Math.max(1, maxSales);
-		const t = Math.sqrt(Math.max(0, value)) / Math.sqrt(safeMax);
-		return minRadius + (maxRadius - minRadius) * t;
-	}
-
-	function resolveCssColor(token) {
-		if (typeof document === 'undefined') return token;
-		if (token?.startsWith('--')) {
-			const value = getComputedStyle(document.documentElement).getPropertyValue(token).trim();
-			return value || '#999999';
-		}
-		return token;
-	}
-
-	function parseRow(row) {
-		const lat = Number(row.lat);
-		const lon = Number(row.long);
-		const sales = Number(row.sales_M);
-		const employees = Number(row.employees);
-		const year = Number(row.year);
-		const naicsCode = String(row.NAICS6 || '').trim();
-		const naicsDesc = String(row.NAICSD || '').trim();
-		const province = String(row.STATE || '').trim();
-		const city = String(row.STCITY || '').trim();
-		const name = String(row.CONAME || '').trim();
-
-		if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
-		if (!naicsCode || !province) return null;
-
-		return {
-			name,
-			lat,
-			lon,
-			sales: Number.isFinite(sales) ? sales : 0,
-			employees: Number.isFinite(employees) ? employees : 0,
-			year: Number.isFinite(year) ? year : null,
-			naicsCode,
-			naicsDesc,
-			province,
-			city,
-			color: '#999999'
-		};
+	function parseAgg(csvText) {
+		return csvParse(csvText).map((r) => ({
+			region_uid: String(r.region_uid).trim(),
+			region_name: r.region_name,
+			year: Number(r.year),
+			NAICS6: String(r.NAICS6).trim(),
+			NAICSD: r.NAICSD,
+			defence_type: r.defence_type,
+			total_sales_M: r.total_sales_M === '' ? null : Number(r.total_sales_M),
+			sales_bucket: r.sales_bucket,
+			n_firms: r.n_firms,
+			avg_employees: r.avg_employees === '' ? null : Number(r.avg_employees),
+			suppressed: r.suppressed === 'True' || r.suppressed === 'true'
+		}));
 	}
 
 	async function loadData() {
-		isLoading = true;
-		loadError = '';
 		try {
-			const response = await fetch((`${base}/data/map_export.csv`));
-			if (!response.ok) {
-				throw new Error('Failed to load map_export.csv');
-			}
-			const csv = await response.text();
-			const rows = csvParse(csv);
-			const parsed = rows.map(parseRow).filter(Boolean);
+			const [csd, cma, prov] = await Promise.all([
+				fetch(`${base}/data/csd_agg.csv`).then((r) => r.text()),
+				fetch(`${base}/data/cma_agg.csv`).then((r) => r.text()),
+				fetch(`${base}/data/prov_agg.csv`).then((r) => r.text())
+			]);
+			aggData.csd = parseAgg(csd);
+			aggData.cma = parseAgg(cma);
+			aggData.prov = parseAgg(prov);
+
+			// Year + NAICS options derived from the union of all rows
+			const allRows = [...aggData.csd, ...aggData.cma, ...aggData.prov];
+			yearOptions = [...new Set(allRows.map((r) => r.year))].sort((a, b) => a - b);
+			selectedYear = yearOptions[yearOptions.length - 1];
 
 			const naicsMap = new Map();
-			const provinces = new Set();
-			const years = new Set();
-			parsed.forEach((row) => {
-				if (!naicsMap.has(row.naicsCode)) {
-					naicsMap.set(row.naicsCode, row.naicsDesc || 'Unknown');
+			allRows.forEach((r) => {
+				if (!['ALL', 'PRIMARY', 'SECONDARY'].includes(r.NAICS6) && !naicsMap.has(r.NAICS6)) {
+					naicsMap.set(r.NAICS6, { desc: r.NAICSD, type: r.defence_type });
 				}
-				if (row.province) provinces.add(row.province);
-				if (row.year) years.add(row.year);
 			});
-
-			naicsOptions = Array.from(naicsMap.entries())
-				.map(([code, desc]) => ({ code, desc }))
-				.sort((a, b) => a.code.localeCompare(b.code));
-
-			naicsLabelByCode = Object.fromEntries(naicsOptions.map((option) => [option.code, option.desc]));
-
-			provinceOptions = Array.from(provinces).sort();
-			yearOptions = Array.from(years).sort((a, b) => a - b);
-			
-			// Initialize with Primary codes selected
-			selectedNaics = naicsOptions
-				.map((option) => option.code)
-				.filter((code) => !secondaryNaicsCodes.includes(code));
-				
-			selectedProvinces = [...provinceOptions];
-			selectedYear = yearOptions.includes(2025) ? 2025 : yearOptions[0] ?? allYearsLabel;
-
-			const resolvedPalette = naicsPalette.map((token) => resolveCssColor(token));
-			const resolvedOverrides = Object.fromEntries(
-				Object.entries(naicsColorOverrides).map(([code, value]) => [code, resolveCssColor(value)])
-			);
-
-			colorByNaics = Object.fromEntries(
-				naicsOptions.map((option, index) => [
-					option.code,
-					resolvedOverrides[option.code] ?? resolvedPalette[index % resolvedPalette.length]
-				])
-			);
-
-			rawData = parsed.map((row) => ({
-				...row,
-				naicsDesc: naicsLabelByCode[row.naicsCode] || row.naicsDesc,
-				color: colorByNaics[row.naicsCode] || '#999999'
-			}));
-		} catch (error) {
-			console.error('Error loading defence map data:', error);
-			loadError = 'Unable to load the defence sales data.';
+			naicsOptions = [...naicsMap.entries()]
+				.map(([code, { desc, type }]) => ({ code, desc, type }))
+				.sort((a, b) => {
+					// primary before secondary, then by code
+					if (a.type !== b.type) return a.type === 'primary' ? -1 : 1;
+					return a.code.localeCompare(b.code);
+				});
+		} catch (err) {
+			console.error(err);
+			loadError = 'Unable to load aggregated defence data.';
 		} finally {
 			isLoading = false;
 		}
 	}
 
-	function toggleAllNaics() {
-		if (selectedNaics.length === naicsOptions.length) {
-			selectedNaics = [];
-			return;
-		}
-		selectedNaics = naicsOptions.map((option) => option.code);
+	async function ensureGeojson(geom) {
+		if (geojsonCache[geom]) return geojsonCache[geom];
+		const file = {
+			csd: 'csd_boundaries',
+			cma: 'cma_boundaries',
+			prov: 'province_boundaries'
+		}[geom];
+		const gj = await fetch(`${base}/geojson/${file}.geojson`).then((r) => r.json());
+		geojsonCache[geom] = gj;
+		return gj;
 	}
 
-	function selectPrimary() {
-		selectedNaics = naicsOptions
-			.map((option) => option.code)
-			.filter((code) => !secondaryNaicsCodes.includes(code));
+	// Active geojson (reactive — only in the browser, never during SSR)
+	let activeGeojson = null;
+	$: if (mounted && selectedGeometry) {
+		ensureGeojson(selectedGeometry).then((gj) => (activeGeojson = gj));
 	}
 
-	function selectSecondary() {
-		selectedNaics = naicsOptions
-			.map((option) => option.code)
-			.filter((code) => secondaryNaicsCodes.includes(code));
-	}
-
-	function toggleAllProvinces() {
-		if (selectedProvinces.length === provinceOptions.length) {
-			selectedProvinces = [];
-			return;
-		}
-		selectedProvinces = [...provinceOptions];
-	}
-
-	function toggleNaics(code) {
-		if (selectedNaics.includes(code)) {
-			selectedNaics = selectedNaics.filter((item) => item !== code);
-			return;
-		}
-		selectedNaics = [...selectedNaics, code];
-	}
-
-	function toggleProvince(province) {
-		if (selectedProvinces.includes(province)) {
-			selectedProvinces = selectedProvinces.filter((item) => item !== province);
-			return;
-		}
-		selectedProvinces = [...selectedProvinces, province];
-	}
-
-	$: filteredData = rawData.filter(
-		(row) =>
-			selectedNaics.includes(row.naicsCode) &&
-			selectedProvinces.includes(row.province) &&
-			(selectedYear === allYearsLabel || row.year === selectedYear)
-	);
-
-	$: maxSales = filteredData.length ? Math.max(...filteredData.map((row) => row.sales)) : 1;
-
-	const sizeLegend = [70, 140, 210];
-
-	$: selectedSales = filteredData.map((row) => row.sales);
-	$: totalSales = selectedSales.reduce((sum, value) => sum + value, 0);
-	$: meanSales = mean(selectedSales);
-	$: medianSales = median(selectedSales);
-	$: firmCount = filteredData.length;
-	$: selectedEmployees = filteredData.map((row) => row.employees)
-	$: meanEmployees = mean(selectedEmployees)
-	$: medianEmployees = median(selectedEmployees)
-
-	$: naicsSummaries = (() => {
-		const summaryMap = new Map();
-		filteredData.forEach((row) => {
-			if (!summaryMap.has(row.naicsCode)) {
-				summaryMap.set(row.naicsCode, {
-					naicsCode: row.naicsCode,
-					naicsDesc: naicsLabelByCode[row.naicsCode] || row.naicsDesc,
-					color: colorByNaics[row.naicsCode] || '#999999',
-					sales: []
-				});
-			}
-			summaryMap.get(row.naicsCode).sales.push(row.sales);
+	// Build { region_uid -> total_sales_M } for the active geometry/year/mode
+	$: valueByUid = (() => {
+		const rows = aggData[selectedGeometry] || [];
+		const lookup = {};
+		rows.forEach((r) => {
+			if (r.year !== selectedYear) return;
+			if (r.NAICS6 !== selectedMode) return;
+			lookup[r.region_uid] = r.total_sales_M;
 		});
-
-		return Array.from(summaryMap.values())
-			.map((entry) => ({
-				...entry,
-				total: entry.sales.reduce((sum, value) => sum + value, 0),
-				mean: mean(entry.sales),
-				median: median(entry.sales)
-			}))
-			.sort((a, b) => b.total - a.total);
+		return lookup;
 	})();
 
-	$: tableSourceData = rawData.filter((row) => selectedNaics.includes(row.naicsCode));
-	$: tableYears = Array.from(
-		new Set(rawData.map((row) => row.year).filter((year) => Number.isFinite(year)))
-	).sort((a, b) => b - a);
-
-	$: tableRows = naicsSummaries.map((entry) => {
-		const totalsByYear = new Map();
-		tableSourceData.forEach((row) => {
-			if (row.naicsCode !== entry.naicsCode) return;
-			const current = totalsByYear.get(row.year) ?? 0;
-			totalsByYear.set(row.year, current + row.sales);
+	// Build { region_uid -> {sales, n_firms, avg_employees} } for the active geometry/year/mode
+	$: recordByUid = (() => {
+		const rows = aggData[selectedGeometry] || [];
+		const lookup = {};
+		rows.forEach((r) => {
+			if (r.year !== selectedYear) return;
+			if (r.NAICS6 !== selectedMode) return;
+			lookup[r.region_uid] = {
+				sales: r.total_sales_M,
+				n_firms: r.n_firms,
+				avg_employees: r.avg_employees
+			};
 		});
-		return {
-			...entry,
-			totalsByYear: tableYears.map((year) => totalsByYear.get(year) ?? 0)
-		};
-	});
+		return lookup;
+	})();
+
+	$: maxValue = Math.max(
+		1,
+		...Object.values(recordByUid)
+			.map((d) => d.sales)
+			.filter((v) => Number.isFinite(v))
+	);
 
 	onMount(() => {
+		mounted = true;
 		loadData();
-		
 	});
-
-	// console.log('NAICS options', naicsOptions)
-	// const opticalinstru = naicsOptions.filter((option) =>
-	// 	option.code === '333314'
-	// );
-	// console.log('opticalinstru', opticalinstru); // it's in diff years essentially.
 </script>
 
 <Password />
@@ -326,14 +164,20 @@
 			date="May 2026."
 		/>
 		<p>
-			Defence spending in Canada has historically been difficult to gather. Canada has historically kept defence spending quite low.
-			Recent commitments from the Federal Budget 2025 are to spend $30B in defence over 5 years and to reach 5% of gross domestic product (GDP) spending in defence by 2035.
+			Defence spending in Canada has historically been difficult to gather. Canada has historically kept
+			defence spending quite low. Recent commitments from the Federal Budget 2025 are to spend $30B in
+			defence over 5 years and to reach 5% of gross domestic product (GDP) spending in defence by 2035.
 			However, it isn't clear as to what the fiscal breakdown is like in what and who they will invest in.
-			This tool aims to tackle historical defence spending based on company sales using the North American Industry Classification System (NAICS).
+			This tool aims to tackle historical defence spending based on company sales using the North American
+			Industry Classification System (NAICS).
 		</p>
 		<p>
-			This map plots defence-related NAICS industries across Canada and sizes points by total sales.
-			Use the filters to focus on specific NAICS codes, provinces, or years. 
+			This map aggregates defence-related firm sales into Canadian geographies and shades each region from
+			light to dark by total sales. Use the filters to choose the geography, the defence category, and the
+			year.
+		</p>
+		<p>
+			Note: Any geometry with only 1 firm has been excluded for privacy. The total sales reflect the firms shown.
 		</p>
 	</div>
 
@@ -344,152 +188,72 @@
 	{:else}
 		<div class="text" style="margin-bottom: 0px;">
 			<h3>Filter the map</h3>
-			<div class="filter-group">
-				<span class="filter-label">NAICS codes</span>
-				<div class="button-group">
-					<button type="button" class="select-all" on:click={toggleAllNaics}>
-						{selectedNaics.length === naicsOptions.length ? 'Clear all' : 'Select all'}
-					</button>
-
-					<button type="button" class="select-all" on:click={selectPrimary}>
-						Select primary
-					</button>
-
-					<button type="button" class="select-all" on:click={selectSecondary}>
-						Select secondary
-					</button>
-				</div>	
-				<div class="button-group">
-					{#each naicsOptions as option}
-						<button
-							type="button"
-							class="filter-toggle-button {selectedNaics.includes(option.code) ? 'selected' : ''}"
-							on:click={() => toggleNaics(option.code)}
-						>
-							<span class="filter-swatch" style="background-color: {colorByNaics[option.code]}"></span>
-							<span class="filter-name">{option.desc}</span>
-						</button>
-					{/each}
-				</div>
-			</div>
-
-			<div class="filter-group">
-				<span class="filter-label">Provinces and territories</span>
-				<button type="button" class="select-all" on:click={toggleAllProvinces}>
-					{selectedProvinces.length === provinceOptions.length ? 'Clear all' : 'Select all'}
-				</button>
-				<div class="button-group">
-					{#each provinceOptions as province}
-						<button
-							type="button"
-							class="filter-toggle-button {selectedProvinces.includes(province) ? 'selected' : ''}"
-							on:click={() => toggleProvince(province)}
-						>
-							<span class="filter-name">{province}</span>
-						</button>
-					{/each}
-				</div>
-			</div>
-
 			<div class="filter-row">
 				<div class="filter-group">
-					<span class="filter-label">Year</span>
-					<select class="year-select" bind:value={selectedYear}>
-						<option value={allYearsLabel}>{allYearsLabel}</option>
-						{#each yearOptions as year}
-							<option value={year}>{year}</option>
+					<span class="filter-label">Aggregate by</span>
+					<select class="year-select" bind:value={selectedGeometry}>
+						{#each geometries as g}
+							<option value={g.id}>{g.label}</option>
 						{/each}
 					</select>
 				</div>
 
 				<div class="filter-group">
-					<span class="filter-label">Circle size</span>
-					<div class="size-legend">
-						{#each sizeLegend as value}
-							<div class="size-row">
-								<span class="size-dot" style="--dot-size: {sizeToPixels(value)}px"></span>
-								<span>{formatSales(value)}</span>
-							</div>
+					<span class="filter-label">Show</span>
+					<select class="year-select" bind:value={selectedMode}>
+						<option value="ALL">All defence</option>
+						<option value="PRIMARY">Primary only</option>
+						<option value="SECONDARY">Secondary only</option>
+						<optgroup label="Primary NAICS">
+							{#each naicsOptions.filter((n) => n.type === 'primary') as n}
+								<option value={n.code} class="opt-primary">{n.code} — {n.desc}</option>
+							{/each}
+						</optgroup>
+						<optgroup label="Secondary NAICS">
+							{#each naicsOptions.filter((n) => n.type === 'secondary') as n}
+								<option value={n.code} class="opt-secondary">{n.code} — {n.desc}</option>
+							{/each}
+						</optgroup>
+					</select>
+				</div>
+
+				<div class="filter-group">
+					<span class="filter-label">Year</span>
+					<select class="year-select" bind:value={selectedYear}>
+						{#each yearOptions as year}
+							<option value={year}>{year}</option>
 						{/each}
-					</div>
+					</select>
 				</div>
 			</div>
 		</div>
 
 		<section class="map-block">
-			<DefenceMap data={filteredData} maxSales={maxSales} />
+			<DefenceMap geojson={activeGeojson} {recordByUid} {maxValue} {formatSales} />
 		</section>
-
-		<div class="text">
-			<h3>Selected summary</h3>
-			<p>
-				Firms: <strong>{firmCount}</strong> ·
-				Mean employees: <strong>{formatEmployees(meanEmployees)}</strong> ·
-				Median employees: <strong>{formatEmployees(medianEmployees)}</strong>
-				<br>
-				Total sales: <strong>{formatSales(totalSales)}</strong> · Mean sales:
-				<strong>{formatSales(meanSales)}</strong> · Median sales:
-				<strong>{formatSales(medianSales)}</strong>
-			</p>
-			<div class="naics-summary-list">
-				{#each naicsSummaries as entry}
-					<div class="naics-summary-row">
-						<span class="filter-swatch" style="background-color: {entry.color}"></span>
-						<div class="naics-summary-content">
-							<div class="naics-summary-name">{entry.naicsDesc}</div>
-							<div class="naics-summary-details">
-								<span>Total: {formatSales(entry.total)}</span>
-								<span>Mean: {formatSales(entry.mean)}</span>
-								<span>Median: {formatSales(entry.median)}</span>
-							</div>
-						</div>
-					</div>
-				{/each}
-			</div>
-		</div>
-
-		<div class="text chart-block">
-			<h3>Selected NAICS sales by year</h3>
-			<div class="table-wrap">
-				<table class="naics-table">
-					<thead>
-						<tr>
-							<th>NAICS</th>
-							{#each tableYears as year}
-								<th>{year}</th>
-							{/each}
-							<th>Total</th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each tableRows as row}
-							<tr>
-								<td class="naics-cell">{row.naicsDesc}</td>
-								{#each row.totalsByYear as value}
-									<td>{formatSales(value)}</td>
-								{/each}
-								<td>{formatSales(row.total)}</td>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
-			</div>
-		</div>
 	{/if}
 
-	<div class="text  style=margin-bottom: 0px;">
+
+	<div class="text" style="margin-bottom: 0px;">
 		<h3>Data sources and methods</h3>
 		<p>
-			The company sales volume data is from the <a href="https://mdl.library.utoronto.ca/technology/tutorials/working-data-axle-historical-business-location-data">University of Toronto Library Data Axle</a>.
-			In order to identify the companies we wanted to observe from the historical business dataset, we gathered a list of NAICS codes deemed to be at least partially defence related.
+			The company sales volume data is from the <a
+				href="https://mdl.library.utoronto.ca/technology/tutorials/working-data-axle-historical-business-location-data"
+				>University of Toronto Library Data Axle</a
+			>. In order to identify the companies we wanted to observe from the historical business dataset, we
+			gathered a list of NAICS codes deemed to be at least partially defence related.
 		</p>
 		<p>
-			"Primary defence" is deemed as NAICS codes where the companies' sales are their primarily defence-related. 
-			"Secondary defence" is when defence is not the primary product that these companies produce. 
-			For example, engineering services fall under many different sectors, but companies like <a href="https://www.wsp.com/en-me/sectors/defense">Williams Sale Partnership (WSP)</a> span dozens of different sectors, one of them being defence.
+			"Primary defence" is deemed as NAICS codes where the companies' sales are their primarily
+			defence-related. "Secondary defence" is when defence is not the primary product that these companies
+			produce. For example, engineering services fall under many different sectors, but companies like <a
+				href="https://www.wsp.com/en-me/sectors/defense">Williams Sale Partnership (WSP)</a
+			> span dozens of different sectors, one of them being defence.
 		</p>
-
-		<p>You can download the data <a href="{base}/data/map_export.csv">here</a>.</p>
+		<p>
+			To protect firm-level confidentiality, regions with fewer than three firms in a given category and
+			year have their exact sales suppressed and appear as "no data" on the map.
+		</p>
 	</div>
 </main>
 
@@ -544,71 +308,8 @@
 		color: var(--brandGray90);
 	}
 
-	.select-all {
-		align-self: flex-start;
-		background: transparent;
-		border: 1px solid var(--brandGray);
-		border-radius: 5px;
-		padding: 4px 10px;
-		font-family: OpenSans;
-		font-size: 12px;
-		color: var(--brandGray90);
-		cursor: pointer;
-	}
-
-	.select-all:hover {
-		border-color: var(--brandMedBlue);
-		color: var(--brandMedBlue);
-	}
-
-	.button-group {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 8px;
-		margin-top: 2px;
-	}
-
-	.filter-toggle-button {
-		display: inline-flex;
-		align-items: center;
-		gap: 8px;
-		padding: 4px 8px;
-		border: 1px solid var(--brandGray);
-		border-radius: 5px;
-		cursor: pointer;
-		background-color: transparent;
-		color: var(--brandGray90);
-		user-select: none;
-		font-family: OpenSans;
-		font-size: 12px;
-		font-weight: normal;
-		opacity: 0.6;
-		transition: opacity 0.2s ease, border 0.2s ease;
-	}
-
-	.filter-toggle-button.selected {
-		opacity: 1;
-		border-color: var(--brandLightBlue);
-	}
-
-	.filter-toggle-button:hover {
-		opacity: 1;
-		border-color: var(--brandMedBlue);
-	}
-
-	.filter-swatch {
-		height: 12px;
-		width: 4px;
-		border-radius: 0px;
-		flex: 0 0 auto;
-	}
-
-	.filter-name {
-		line-height: 1.2;
-	}
-
 	.year-select {
-		max-width: 220px;
+		max-width: 280px;
 		padding: 6px 10px;
 		border: 1px solid var(--brandGray);
 		border-radius: 5px;
@@ -618,128 +319,20 @@
 		font-size: 13px;
 	}
 
-	.size-legend {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 16px;
-		align-items: center;
+	.year-select :global(option.opt-primary) {
+		background-color: #e3f0f7; /* light blue */
 	}
-
-	.size-row {
-		display: inline-flex;
-		align-items: center;
-		gap: 10px;
-		font-size: 14px;
-		font-family: OpenSans;
-	}
-
-	.size-dot {
-		width: var(--dot-size);
-		height: var(--dot-size);
-		background: var(--brandGray90);
-		border-radius: 50%;
-		display: inline-block;
+	.year-select :global(option.opt-secondary) {
+		background-color: #fbe4e4; /* light red */
 	}
 
 	.map-block {
 		width: 100%;
 	}
 
-	.summary-block {
-		max-width: 100%;
-	}
-
-	.chart-block {
-		margin-top: 24px;
-	}
-
-	.table-wrap {
-		margin-top: 8px;
-		width: 100%;
-		overflow-x: auto;
-		border: 1px solid var(--brandGray);
-		background: var(--brandWhite);
-	}
-
-	.naics-table {
-		width: 100%;
-		border-collapse: collapse;
-		font-family: OpenSans;
-		font-size: 14px;
-		min-width: 520px;
-	}
-
-	.naics-table th,
-	.naics-table td {
-		padding: 8px 10px;
-		border-bottom: 1px solid var(--brandGray);
-		text-align: right;
-		white-space: nowrap;
-	}
-
-	.naics-table th {
-		font-family: OpenSansBold;
-		/* color: var(--brandGray90); */
-		/* background: #f6f6f6; */
-	}
-
-	.naics-table td.naics-cell,
-	.naics-table th:first-child {
-		text-align: left;
-		min-width: 240px;
-	}
-
-	.naics-table tbody tr:last-child td {
-		border-bottom: none;
-	}
-
-	.summary-block p {
-		margin-top: 8px;
-		margin-bottom: 14px;
-	}
-
-	.naics-summary-list {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-	}
-
-	.naics-summary-row {
-		display: flex;
-		gap: 12px;
-		align-items: flex-start;
-		font-family: OpenSans;
-		font-size: 13px;
-		color: var(--brandGray90);
-	}
-
-	.naics-summary-content {
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-		min-width: 0;
-	}
-
-	.naics-summary-name {
-		font-family: OpenSansBold;
-	}
-
-	.naics-summary-details {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 15px;
-		font-family: OpenSans;
-		font-size: 12px;
-		color: var(--brandGray70);
-	}
-
 	@media (max-width: 720px) {
 		.page {
 			padding: 32px 16px 64px;
-		}
-
-		.button-group {
-			gap: 8px;
 		}
 	}
 </style>

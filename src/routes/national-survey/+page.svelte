@@ -36,7 +36,7 @@
     let chartEls = {};
 
     const sizeMetricOptions = [
-        { id: 'amount', label: 'Amount (Sales)', type: 'amount' },
+        { id: 'amount', label: 'Number of firms', type: 'amount' },
         { id: 'percSales', label: 'Percent of total sales', type: 'percent' },
         { id: 'percExports', label: 'Percent of total exports', type: 'percent' },
         { id: 'percEmployment', label: 'Percent of total employment', type: 'percent' },
@@ -57,7 +57,7 @@
         'Enterprises with 500 or more employees': '--brandDarkBlue'
     };
 
-function formatCurrency(val) {
+    function formatCurrency(val) {
 		if (val >= 1e9) return `$${(val / 1e9).toFixed(2)}B`;
 		if (val >= 1e6) return `$${(val / 1e6).toFixed(1)}M`;
 		return `$${val.toLocaleString()}`;
@@ -106,6 +106,19 @@ function formatCurrency(val) {
         return match ? row[match] : '';
     }
 
+    function normalizeCategory(cat) {
+        const c = cat.trim();
+        if (c.includes('non-government') && c.includes('Canadian'))
+            return 'Sales to non-government entities in Canadian defence & aerospace sectors';
+        if (c.includes('non-government') && (c.includes('U.S.') || c.includes('US')))
+            return 'Sales to non-government entities in U.S. defence & aerospace sectors';
+        if (c.startsWith('Sales to Central America'))
+            return 'Sales to Central America, Caribbean, Mexico and South America';
+        if (c === 'Sales to Asia and Oceania')
+            return 'Sales to Asia and Oceania - Other than Australia & New Zealand';
+        return c;
+    }
+
     async function loadData() {
         try {
             const [resLoc, resGoods, resSize] = await Promise.all([
@@ -121,7 +134,7 @@ function formatCurrency(val) {
             const csvSize = await resSize.text();
 
             b1Data = csvParse(csvLoc).map((row) => ({
-                category: row['Type of Sale'].trim(),
+                category: normalizeCategory(row['Type of Sale'].trim()),
                 amount: parseNum(row['Amount']),
                 year: Number(row['Year'])
             })).filter((d) => d.year && d.amount > 0);
@@ -162,8 +175,29 @@ function formatCurrency(val) {
             return region === selectedRegion;
         })
         .sort((a, b) => b.amount - a.amount);
+
     
     $: locTotal = locFiltered.reduce((sum, d) => sum + d.amount, 0);
+
+    // Remove locYear filter, group by category across all years
+    $: locAllYears = years.map(y => {
+        const items = b1Data.filter(d => d.year === y);
+        const total = items.reduce((sum, d) => sum + d.amount, 0);
+        return { year: y, items, total };
+    });
+
+    // Get all unique categories across all years, sorted by most recent year amount
+    $: allCategories = (() => {
+        const latestYear = Math.max(...years);
+        const latestItems = b1Data.filter(d => d.year === latestYear);
+        const cats = [...new Set(b1Data.map(d => d.category))];
+        return cats.sort((a, b) => {
+            const aVal = latestItems.find(d => d.category === a)?.amount ?? 0;
+            const bVal = latestItems.find(d => d.category === b)?.amount ?? 0;
+            return bVal - aVal;
+        });
+    })();
+    
 
     // ---------------------------
     // Goods/Services Spider Data (B4)
@@ -394,25 +428,54 @@ function formatCurrency(val) {
         <!-- TABULAR LIST: LOCATIONS -->
         <div class="text">
             <h3>Sales by location</h3>
-            <p>Tabular view showing sales breakdown for <strong>{locYear}</strong>, ordered by decreasing value.</p>
+            <p>Sales breakdown across all survey years, ordered by most recent year value.</p>
+            <div class="filter-group inline-filters">
+                <span class="filter-label">Sales metric</span>
+                <div class="button-group">
+                    <button class="filter-toggle-button {locViewMode === 'raw' ? 'selected' : ''}" on:click={() => (locViewMode = 'raw')}>
+                        Show Raw
+                    </button>
+                    <button class="filter-toggle-button {locViewMode === 'percent' ? 'selected' : ''}" on:click={() => (locViewMode = 'percent')}>
+                        Show Percent
+                    </button>
+                </div>
+            </div>
+            <div class="filter-group inline-filters">
+                <span class="filter-label">Region</span>
+                <select class="year-select" bind:value={selectedRegion}>
+                    {#each regions as r}
+                        <option value={r}>{regionLabels[r]}</option>
+                    {/each}
+                </select>
+            </div>
             <div class="table-wrap">
                 <table class="data-table">
                     <thead>
                         <tr>
                             <th class="align-left">Location Breakdown</th>
-                            <th>{locViewMode === 'raw' ? 'Amount (Sales)' : 'Share of Total (%)'}</th>
+                            {#each years as y}
+                                <th>{y}</th>
+                            {/each}
                         </tr>
                     </thead>
                     <tbody>
-                        {#each locFiltered as item}
+                        {#each allCategories.filter(cat => selectedRegion === 'all' || resolveRegion(cat) === selectedRegion || (selectedRegion === 'notcanada' && resolveRegion(cat) === 'notcanada')) as cat}
                             <tr>
-                                <td class="align-left cell-category">{item.category}</td>
-                                <td>{formatValue(item.amount, locTotal, locViewMode)}</td>
+                                <td class="align-left cell-category">{cat}</td>
+                                {#each locAllYears as { year, items, total }}
+                                    {@const val = items.find(d => d.category === cat)?.amount ?? 0}
+                                    <td>{val > 0 ? formatValue(val, total, locViewMode) : '—'}</td>
+                                {/each}
                             </tr>
                         {/each}
                         <tr class="total-row">
                             <td class="align-left cell-category">Total</td>
-                            <td>{formatValue(locTotal, locTotal, locViewMode)}</td>
+                            {#each locAllYears as { total, items }}
+                                {@const filteredTotal = items
+                                    .filter(d => selectedRegion === 'all' || resolveRegion(d.category) === selectedRegion || (selectedRegion === 'notcanada' && resolveRegion(d.category) === 'notcanada'))
+                                    .reduce((sum, d) => sum + d.amount, 0)}
+                                <td>{formatValue(filteredTotal, filteredTotal, locViewMode)}</td>
+                            {/each}
                         </tr>
                     </tbody>
                 </table>
@@ -421,48 +484,86 @@ function formatCurrency(val) {
 
         <div class="text">
             <h3>Share of sales by company size</h3>
-            <p>Waffle chart showing the distribution of sales, exports, employment, and R&D by company size.</p>
-            <div class="waffle-controls">
-                <div class="filter-group">
-                    <span class="filter-label">Year</span>
-                    <select class="year-select" bind:value={waffleYear}>
-                        {#each years as y}
-                            <option value={y}>{y}</option>
-                        {/each}
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <span class="filter-label">Metric</span>
-                    <select class="year-select" bind:value={waffleMetric}>
-                        {#each sizeMetricOptions as metric}
-                            <option value={metric.id}>{metric.label}</option>
-                        {/each}
-                    </select>
-                </div>
-            </div>
-            <div class="waffle-layout">
-                <SizeWaffle items={waffleItems} total={waffleTotal} />
-                <div class="waffle-legend">
-                    {#each waffleItems as item}
-                        <div class="waffle-legend-row">
-                            <span class="waffle-swatch" style="background-color: {resolveCssColor(item.color)}"></span>
-                            <span class="waffle-label">{item.label}:</span>
-                            <span class="waffle-value">
-                                {waffleMetricDef.type === 'percent'
-                                    ? `${item.value.toFixed(1)}%`
-                                    : `${item.value}`}
-                            </span>
-                        </div>
+            <p>Distribution of sales, exports, employment, and R&D by company size across all survey years.</p>
+            <div class="filter-group inline-filters">
+                <span class="filter-label">Metric</span>
+                <select class="year-select" bind:value={waffleMetric}>
+                    {#each sizeMetricOptions as metric}
+                        <option value={metric.id}>{metric.label}</option>
                     {/each}
-                </div>
+                </select>
+            </div>
+            <div class="waffle-legend" style="margin-top: 16px; margin-bottom: 8px;">
+                {#each sizeCategoryOrder as label}
+                    <div class="waffle-legend-row">
+                        <span class="waffle-swatch" style="background-color: {resolveCssColor(sizeCategoryColors[label])}"></span>
+                        <span class="waffle-label">{label}</span>
+                    </div>
+                {/each}
             </div>
         </div>
+            <div class="spider-scroll-wrapper">
+                {#each [...years].reverse() as y}
+                    {@const yearItems = sizeData.filter(d => d.year === y)}
+                    {@const metricDef = sizeMetricOptions.find(m => m.id === waffleMetric) || sizeMetricOptions[0]}
+                    {@const total = metricDef.type === 'amount'
+                        ? yearItems.reduce((sum, d) => sum + d.amount, 0)
+                        : 100}
+                    {@const items = sizeCategoryOrder.map(label => {
+                        const match = yearItems.find(d => d.size === label);
+                        const value = match ? match[metricDef.id] ?? 0 : 0;
+                        return {
+                            label,
+                            value,
+                            displayValue: metricDef.type === 'amount' ? value.toLocaleString() : `${value.toFixed(1)}%`,
+                            color: sizeCategoryColors[label] || '--brandGray'
+                        };
+                    })}
+                    <div class="waffle-year-block">
+                        <div class="waffle-year-label">{y}</div>
+                        <SizeWaffle {items} {total} />
+                        <div class="waffle-year-values">
+                            {#each items as item}
+                                <div class="waffle-legend-row">
+                                    <span class="waffle-swatch" style="background-color: {resolveCssColor(item.color)}"></span>
+                                    <span class="waffle-value">{item.displayValue}</span>
+                                </div>
+                            {/each}
+                        </div>
+                    </div>
+                {/each}
+            </div>
     {/if}
 </main>
 
 <Footer />
 
 <style>
+
+    .waffle-year-block {
+        flex: 0 0 320px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        border: 1px solid var(--brandGray);
+        background-color: #fafafa;
+        border-radius: 3px;
+        padding: 16px;
+    }
+
+    .waffle-year-label {
+        font-family: TradeGothicBold;
+        font-size: 18px;
+        color: var(--brandDarkBlue);
+        text-align: center;
+    }
+
+    .waffle-year-values {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 13px;
+    }
     .page {
         max-width: 1200px;
         margin: 0 auto;

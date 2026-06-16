@@ -386,73 +386,6 @@ function formatCurrency(val) {
         <div class="status error">{loadError}</div>
     {:else}
         
-
-        <!-- SPIDER DIAGRAMS: GOODS & SERVICES -->
-        <div class="text">
-            <h3>Sales by goods and services</h3>
-            <p>Spider diagrams comparing sectoral composition across all survey years.</p>
-            <div class="filter-group inline-filters">
-                <span class="filter-label">Spider chart metric</span>
-                <div class="button-group">
-                    <button class="filter-toggle-button {spiderViewMode === 'raw' ? 'selected' : ''}" on:click={() => (spiderViewMode = 'raw')}>
-                        Show Raw
-                    </button>
-                    <button class="filter-toggle-button {spiderViewMode === 'percent' ? 'selected' : ''}" on:click={() => (spiderViewMode = 'percent')}>
-                        Show Percent
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="spider-scroll-wrapper">
-            {#each [...years].reverse() as y}
-                <div class="spider-chart" bind:this={chartEls[y]}></div>
-            {/each}
-        </div>
-
-        <!-- TOP CONTROLS & TOTAL EXPENDITURE -->
-        <div class="text">
-            <div class="dashboard-controls">
-                <div class="control-actions">
-                    <div class="metric-group">
-                        <div class="metric-card">
-                            <h4>Total Sales ({locYear})</h4>
-                            <div class="metric-val">{formatCurrency(locTotal)}</div>
-                        </div>
-                    </div>
-                    <div class="filter-group">
-                        <span class="filter-label">Sales metric</span>
-                        <div class="button-group">
-                            <button class="filter-toggle-button {locViewMode === 'raw' ? 'selected' : ''}" on:click={() => (locViewMode = 'raw')}>
-                                Show Raw
-                            </button>
-                            <button class="filter-toggle-button {locViewMode === 'percent' ? 'selected' : ''}" on:click={() => (locViewMode = 'percent')}>
-                                Show Percent
-                            </button>
-                        </div>
-                    </div>
-                    <div class="bottom-filters">
-                        <div class="filter-group">
-                            <span class="filter-label">Region</span>
-                            <select class="year-select" bind:value={selectedRegion}>
-                                {#each regions as r}
-                                    <option value={r}>{regionLabels[r]}</option>
-                                {/each}
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <span class="filter-label">Location year</span>
-                            <select class="year-select" bind:value={locYear}>
-                                {#each years as y}
-                                    <option value={y}>{y}</option>
-                                {/each}
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div class="text">
             <h3>Historical Arms Transfers (1950 - 2025)</h3>
             <p>
@@ -464,74 +397,8 @@ function formatCurrency(val) {
                 <div bind:this={sipriChartEl} style="width: 100%; height: 400px;"></div>
             </div>
         </div>
-
-        <!-- TABULAR LIST: LOCATIONS -->
-        <div class="text">
-            <h3>Sales by location</h3>
-            <p>Tabular view showing sales breakdown for <strong>{locYear}</strong>, ordered by decreasing value.</p>
-            <div class="table-wrap">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th class="align-left">Location Breakdown</th>
-                            <th>{locViewMode === 'raw' ? 'Amount (Sales)' : 'Share of Total (%)'}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {#each locFiltered as item}
-                            <tr>
-                                <td class="align-left cell-category">{item.category}</td>
-                                <td>{formatValue(item.amount, locTotal, locViewMode)}</td>
-                            </tr>
-                        {/each}
-                        <tr class="total-row">
-                            <td class="align-left cell-category">Total</td>
-                            <td>{formatValue(locTotal, locTotal, locViewMode)}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="text">
-            <h3>Share of sales by company size</h3>
-            <p>Waffle chart showing the distribution of sales, exports, employment, and R&D by company size.</p>
-            <div class="waffle-controls">
-                <div class="filter-group">
-                    <span class="filter-label">Year</span>
-                    <select class="year-select" bind:value={waffleYear}>
-                        {#each years as y}
-                            <option value={y}>{y}</option>
-                        {/each}
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <span class="filter-label">Metric</span>
-                    <select class="year-select" bind:value={waffleMetric}>
-                        {#each sizeMetricOptions as metric}
-                            <option value={metric.id}>{metric.label}</option>
-                        {/each}
-                    </select>
-                </div>
-            </div>
-            <div class="waffle-layout">
-                <SizeWaffle items={waffleItems} total={waffleTotal} />
-                <div class="waffle-legend">
-                    {#each waffleItems as item}
-                        <div class="waffle-legend-row">
-                            <span class="waffle-swatch" style="background-color: {resolveCssColor(item.color)}"></span>
-                            <span class="waffle-label">{item.label}:</span>
-                            <span class="waffle-value">
-                                {waffleMetricDef.type === 'percent'
-                                    ? `${item.value.toFixed(1)}%`
-                                    : `${item.value}`}
-                            </span>
-                        </div>
-                    {/each}
-                </div>
-            </div>
-        </div>
     {/if}
+
 </main>
 
 <Footer />
