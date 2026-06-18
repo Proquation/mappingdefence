@@ -8,8 +8,10 @@
 	import Footer from '$lib/Footer.svelte';
 	import AuthorDate from '$lib/AuthorDate.svelte';
 	import TitleStandard from '$lib/TitleStandard.svelte';
-	import DefenceMap from '$lib/DefenceMap.svelte';
 	import Password from '$lib/Password.svelte';
+	import DefenceMap from '$lib/DefenceMap.svelte';
+	import CmaCartogram from '$lib/CmaCartogram.svelte';
+	import ProvinceCartogram from '$lib/ProvinceCartogram.svelte';
 
 	let isLoading = true;
 	let loadError = '';
@@ -25,10 +27,11 @@
 
 	// Mode: ALL / PRIMARY / SECONDARY / a specific NAICS6 code
 	let selectedMode = 'ALL';
-
 	let selectedYear = null;
 	let yearOptions = [];
 	let naicsOptions = []; // [{code, desc}] of individual NAICS codes
+
+	let lqBasis = 'sales'; // sales vs. firms vs. jobs
 
 	// Per-geometry data + geojson caches
 	const aggData = {}; // { csd: [...rows], cma: [...], prov: [...] }
@@ -52,26 +55,30 @@
 			sales_bucket: r.sales_bucket,
 			n_firms: r.n_firms,
 			avg_employees: r.avg_employees === '' ? null : Number(r.avg_employees),
+			total_jobs: r.total_jobs === '' ? null: Number(r.total_jobs),
+			lq_sales: r.lq_sales === '' || r.lq_sales == null ? null : Number(r.lq_sales),
+			lq_firms: r.lq_firms === '' || r.lq_firms == null ? null : Number(r.lq_firms),
+			lq_jobs: r.lq_jobs === '' || r.lq_jobs == null ? null : Number(r.lq_jobs),
 			suppressed: r.suppressed === 'True' || r.suppressed === 'true'
 		}));
 	}
 
+
 	async function loadData() {
 		try {
-			const [csd, cma, prov] = await Promise.all([
+			const [csd, cmaRural, prov] = await Promise.all([
 				fetch(`${base}/data/csd_agg.csv`).then((r) => r.text()),
-				fetch(`${base}/data/cma_agg.csv`).then((r) => r.text()),
+				fetch(`${base}/data/cma_rural_agg.csv`).then((r) => r.text()),
 				fetch(`${base}/data/prov_agg.csv`).then((r) => r.text())
 			]);
 			aggData.csd = parseAgg(csd);
-			aggData.cma = parseAgg(cma);
+			aggData.cma = parseAgg(cmaRural);   // bubble view uses the rural-aware file
 			aggData.prov = parseAgg(prov);
-
-			// Year + NAICS options derived from the union of all rows
+ 
 			const allRows = [...aggData.csd, ...aggData.cma, ...aggData.prov];
 			yearOptions = [...new Set(allRows.map((r) => r.year))].sort((a, b) => a - b);
 			selectedYear = yearOptions[yearOptions.length - 1];
-
+ 
 			const naicsMap = new Map();
 			allRows.forEach((r) => {
 				if (!['ALL', 'PRIMARY', 'SECONDARY'].includes(r.NAICS6) && !naicsMap.has(r.NAICS6)) {
@@ -80,11 +87,7 @@
 			});
 			naicsOptions = [...naicsMap.entries()]
 				.map(([code, { desc, type }]) => ({ code, desc, type }))
-				.sort((a, b) => {
-					// primary before secondary, then by code
-					if (a.type !== b.type) return a.type === 'primary' ? -1 : 1;
-					return a.code.localeCompare(b.code);
-				});
+				.sort((a, b) => (a.type !== b.type ? (a.type === 'primary' ? -1 : 1) : a.code.localeCompare(b.code)));
 		} catch (err) {
 			console.error(err);
 			loadError = 'Unable to load aggregated defence data.';
@@ -93,58 +96,43 @@
 		}
 	}
 
-	async function ensureGeojson(geom) {
-		if (geojsonCache[geom]) return geojsonCache[geom];
-		const file = {
-			csd: 'csd_boundaries',
-			cma: 'cma_boundaries',
-			prov: 'province_boundaries'
-		}[geom];
+
+	async function ensureGeojson(file) {
+		if (geojsonCache[file]) return geojsonCache[file];
 		const gj = await fetch(`${base}/geojson/${file}.geojson`).then((r) => r.json());
-		geojsonCache[geom] = gj;
+		geojsonCache[file] = gj;
 		return gj;
 	}
 
-	// Active geojson (reactive — only in the browser, never during SSR)
-	let activeGeojson = null;
-	$: if (mounted && selectedGeometry) {
-		ensureGeojson(selectedGeometry).then((gj) => (activeGeojson = gj));
+	let csdGeojson = null, cmaGeojson = null, provinceGeojson = null;
+	$: if (mounted) {
+		if (selectedGeometry === 'csd') ensureGeojson('csd_boundaries').then((g) => (csdGeojson = g));
+		if (selectedGeometry === 'cma') {
+			ensureGeojson('cma_boundaries').then((g) => (cmaGeojson = g));
+			ensureGeojson('province_boundaries').then((g) => (provinceGeojson = g));
+		}
 	}
 
-	// Build { region_uid -> total_sales_M } for the active geometry/year/mode
-	$: valueByUid = (() => {
-		const rows = aggData[selectedGeometry] || [];
-		const lookup = {};
-		rows.forEach((r) => {
-			if (r.year !== selectedYear) return;
-			if (r.NAICS6 !== selectedMode) return;
-			lookup[r.region_uid] = r.total_sales_M;
-		});
-		return lookup;
-	})();
 
-	// Build { region_uid -> {sales, n_firms, avg_employees} } for the active geometry/year/mode
+	$: activeRows = (aggData[selectedGeometry] || []).filter(
+		(r) => r.year === selectedYear && r.NAICS6 === selectedMode
+	);
+ 
 	$: recordByUid = (() => {
-		const rows = aggData[selectedGeometry] || [];
 		const lookup = {};
-		rows.forEach((r) => {
-			if (r.year !== selectedYear) return;
-			if (r.NAICS6 !== selectedMode) return;
+		const lqKey = { sales: 'lq_sales', firms: 'lq_firms', jobs: 'lq_jobs' }[lqBasis];
+		activeRows.forEach((r) => {
 			lookup[r.region_uid] = {
 				sales: r.total_sales_M,
 				n_firms: r.n_firms,
-				avg_employees: r.avg_employees
+				total_jobs: r.total_jobs,
+				avg_employees: r.avg_employees,
+				lq: r[lqKey]
 			};
 		});
 		return lookup;
 	})();
-
-	$: maxValue = Math.max(
-		1,
-		...Object.values(recordByUid)
-			.map((d) => d.sales)
-			.filter((v) => Number.isFinite(v))
-	);
+	
 
 	onMount(() => {
 		mounted = true;
@@ -152,7 +140,7 @@
 	});
 </script>
 
-<Password />
+<!-- <Password /> -->
 
 <Logo logoType="Blue" backgroundColor="var(--brandWhite)" />
 
@@ -172,12 +160,11 @@
 			Industry Classification System (NAICS).
 		</p>
 		<p>
-			This map aggregates defence-related firm sales into Canadian geographies and shades each region from
-			light to dark by total sales. Use the filters to choose the geography, the defence category, and the
-			year.
+			This tool aggregates defence-related firms' sales and employees into different Canadian geographies.
+			Switch the geography to view provinces, census metropolitan areas and their rural counterparts as cartograms (size = sales, colour = location quotient), and census subdivisions as choropleths.
 		</p>
 		<p>
-			Note: Any geometry with only 1 firm has been excluded for privacy. The total sales reflect the firms shown.
+			Note: Any geometry with only 1 firm has been excluded for privacy. The total values reflect those that have been included only.
 		</p>
 	</div>
 
@@ -190,14 +177,12 @@
 			<h3>Filter the map</h3>
 			<div class="filter-row">
 				<div class="filter-group">
-					<span class="filter-label">Aggregate by</span>
+					<span class="filter-label">Geography</span>
 					<select class="year-select" bind:value={selectedGeometry}>
-						{#each geometries as g}
-							<option value={g.id}>{g.label}</option>
-						{/each}
+						{#each geometries as g}<option value={g.id}>{g.label}</option>{/each}
 					</select>
 				</div>
-
+ 
 				<div class="filter-group">
 					<span class="filter-label">Show</span>
 					<select class="year-select" bind:value={selectedMode}>
@@ -206,33 +191,47 @@
 						<option value="SECONDARY">Secondary only</option>
 						<optgroup label="Primary NAICS">
 							{#each naicsOptions.filter((n) => n.type === 'primary') as n}
-								<option value={n.code} class="opt-primary">{n.code} — {n.desc}</option>
+								<option value={n.code}>{n.code} — {n.desc}</option>
 							{/each}
 						</optgroup>
 						<optgroup label="Secondary NAICS">
 							{#each naicsOptions.filter((n) => n.type === 'secondary') as n}
-								<option value={n.code} class="opt-secondary">{n.code} — {n.desc}</option>
+								<option value={n.code}>{n.code} — {n.desc}</option>
 							{/each}
 						</optgroup>
 					</select>
 				</div>
-
+ 
 				<div class="filter-group">
 					<span class="filter-label">Year</span>
 					<select class="year-select" bind:value={selectedYear}>
-						{#each yearOptions as year}
-							<option value={year}>{year}</option>
-						{/each}
+						{#each yearOptions as year}<option value={year}>{year}</option>{/each}
 					</select>
 				</div>
+ 
+				{#if selectedGeometry === 'cma' || selectedGeometry === 'prov' || selectedGeometry === 'csd'}
+					<div class="filter-group">
+						<span class="filter-label">LQ basis (bubble colour)</span>
+						<select class="year-select" bind:value={lqBasis}>
+							<option value="sales">Sales</option>
+							<option value="firms">Firms</option>
+							<option value="jobs">Jobs</option>
+						</select>
+					</div>
+				{/if}
 			</div>
 		</div>
-
+ 
 		<section class="map-block">
-			<DefenceMap geojson={activeGeojson} {recordByUid} {maxValue} {formatSales} />
+			{#if selectedGeometry === 'csd'}
+				<DefenceMap geojson={csdGeojson} {recordByUid} {lqBasis} {formatSales} />
+			{:else if selectedGeometry === 'cma'}
+				<CmaCartogram rows={activeRows} {cmaGeojson} {provinceGeojson} {lqBasis} {formatSales} />
+			{:else}
+				<ProvinceCartogram rows={activeRows} {provinceGeojson} {lqBasis} {formatSales} />
+			{/if}
 		</section>
 	{/if}
-
 
 	<div class="text" style="margin-bottom: 0px;">
 		<h3>Data sources and methods</h3>

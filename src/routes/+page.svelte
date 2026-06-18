@@ -32,7 +32,7 @@
 
 <svelte:head>
 
-	<title>Mapping tariffs | School of Cities</title>
+	<title>Mapping defence | School of Cities</title>
 
 	<meta name="description" content="Examining potential local impacts on jobs and businesses across Canada via maps and charts" />
 	<meta name="author" content="School of Cities">
@@ -46,10 +46,10 @@
 	<meta property="og:locale" content="en_CA">
 
 	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:title" content="Mapping tariffs" />
+	<meta name="twitter:title" content="Mapping defence" />
 	<meta name="twitter:description" content="Examining potential local impacts on jobs and businesses across Canada via maps and charts" />
-	<meta name="twitter:site" content="https://schoolofcities.github.io/tariffs/" />
-	<meta name="twitter:image" content="https://raw.githubusercontent.com/schoolofcities/tariffs/main/static/web-card.png" /> 
+	<meta name="twitter:site" content="https://schoolofcities.github.io/defence/" />
+	<meta name="twitter:image" content="https://raw.githubusercontent.com/schoolofcities/defence/main/static/web-card.png" /> 
 
 </svelte:head>
 
@@ -136,26 +136,16 @@
 			Although Budget 2025 outlines broad programs for investment, the question remains as to what this entails for different regions across Canada and the employees that work in this sector.
 		</p>
 
-		<!-- <p>
-			Measuring trade impacts is complex because there are many factors at play. The immediate impacts of tariffs are on the businesses (and their employees) that produce goods subject to tariffs. However, there may also be downstream, indirect impacts. And, the situation is not static as businesses, consumers and governments respond and adjust to a changing economy. Businesses may diversify their markets and seek new (or substitute) suppliers. Citizens may alter their purchasing habits by buying local or Canadian products. Governments may try to spur local purchasing and help support businesses. And the federal government may adjust monetary policy, fiscal policy, and trade policy (e.g. counter tariffs, new trade agreements) to ensure the resilience of the Canadian economy.
-		</p> -->
-
-		<!-- <p>
-			Since May 2025, <a href="">Tara Vinodrai</a> and <a href="">Karen Chapple</a> have led a team of researchers at the School of Cities to develop interactive mapping and visualization tools that measure and explore the potential impacts of tariffs on jobs and businesses across Canadian cities and communities at the neighbourhood and city level. Our tools illustrate the highly localized and uneven potential impacts of U.S. tariffs reflecting Canada’s underlying urban, regional and sectoral specializations.
-		</p> -->
 
 		<ul>
 		<li>
-			<a href="./national-survey">Examine graphs from a national survey</a> on defence expenditures across Canada.
+			<a href="./national-survey-comparison">Examine graphs from a national survey</a> on defence expenditures across Canada.
 		</li>
 
 		<li>
 			<a href="./company-insights">Read about the companies that make up our defence industry</a>.	
 		</li>
 
-		<!-- <li>
-			<a href="https://github.com/schoolofcities/tariffs" target="_blank">Learn more about our research methodology</a>.
-		</li> -->
 		</ul>
 
 		<h2>
