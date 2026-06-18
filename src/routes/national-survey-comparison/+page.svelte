@@ -487,7 +487,7 @@
     }
 </script>
 
-<!-- <Password /> -->
+<Password />
 
 <Logo logoType="Blue" backgroundColor="var(--brandWhite)" />
 
