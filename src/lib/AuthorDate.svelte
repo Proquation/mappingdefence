@@ -42,14 +42,14 @@
 	.author-date {
 		margin-top: 0px;
 		padding-bottom: 0px;
-		border-bottom: solid 1px var(--brandGray);
+		border-bottom: solid 1px var(--brandWhite);
 		margin-bottom: 14px;
 	}
 
 	.author-date p {
 		font-size: 16px;
 		line-height: 24px;
-		color: var(--brandBlack);
+		color: var(--brandWhite);
 	}
 
 	.author-date #date {

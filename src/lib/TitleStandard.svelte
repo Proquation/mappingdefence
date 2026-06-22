@@ -31,13 +31,14 @@
 		padding-top: 5px;
 		margin-bottom: 18px;
 		width: 100%;
+		color: var(--brandWhite);
 	}
 
 	.title-text-container h1 {
 		font-family: TradeGothicBold;
 		font-weight: normal;
 		font-size: 48px;
-		color: var(--brandGray90);
+		color: var(--brandWhite);
 		text-decoration: none;
 		margin-bottom: 6px;
 		padding: 0px;

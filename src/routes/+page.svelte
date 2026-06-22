@@ -94,7 +94,7 @@
 	
 	<!-- Simple title example with logo and subtitle: -->
 
-	<Logo logoType="Blue" backgroundColor="var(--brandWhite)"/>
+	<Logo logoType="White" backgroundColor="var(--brandGray90)"/>
 
 
 	<ImageSingle

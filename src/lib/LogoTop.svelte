@@ -5,8 +5,8 @@
 	import logoBlack from '../assets/sofc-uoft-logo-black.svg';
 	import logoWhite from '../assets/sofc-uoft-logo-white.svg';
 
-	export let logoType = 'Blue';
-	export let backgroundColor = 'var(--brandWhite)';
+	export let logoType = 'White';
+	export let backgroundColor = 'var(--brandGray90)';
 
 	let menuOpen = false;
 
@@ -56,7 +56,7 @@
 		align-items: center;
 		margin-top: 0px;
 		margin-bottom: 60px;
-		border-bottom: solid 1px var(--brandDarkBlue);
+		border-bottom: solid 1px var(--brandLightBlue);
 		padding: 0px 35px;
 		position: relative;
 	}
@@ -81,7 +81,7 @@
 		font-size: 18px;
 		text-decoration: underline;
 		text-decoration-thickness: 1px;
-		color: var(--brandDarkBlue);
+		color: var(--brandLightBlue);
 		margin-right: 10px;
 	}
 
@@ -94,7 +94,7 @@
 		border: none;
 		font-size: 18px;
 		cursor: pointer;
-		color: var(--brandDarkBlue);
+		color: var(--brandLightBlue);
 		transform: translateY(-2px);
 	}
 
@@ -106,8 +106,8 @@
 		position: absolute;
 		top: 46px;
 		right: 0;
-		background: var(--brandWhite);
-		border: 1px solid var(--brandDarkBlue);
+		background: var(--brandGray90);
+		border: 1px solid var(--brandLightBlue);
 		box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 		border-radius: 0px;
 		display: flex;
@@ -119,13 +119,13 @@
 	.dropdown-item {
 		padding: 6px;
 		padding-left: 10px;
-		color: var(--brandDarkBlue);
+		color: var(--brandLightBlue);
 		text-decoration: none;
 		font-size: 14px;
 	}
 
 	.dropdown-item:hover {
-		background: var(--brandLightGrey);
+		background: var(--brandGray90);
 		color: var(--brandMedGreen);
 	}
 

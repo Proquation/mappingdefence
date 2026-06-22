@@ -365,7 +365,7 @@ function formatCurrency(val) {
 
 <Password />
 
-<Logo logoType="Blue" backgroundColor="var(--brandWhite)" />
+<Logo logoType="White" backgroundColor="var(--brandGray90)"/>
 
 <main class="page">
     <TitleStandard title="Where are defence sales going?" />

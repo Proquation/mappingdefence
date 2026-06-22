@@ -9,7 +9,6 @@
     import AuthorDate from '$lib/AuthorDate.svelte';
     import TitleStandard from '$lib/TitleStandard.svelte';
 	import Password from '$lib/Password.svelte';
-    import SizeWaffle from '$lib/SizeWaffle.svelte';
 
     let isLoading = true;
     let loadError = '';
@@ -134,144 +133,123 @@
     }
 
     async function renderSankey() {
-        await ensurePlotly();
+        const d3 = await import('d3-selection');
         if (!sankeyEl) return;
+        sankeyEl.innerHTML = '';
+        sankeyEl.style.position = 'relative';   // anchor for the tooltip
 
         const metricDef = sizeMetricOptions.find((m) => m.id === waffleMetric) || sizeMetricOptions[0];
-        
-        // Left nodes
-        const sizeNodes = sizeCategoryOrder;
-        const yearNodes = selectedYears.map((y) => String(y));
-
-        // node index layout
-        const nodeLabels = [...sizeNodes, ...yearNodes];
-        const sizeColors = sizeCategoryOrder.map((label) => resolveCssColor(sizeCategoryColors[label]));
-        const yearColor = resolveCssColor('--brandGray70');
-        const nodeColors = [...sizeColors, ...yearNodes.map(() => yearColor)];
-
-        // Build links: each size category → each year, width = metric value
-        const source = [];
-        const target = [];
-        const value = [];
-        const linkColors = [];
-
-        selectedYears.forEach((yr, yIdx) => {
-            const yearItems = sizeData.filter((d) => d.year === yr);
-            sizeCategoryOrder.forEach((label, sIdx) => {
-                const match = yearItems.find((d) => d.size === label);
-                const v = match ? match[metricDef.id] ?? 0 : 0;
-                if (v > 0) {
-                    source.push(sIdx);                       // size node
-                    target.push(sizeNodes.length + yIdx);    // year node
-                    value.push(v);
-                    const c = resolveCssColor(sizeCategoryColors[label]);
-                    linkColors.push(hexToRgba(c, 0.45));
-                }
-            });
-        });
-
-        // Per-node totals for the label suffix
-        const nodeValues = nodeLabels.map((_, i) => {
-            if (i < sizeNodes.length) {
-                return value.filter((_, k) => source[k] === i).reduce((a, b) => a + b, 0);
-            }
-            return value.filter((_, k) => target[k] === i).reduce((a, b) => a + b, 0);
-        });
-
-        const suffix = metricDef.type === 'percent' ? '%' : '';
-        
-
-        // Link labels = the per-flow value
-        const linkLabels = value.map((v) =>
-            metricDef.type === 'percent' ? `${v.toFixed(1)}%` : v.toLocaleString()
-        );
-
-        // Year totals (for percent-of-year on hover) — based on firm COUNTS (amount)
-        const yearAmountTotals = {};
-        selectedYears.forEach((yr) => {
-            yearAmountTotals[yr] = sizeData
-                .filter((d) => d.year === yr)
-                .reduce((sum, d) => sum + d.amount, 0);
-        });
-
-        // Node labels: sizes get NO value suffix (summing across years is misleading);
-        // years keep their total (which is ~100% for percent, meaningful for counts)
-        const labelsWithValues = nodeLabels.map((lab, i) => {
-            if (i < sizeNodes.length) return lab;  // size category — name only
-            
-            // Year nodes — show total for amount, 100% for percentage metrics
-            const yr = Number(lab);
-            if (metricDef.id === 'amount') {
-                const total = yearAmountTotals[yr];
-                return `${lab}\n${total?.toLocaleString() ?? ''} firms`;
-            } else {
-                return `${lab}\n100%`;
-            }
-        });
-        
-        // Build per-link custom hover data
-        const linkCustom = [];
-        selectedYears.forEach((yr) => {
-            const yearItems = sizeData.filter((d) => d.year === yr);
-            sizeCategoryOrder.forEach((label) => {
-                const match = yearItems.find((d) => d.size === label);
-                if (!match) return;
-                const metricVal = match[metricDef.id] ?? 0;
-                if (metricVal <= 0) return;
-
-                if (metricDef.id === 'amount') {
-                    // absolute firm count + its share of that year's firms
-                    const pct = yearAmountTotals[yr] ? (match.amount / yearAmountTotals[yr]) * 100 : 0;
-                    linkCustom.push(`${match.amount.toLocaleString()} firms (${pct.toFixed(1)}%)`);
-                } else {
-                    // percent metrics: only the percentage exists
-                    linkCustom.push(`${metricVal.toFixed(1)}%`);
-                }
-            });
-        });
-
-        const data = [{
-            type: 'sankey',
-            orientation: 'h',
-            arrangement: 'snap',
-            node: {
-                pad: 18,
-                thickness: 16,
-                line: { color: '#ffffff', width: 1 },
-                label: labelsWithValues,
-                color: nodeColors,
-                font: { family: 'OpenSans', size: 12 }
-            },
-            link: {
-                source,
-                target,
-                value,
-                color: linkColors,
-                customdata: linkCustom,
-                hovertemplate: '%{source.label} → %{target.label}<br>%{customdata}<extra></extra>'
-            },
-            node: {
-                pad: 18,
-                thickness: 16,
-                line: { color: '#ffffff', width: 1 },
-                label: labelsWithValues,
-                color: nodeColors,
-                font: { family: 'OpenSans', size: 12 },
-                hovertemplate: '%{label}<extra></extra>'   // ← removes "incoming/outgoing flow count"
-            }
-        }];
-
-        const layout = {
-            font: { family: 'OpenSans', size: 12 },
-            margin: { l: 10, r: 10, t: 20, b: 10 },
-            height: 420,
-            paper_bgcolor: 'rgba(0,0,0,0)',
-            plot_bgcolor: 'rgba(0,0,0,0)'
+        const [yearLow, yearHigh] = [...selectedYears].sort((a, b) => a - b);
+        const catColors = {
+            'Enterprises with less than 100 employees':       '#6FC7EA',
+            'Enterprises with between 100 and 249 employees': '#a8dff5',
+            'Enterprises with between 250 and 499 employees': '#8DBF2E',
+            'Enterprises with 500 or more employees':         '#ffffff',
         };
 
-        
+        const lowItems  = sizeData.filter((d) => d.year === yearLow);
+        const highItems = sizeData.filter((d) => d.year === yearHigh);
+        const lowTotal  = lowItems.reduce((s, d) => s + (d[metricDef.id] ?? 0), 0);
+        const highTotal = highItems.reduce((s, d) => s + (d[metricDef.id] ?? 0), 0);
 
-        Plotly.react(sankeyEl, data, layout, { displayModeBar: false, responsive: true });
+        const W = sankeyEl.clientWidth || 900, H = 420;
+        const nodeW = 14, padBetween = 18, marginY = 10;
+        const nCats = sizeCategoryOrder.length;
+        const usableH = H - marginY * 2 - padBetween * (nCats - 1);
+
+        const svg = d3.select(sankeyEl).append('svg')
+            .attr('width', '100%').attr('height', H).attr('viewBox', `0 0 ${W} ${H}`);
+
+        // floating tooltip div
+        const tip = d3.select(sankeyEl).append('div')
+            .style('position', 'absolute')
+            .style('pointer-events', 'none')
+            .style('opacity', '0')
+            .style('background', 'rgba(30,55,101,0.96)')
+            .style('color', '#fff')
+            .style('font-family', 'OpenSans')
+            .style('font-size', '12px')
+            .style('line-height', '1.4')
+            .style('padding', '8px 10px')
+            .style('border-radius', '6px')
+            .style('border', '1px solid #6FC7EA')
+            .style('box-shadow', '0 4px 14px rgba(0,0,0,0.35)')
+            .style('z-index', '5')
+            .style('max-width', '260px');
+
+        const xL0 = 0, xL1 = nodeW, xR0 = W - nodeW;
+        let yL = marginY, yR = marginY;
+
+        sizeCategoryOrder.forEach((label) => {
+            const lo = lowItems.find(d => d.size === label);
+            const hi = highItems.find(d => d.size === label);
+            const vL = lo ? (lo[metricDef.id] ?? 0) : 0;
+            const vH = hi ? (hi[metricDef.id] ?? 0) : 0;
+            const hL = lowTotal  > 0 ? (vL / lowTotal)  * usableH : 0;
+            const hR = highTotal > 0 ? (vH / highTotal) * usableH : 0;
+            const color = catColors[label];
+
+            const lT = yL, lB = yL + hL;
+            const rT = yR, rB = yR + hR;
+            const xc = (xL1 + xR0) / 2;
+
+            const path = [
+                `M ${xL1} ${lT}`,
+                `C ${xc} ${lT}, ${xc} ${rT}, ${xR0} ${rT}`,
+                `L ${xR0} ${rB}`,
+                `C ${xc} ${rB}, ${xc} ${lB}, ${xL1} ${lB}`,
+                `Z`
+            ].join(' ');
+
+            // percentage of each year's total
+            const pctL = lowTotal  ? ((vL / lowTotal)  * 100).toFixed(1) : '0.0';
+            const pctH = highTotal ? ((vH / highTotal) * 100).toFixed(1) : '0.0';
+
+            // tooltip HTML — firms metric shows count + %, percent metrics show just %
+            const tipHtml = metricDef.id === 'amount'
+                ? `<div style="font-weight:600;margin-bottom:4px">${label}</div>
+                <div>${yearLow}: ${vL.toLocaleString()} firms (${pctL}%)</div>
+                <div>${yearHigh}: ${vH.toLocaleString()} firms (${pctH}%)</div>`
+                : `<div style="font-weight:600;margin-bottom:4px">${label}</div>
+                <div>${metricDef.label}</div>
+                <div>${yearLow}: ${vL.toFixed(1)}%</div>
+                <div>${yearHigh}: ${vH.toFixed(1)}%</div>`;
+
+            const band = svg.append('path').attr('d', path)
+                .attr('fill', color).attr('fill-opacity', 0.5).attr('stroke', 'none')
+                .style('cursor', 'pointer');
+
+            band
+                .on('mouseenter', () => {
+                    band.attr('fill-opacity', 0.8);
+                    tip.html(tipHtml).style('opacity', '1');
+                })
+                .on('mousemove', (event) => {
+                    // position relative to the container
+                    const rect = sankeyEl.getBoundingClientRect();
+                    const x = event.clientX - rect.left;
+                    const y = event.clientY - rect.top;
+                    tip.style('left', `${x + 14}px`).style('top', `${y + 14}px`);
+                })
+                .on('mouseleave', () => {
+                    band.attr('fill-opacity', 0.5);
+                    tip.style('opacity', '0');
+                });
+
+            // node bars
+            svg.append('rect').attr('x', xL0).attr('y', lT).attr('width', nodeW).attr('height', hL).attr('fill', color);
+            svg.append('rect').attr('x', xR0).attr('y', rT).attr('width', nodeW).attr('height', hR).attr('fill', color);
+
+            // left label
+            svg.append('text').attr('x', xL1 + 6).attr('y', lT + hL / 2)
+                .attr('dominant-baseline', 'middle')
+                .attr('font-family', 'OpenSans').attr('font-size', 11).attr('fill', '#fff')
+                .style('pointer-events', 'none')
+                .text(label);
+
+            yL += hL + padBetween;
+            yR += hR + padBetween;
+        });
     }
 
     async function loadData() {
@@ -417,46 +395,55 @@
             : '<b>%{text}</b><br>Sales: %{r:$,.0f}<br>Year: ' + year + '<extra></extra>';
 
 
-			const data = [
-				{
-					type: 'scatterpolar',
-					r: activeValues,
-					theta: labels,
-					fill: 'toself',
-                    mode: 'lines+markers', // applies to all years for some reason...
-					name: String(year),
-					marker: { color: brandBlue, size: 8, symbol: 'circle' },
-					line: { color: brandBlue },
+			const brandLightBlue = resolveCssColor('--brandLightBlue') || '#6FC7EA';
+            const brandWhite = resolveCssColor('--brandWhite') || '#ffffff';
+
+            const data = [
+                {
+                    type: 'scatterpolar',
+                    r: activeValues,
+                    theta: labels,
+                    fill: 'toself',
+                    mode: 'lines+markers',
+                    name: String(year),
+                    marker: { color: brandLightBlue, size: 8, symbol: 'circle' },
+                    line: { color: brandLightBlue },
+                    fillcolor: hexToRgba(brandLightBlue.replace('#','').length === 6 ? brandLightBlue : '#6FC7EA', 0.15),
                     hoverinfo: 'text',
                     hovertemplate: hovertemplate,
                     text: fullLabels,
                     hoverlabel: {
-                        bgcolor: 'white',
-                        bordercolor: brandBlue,
-                        font: { family: 'OpenSans', size: 12 },
-                        namelength: -1  
+                        bgcolor: '#1e3765',
+                        bordercolor: brandLightBlue,
+                        font: { family: 'OpenSans', size: 12, color: brandWhite },
+                        namelength: -1
                     }
                 }
             ];
 
-            
             const layout = {
                 polar: {
+                    bgcolor: 'rgba(0,0,0,0)',
                     radialaxis: {
                         visible: true,
-                        ticksuffix: spiderViewMode === 'percent' ? '%' : ''
+                        ticksuffix: spiderViewMode === 'percent' ? '%' : '',
+                        color: 'rgba(255,255,255,0.6)',
+                        gridcolor: 'rgba(255,255,255,0.12)',
+                        linecolor: 'rgba(255,255,255,0.2)',
+                        tickfont: { color: 'rgba(255,255,255,0.7)', family: 'OpenSans', size: 10 }
                     },
                     angularaxis: {
-                        tickfont: { size: 10, family: 'OpenSans' }
+                        tickfont: { size: 10, family: 'OpenSans', color: 'rgba(255,255,255,0.85)' },
+                        gridcolor: 'rgba(255,255,255,0.12)',
+                        linecolor: 'rgba(255,255,255,0.2)'
                     }
                 },
                 title: {
                     text: `${year}`,
-                    font: { family: 'TradeGothicBold', size: 18, color: brandDarkBlue }
+                    font: { family: 'TradeGothicBold', size: 18, color: brandLightBlue }
                 },
                 showlegend: false,
-                margin: { l: 80, r: 80, t: 40, b: 60 },  // Increased bottom margin for labels
-                width: undefined,
+                margin: { l: 80, r: 80, t: 40, b: 60 },
                 height: 400,
                 autosize: true,
                 paper_bgcolor: 'rgba(0,0,0,0)',
@@ -487,9 +474,9 @@
     }
 </script>
 
-<Password />
+<!-- <Password /> -->
 
-<Logo logoType="Blue" backgroundColor="var(--brandWhite)" />
+<Logo logoType="White" backgroundColor="var(--brandGray90)"/>
 
 <main class="page">
     <TitleStandard title="Where are defence sales going?" />
@@ -691,31 +678,7 @@
     .year-vs {
         font-family: OpenSansBold;
         font-size: 13px;
-        color: var(--brandGray70);
-    }
-    .waffle-year-block {
-        flex: 0 0 320px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        border: 1px solid var(--brandGray);
-        background-color: #fafafa;
-        border-radius: 3px;
-        padding: 16px;
-    }
-
-    .waffle-year-label {
-        font-family: TradeGothicBold;
-        font-size: 18px;
-        color: var(--brandDarkBlue);
-        text-align: center;
-    }
-
-    .waffle-year-values {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        font-size: 13px;
+        color: var(--brandGray);
     }
     .page {
         max-width: 1200px;
@@ -736,43 +699,10 @@
     }
     .status.error { color: var(--brandRed); }
 
-    .section-container {
-        width: 100%;
-        border-top: 2px solid var(--brandDarkBlue);
-        padding-top: 24px;
-    }
 
-    /* Controls & Top Bar */
-    .dashboard-controls {
-        background: #fcfcfc;
-        border: 1px solid var(--brandGray);
-        padding: 20px 24px;
-        border-radius: 3px;
-        width: 100%;
-    }
+    .filter-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;}
 
-    .metric-card h4 { margin: 0 0 8px; color: var(--brandGray70); font-size: 14px; }
-    .metric-card .metric-val { font-size: 36px; font-family: TradeGothicBold; color: var(--brandDarkBlue); }
-
-    .control-actions {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 24px 32px;
-        width: 100%;
-    }
-
-    .metric-group {
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-    }
-
-    .filter-group { display: flex; flex-direction: column; gap: 8px; }
-
-    .bottom-filters {
-        display: contents;
-    }
-    .filter-label { font-family: OpenSansBold; font-size: 13px; color: var(--brandGray90); }
+    .filter-label { font-family: OpenSansBold; font-size: 13px; color: var(--brandWhite); }
 
     .button-group { display: flex; gap: 8px; }
     .filter-toggle-button {
@@ -793,11 +723,13 @@
 
     .year-select {
         padding: 8px 12px;
-        border: 1px solid var(--brandGray);
+        border: 1px solid var(--brandWhite);
+        background-color: var(--brandGray90);
         border-radius: 3px;
         font-family: OpenSans;
         font-size: 14px;
         min-width: 120px;
+        color: var(--brandWhite);
     }
 
     /* Spider Charts Scroll View */
@@ -813,25 +745,12 @@
     }
 
     .spider-chart {
-        flex: 1 1 0;               /* grow/shrink equally to fill available width */
+        flex: 1 1 0;              
         min-width: 0;
-        height: 400px;             /* slightly shorter to reduce vertical bulk */
+        height: 400px;             
         border: 1px solid var(--brandGray);
-        background-color: #fafafa;
+        background-color: var(--brandGray90);
         border-radius: 3px;
-    }
-
-    .waffle-year-block {
-        flex: 1 1 0;               /* same equal-share treatment */
-        min-width: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        border: 1px solid var(--brandGray);
-        background-color: #fafafa;
-        border-radius: 3px;
-        padding: 16px;
-        align-items: center;       /* centers the waffle within its column */
     }
 
     /* Simple Shared Table */
@@ -841,7 +760,7 @@
         overflow-x: auto;
         border: 1px solid var(--brandGray);
         border-radius: 3px;
-        background: var(--brandWhite);
+        background: var(--brandGray90);
     }
 
     .data-table {
@@ -853,6 +772,7 @@
     }
 
     .data-table th, .data-table td {
+        color: var(--brandWhite);
         padding: 6px 8px;
         border-bottom: 1px solid var(--brandGray);
         text-align: right;
@@ -863,7 +783,7 @@
         border-right: 1px solid var(--brandGray);
     }
 
-    .data-table th { background: #f6f6f6; font-family: OpenSansBold}
+    .data-table th { background:var(--brandGray90); font-family: OpenSansBold}
     .align-left { text-align: left !important; }
     .cell-category { min-width: 300px;  font-family: OpenSans; }
     .data-table tbody tr:last-child td { border-bottom: none; }
@@ -876,20 +796,6 @@
         margin-top: 12px;
     }
 
-    .waffle-controls {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 16px 24px;
-        margin-top: 12px;
-    }
-
-    .waffle-layout {
-        display: grid;
-        grid-template-columns: minmax(220px, 360px) minmax(240px, 1fr);
-        gap: 24px;
-        align-items: start;
-        margin-top: 16px;
-    }
 
     .waffle-legend {
         display: flex;
@@ -916,15 +822,9 @@
 
     .waffle-label {
         font-family: OpenSans;
+        color: var(--brandWhite);
     }
 
-    .waffle-value {
-        font-family: OpenSansBold;
-    }
-
-    .summary-block {
-		max-width: 100%;
-	}
 
     @media (max-width: 720px) {
 		.page {
@@ -935,8 +835,5 @@
 			gap: 8px;
 		}
 
-        .waffle-layout {
-            grid-template-columns: 1fr;
-        }
 	}
 </style>

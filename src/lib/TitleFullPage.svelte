@@ -92,6 +92,7 @@
 	}
 
 	.logo-container {
+		background-color: var(--brandGray90);
 		position: absolute;
 		top: 25px;
 		left: 45px;
