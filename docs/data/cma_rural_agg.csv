@@ -350,33 +350,33 @@ region_uid,region_name,year,NAICS6,NAICSD,defence_type,total_sales_M,sales_bucke
 944,Campbell River,2025,ALL,All,all,51.437,>=$5M,26,10.4,271.0,1.273,1.253,1.03,False
 944,Campbell River,2025,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
 944,Campbell River,2025,SECONDARY,Secondary,secondary,51.437,>=$5M,26,10.4,271.0,1.428,1.354,1.144,False
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2017,ALL,All,all,6.111,>=$5M,3,11.0,33.0,0.339,0.614,0.431,False
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2017,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2017,SECONDARY,Secondary,secondary,6.111,>=$5M,3,11.0,33.0,0.361,0.622,0.45,False
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2018,ALL,All,all,6.111,>=$5M,3,11.0,33.0,0.329,0.593,0.414,False
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2018,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2018,SECONDARY,Secondary,secondary,6.111,>=$5M,3,11.0,33.0,0.35,0.6,0.431,False
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2019,ALL,All,all,6.318,>=$5M,4,8.5,34.0,0.312,0.736,0.363,False
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2019,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2019,SECONDARY,Secondary,secondary,6.318,>=$5M,4,8.5,34.0,0.339,0.747,0.382,False
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2020,ALL,All,all,6.318,>=$5M,4,8.5,34.0,0.262,0.741,0.3,False
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2020,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2020,SECONDARY,Secondary,secondary,6.318,>=$5M,4,8.5,34.0,0.28,0.752,0.312,False
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2021,ALL,All,all,6.318,>=$5M,4,8.5,34.0,0.438,0.753,0.53,False
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2021,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2021,SECONDARY,Secondary,secondary,6.318,>=$5M,4,8.5,34.0,0.477,0.764,0.558,False
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2022,ALL,All,all,6.318,>=$5M,4,8.5,34.0,0.395,0.671,0.489,False
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2022,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2022,SECONDARY,Secondary,secondary,6.318,>=$5M,4,8.5,34.0,0.456,0.724,0.547,False
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2023,ALL,All,all,6.261,>=$5M,4,8.5,34.0,0.456,0.705,0.531,False
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2023,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2023,SECONDARY,Secondary,secondary,6.261,>=$5M,4,8.5,34.0,0.525,0.763,0.598,False
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2024,ALL,All,all,1.627,<$5M,2,8.0,16.0,0.121,0.348,0.167,False
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2024,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2024,SECONDARY,Secondary,secondary,1.627,<$5M,2,8.0,16.0,0.136,0.376,0.186,False
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2025,ALL,All,all,1.627,<$5M,2,8.0,16.0,0.121,0.34,0.163,False
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2025,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-330,Campbellton (New Brunswick part / partie du Nouveau-Brunswick),2025,SECONDARY,Secondary,secondary,1.627,<$5M,2,8.0,16.0,0.135,0.368,0.181,False
+330,Campbellton,2017,ALL,All,all,6.111,>=$5M,3,11.0,33.0,0.339,0.614,0.431,False
+330,Campbellton,2017,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+330,Campbellton,2017,SECONDARY,Secondary,secondary,6.111,>=$5M,3,11.0,33.0,0.361,0.622,0.45,False
+330,Campbellton,2018,ALL,All,all,6.111,>=$5M,3,11.0,33.0,0.329,0.593,0.414,False
+330,Campbellton,2018,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+330,Campbellton,2018,SECONDARY,Secondary,secondary,6.111,>=$5M,3,11.0,33.0,0.35,0.6,0.431,False
+330,Campbellton,2019,ALL,All,all,6.318,>=$5M,4,8.5,34.0,0.312,0.736,0.363,False
+330,Campbellton,2019,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+330,Campbellton,2019,SECONDARY,Secondary,secondary,6.318,>=$5M,4,8.5,34.0,0.339,0.747,0.382,False
+330,Campbellton,2020,ALL,All,all,6.318,>=$5M,4,8.5,34.0,0.262,0.741,0.3,False
+330,Campbellton,2020,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+330,Campbellton,2020,SECONDARY,Secondary,secondary,6.318,>=$5M,4,8.5,34.0,0.28,0.752,0.312,False
+330,Campbellton,2021,ALL,All,all,6.318,>=$5M,4,8.5,34.0,0.438,0.753,0.53,False
+330,Campbellton,2021,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+330,Campbellton,2021,SECONDARY,Secondary,secondary,6.318,>=$5M,4,8.5,34.0,0.477,0.764,0.558,False
+330,Campbellton,2022,ALL,All,all,6.318,>=$5M,4,8.5,34.0,0.395,0.671,0.489,False
+330,Campbellton,2022,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+330,Campbellton,2022,SECONDARY,Secondary,secondary,6.318,>=$5M,4,8.5,34.0,0.456,0.724,0.547,False
+330,Campbellton,2023,ALL,All,all,6.261,>=$5M,4,8.5,34.0,0.456,0.705,0.531,False
+330,Campbellton,2023,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+330,Campbellton,2023,SECONDARY,Secondary,secondary,6.261,>=$5M,4,8.5,34.0,0.525,0.763,0.598,False
+330,Campbellton,2024,ALL,All,all,1.627,<$5M,2,8.0,16.0,0.121,0.348,0.167,False
+330,Campbellton,2024,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+330,Campbellton,2024,SECONDARY,Secondary,secondary,1.627,<$5M,2,8.0,16.0,0.136,0.376,0.186,False
+330,Campbellton,2025,ALL,All,all,1.627,<$5M,2,8.0,16.0,0.121,0.34,0.163,False
+330,Campbellton,2025,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+330,Campbellton,2025,SECONDARY,Secondary,secondary,1.627,<$5M,2,8.0,16.0,0.135,0.368,0.181,False
 833,Camrose,2017,ALL,All,all,,<$5M,<2,,,,,,True
 833,Camrose,2017,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
 833,Camrose,2017,SECONDARY,Secondary,secondary,,<$5M,<2,,,,,,True
@@ -1268,33 +1268,33 @@ region_uid,region_name,year,NAICS6,NAICSD,defence_type,total_sales_M,sales_bucke
 537,Hamilton,2025,ALL,All,all,1094.48,>=$5M,365,13.5,4923.0,1.218,1.1,1.106,False
 537,Hamilton,2025,PRIMARY,Primary,primary,119.424,>=$5M,31,17.1,529.0,1.227,1.254,1.197,False
 537,Hamilton,2025,SECONDARY,Secondary,secondary,975.056,>=$5M,334,13.2,4394.0,1.217,1.088,1.096,False
-502,Hawkesbury (Ontario part / partie de l'Ontario),2017,ALL,All,all,11.298,>=$5M,6,9.0,54.0,0.458,0.934,0.811,False
-502,Hawkesbury (Ontario part / partie de l'Ontario),2017,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-502,Hawkesbury (Ontario part / partie de l'Ontario),2017,SECONDARY,Secondary,secondary,11.298,>=$5M,6,9.0,54.0,0.488,0.945,0.846,False
-502,Hawkesbury (Ontario part / partie de l'Ontario),2018,ALL,All,all,11.298,>=$5M,6,9.0,54.0,0.442,0.914,0.775,False
-502,Hawkesbury (Ontario part / partie de l'Ontario),2018,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-502,Hawkesbury (Ontario part / partie de l'Ontario),2018,SECONDARY,Secondary,secondary,11.298,>=$5M,6,9.0,54.0,0.47,0.925,0.807,False
-502,Hawkesbury (Ontario part / partie de l'Ontario),2019,ALL,All,all,13.335,>=$5M,8,8.1,65.0,0.425,1.052,0.748,False
-502,Hawkesbury (Ontario part / partie de l'Ontario),2019,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-502,Hawkesbury (Ontario part / partie de l'Ontario),2019,SECONDARY,Secondary,secondary,13.335,>=$5M,8,8.1,65.0,0.463,1.067,0.788,False
-502,Hawkesbury (Ontario part / partie de l'Ontario),2020,ALL,All,all,13.335,>=$5M,8,8.1,65.0,0.349,1.056,0.591,False
-502,Hawkesbury (Ontario part / partie de l'Ontario),2020,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-502,Hawkesbury (Ontario part / partie de l'Ontario),2020,SECONDARY,Secondary,secondary,13.335,>=$5M,8,8.1,65.0,0.373,1.071,0.615,False
-502,Hawkesbury (Ontario part / partie de l'Ontario),2021,ALL,All,all,13.566,>=$5M,9,7.3,66.0,0.442,1.209,0.823,False
-502,Hawkesbury (Ontario part / partie de l'Ontario),2021,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-502,Hawkesbury (Ontario part / partie de l'Ontario),2021,SECONDARY,Secondary,secondary,13.566,>=$5M,9,7.3,66.0,0.481,1.226,0.866,False
-502,Hawkesbury (Ontario part / partie de l'Ontario),2022,ALL,All,all,17.274,>=$5M,10,7.3,73.0,0.555,1.234,0.882,False
-502,Hawkesbury (Ontario part / partie de l'Ontario),2022,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-502,Hawkesbury (Ontario part / partie de l'Ontario),2022,SECONDARY,Secondary,secondary,13.566,>=$5M,9,7.1,64.0,0.502,1.197,0.865,False
-502,Hawkesbury (Ontario part / partie de l'Ontario),2023,ALL,All,all,16.607,>=$5M,9,8.0,72.0,0.561,1.189,0.96,False
-502,Hawkesbury (Ontario part / partie de l'Ontario),2023,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-502,Hawkesbury (Ontario part / partie de l'Ontario),2023,SECONDARY,Secondary,secondary,12.899,>=$5M,8,7.9,63.0,0.502,1.143,0.946,False
-502,Hawkesbury (Ontario part / partie de l'Ontario),2024,ALL,All,all,11.099,>=$5M,9,7.0,63.0,0.346,1.168,0.607,False
-502,Hawkesbury (Ontario part / partie de l'Ontario),2024,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-502,Hawkesbury (Ontario part / partie de l'Ontario),2024,SECONDARY,Secondary,secondary,9.373,>=$5M,8,6.9,55.0,0.328,1.122,0.588,False
-502,Hawkesbury (Ontario part / partie de l'Ontario),2025,ALL,All,all,11.006,>=$5M,9,7.1,64.0,0.341,1.142,0.601,False
-502,Hawkesbury (Ontario part / partie de l'Ontario),2025,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-502,Hawkesbury (Ontario part / partie de l'Ontario),2025,SECONDARY,Secondary,secondary,9.472,>=$5M,8,7.0,56.0,0.329,1.097,0.584,False
+502,Hawkesbury,2017,ALL,All,all,11.298,>=$5M,6,9.0,54.0,0.458,0.934,0.811,False
+502,Hawkesbury,2017,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+502,Hawkesbury,2017,SECONDARY,Secondary,secondary,11.298,>=$5M,6,9.0,54.0,0.488,0.945,0.846,False
+502,Hawkesbury,2018,ALL,All,all,11.298,>=$5M,6,9.0,54.0,0.442,0.914,0.775,False
+502,Hawkesbury,2018,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+502,Hawkesbury,2018,SECONDARY,Secondary,secondary,11.298,>=$5M,6,9.0,54.0,0.47,0.925,0.807,False
+502,Hawkesbury,2019,ALL,All,all,13.335,>=$5M,8,8.1,65.0,0.425,1.052,0.748,False
+502,Hawkesbury,2019,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+502,Hawkesbury,2019,SECONDARY,Secondary,secondary,13.335,>=$5M,8,8.1,65.0,0.463,1.067,0.788,False
+502,Hawkesbury,2020,ALL,All,all,13.335,>=$5M,8,8.1,65.0,0.349,1.056,0.591,False
+502,Hawkesbury,2020,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+502,Hawkesbury,2020,SECONDARY,Secondary,secondary,13.335,>=$5M,8,8.1,65.0,0.373,1.071,0.615,False
+502,Hawkesbury,2021,ALL,All,all,13.566,>=$5M,9,7.3,66.0,0.442,1.209,0.823,False
+502,Hawkesbury,2021,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+502,Hawkesbury,2021,SECONDARY,Secondary,secondary,13.566,>=$5M,9,7.3,66.0,0.481,1.226,0.866,False
+502,Hawkesbury,2022,ALL,All,all,17.274,>=$5M,10,7.3,73.0,0.555,1.234,0.882,False
+502,Hawkesbury,2022,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+502,Hawkesbury,2022,SECONDARY,Secondary,secondary,13.566,>=$5M,9,7.1,64.0,0.502,1.197,0.865,False
+502,Hawkesbury,2023,ALL,All,all,16.607,>=$5M,9,8.0,72.0,0.561,1.189,0.96,False
+502,Hawkesbury,2023,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+502,Hawkesbury,2023,SECONDARY,Secondary,secondary,12.899,>=$5M,8,7.9,63.0,0.502,1.143,0.946,False
+502,Hawkesbury,2024,ALL,All,all,11.099,>=$5M,9,7.0,63.0,0.346,1.168,0.607,False
+502,Hawkesbury,2024,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+502,Hawkesbury,2024,SECONDARY,Secondary,secondary,9.373,>=$5M,8,6.9,55.0,0.328,1.122,0.588,False
+502,Hawkesbury,2025,ALL,All,all,11.006,>=$5M,9,7.1,64.0,0.341,1.142,0.601,False
+502,Hawkesbury,2025,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+502,Hawkesbury,2025,SECONDARY,Secondary,secondary,9.472,>=$5M,8,7.0,56.0,0.329,1.097,0.584,False
 821,High River,2017,ALL,All,all,3.03,<$5M,3,6.0,18.0,0.181,0.602,0.423,False
 821,High River,2017,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
 821,High River,2017,SECONDARY,Secondary,secondary,3.03,<$5M,3,6.0,18.0,0.193,0.609,0.441,False
@@ -1673,33 +1673,33 @@ region_uid,region_name,year,NAICS6,NAICSD,defence_type,total_sales_M,sales_bucke
 810,Lethbridge,2025,ALL,All,all,55.601,>=$5M,45,7.5,339.0,0.361,0.769,0.416,False
 810,Lethbridge,2025,PRIMARY,Primary,primary,2.112,<$5M,4,3.0,12.0,0.127,0.918,0.148,False
 810,Lethbridge,2025,SECONDARY,Secondary,secondary,53.489,>=$5M,41,8.0,327.0,0.39,0.757,0.445,False
-840,Lloydminster (Alberta part / partie de l'Alberta),2017,ALL,All,all,162.409,>=$5M,24,14.0,335.0,2.506,1.487,1.852,False
-840,Lloydminster (Alberta part / partie de l'Alberta),2017,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-840,Lloydminster (Alberta part / partie de l'Alberta),2017,SECONDARY,Secondary,secondary,162.409,>=$5M,24,14.0,335.0,2.668,1.505,1.932,False
-840,Lloydminster (Alberta part / partie de l'Alberta),2018,ALL,All,all,164.761,>=$5M,24,14.3,343.0,2.521,1.434,1.802,False
-840,Lloydminster (Alberta part / partie de l'Alberta),2018,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-840,Lloydminster (Alberta part / partie de l'Alberta),2018,SECONDARY,Secondary,secondary,164.761,>=$5M,24,14.3,343.0,2.681,1.452,1.877,False
-840,Lloydminster (Alberta part / partie de l'Alberta),2019,ALL,All,all,161.256,>=$5M,28,13.0,364.0,1.951,1.482,1.47,False
-840,Lloydminster (Alberta part / partie de l'Alberta),2019,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-840,Lloydminster (Alberta part / partie de l'Alberta),2019,SECONDARY,Secondary,secondary,161.256,>=$5M,28,13.0,364.0,2.126,1.504,1.549,False
-840,Lloydminster (Alberta part / partie de l'Alberta),2020,ALL,All,all,173.077,>=$5M,27,14.2,383.0,1.668,1.42,1.251,False
-840,Lloydminster (Alberta part / partie de l'Alberta),2020,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-840,Lloydminster (Alberta part / partie de l'Alberta),2020,SECONDARY,Secondary,secondary,173.077,>=$5M,27,14.2,383.0,1.78,1.44,1.301,False
-840,Lloydminster (Alberta part / partie de l'Alberta),2021,ALL,All,all,169.843,>=$5M,26,14.4,374.0,2.029,1.377,1.594,False
-840,Lloydminster (Alberta part / partie de l'Alberta),2021,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-840,Lloydminster (Alberta part / partie de l'Alberta),2021,SECONDARY,Secondary,secondary,169.843,>=$5M,26,14.4,374.0,2.206,1.397,1.678,False
-840,Lloydminster (Alberta part / partie de l'Alberta),2022,ALL,All,all,213.631,>=$5M,30,16.1,482.0,2.481,1.433,1.968,False
-840,Lloydminster (Alberta part / partie de l'Alberta),2022,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-840,Lloydminster (Alberta part / partie de l'Alberta),2022,SECONDARY,Secondary,secondary,213.631,>=$5M,30,16.1,482.0,2.86,1.546,2.2,False
-840,Lloydminster (Alberta part / partie de l'Alberta),2023,ALL,All,all,164.789,>=$5M,27,14.4,390.0,2.445,1.386,1.788,False
-840,Lloydminster (Alberta part / partie de l'Alberta),2023,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-840,Lloydminster (Alberta part / partie de l'Alberta),2023,SECONDARY,Secondary,secondary,164.789,>=$5M,27,14.4,390.0,2.816,1.499,2.014,False
-840,Lloydminster (Alberta part / partie de l'Alberta),2024,ALL,All,all,183.724,>=$5M,34,16.9,573.0,2.995,1.693,1.984,False
-840,Lloydminster (Alberta part / partie de l'Alberta),2024,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-840,Lloydminster (Alberta part / partie de l'Alberta),2024,SECONDARY,Secondary,secondary,183.226,>=$5M,33,17.3,570.0,3.352,1.776,2.192,False
-840,Lloydminster (Alberta part / partie de l'Alberta),2025,ALL,All,all,184.41,>=$5M,36,16.1,578.0,2.982,1.715,1.923,False
-840,Lloydminster (Alberta part / partie de l'Alberta),2025,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
-840,Lloydminster (Alberta part / partie de l'Alberta),2025,SECONDARY,Secondary,secondary,183.912,>=$5M,35,16.4,575.0,3.335,1.801,2.124,False
+840,Lloydminster,2017,ALL,All,all,162.409,>=$5M,24,14.0,335.0,2.506,1.487,1.852,False
+840,Lloydminster,2017,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+840,Lloydminster,2017,SECONDARY,Secondary,secondary,162.409,>=$5M,24,14.0,335.0,2.668,1.505,1.932,False
+840,Lloydminster,2018,ALL,All,all,164.761,>=$5M,24,14.3,343.0,2.521,1.434,1.802,False
+840,Lloydminster,2018,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+840,Lloydminster,2018,SECONDARY,Secondary,secondary,164.761,>=$5M,24,14.3,343.0,2.681,1.452,1.877,False
+840,Lloydminster,2019,ALL,All,all,161.256,>=$5M,28,13.0,364.0,1.951,1.482,1.47,False
+840,Lloydminster,2019,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+840,Lloydminster,2019,SECONDARY,Secondary,secondary,161.256,>=$5M,28,13.0,364.0,2.126,1.504,1.549,False
+840,Lloydminster,2020,ALL,All,all,173.077,>=$5M,27,14.2,383.0,1.668,1.42,1.251,False
+840,Lloydminster,2020,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+840,Lloydminster,2020,SECONDARY,Secondary,secondary,173.077,>=$5M,27,14.2,383.0,1.78,1.44,1.301,False
+840,Lloydminster,2021,ALL,All,all,169.843,>=$5M,26,14.4,374.0,2.029,1.377,1.594,False
+840,Lloydminster,2021,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+840,Lloydminster,2021,SECONDARY,Secondary,secondary,169.843,>=$5M,26,14.4,374.0,2.206,1.397,1.678,False
+840,Lloydminster,2022,ALL,All,all,213.631,>=$5M,30,16.1,482.0,2.481,1.433,1.968,False
+840,Lloydminster,2022,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+840,Lloydminster,2022,SECONDARY,Secondary,secondary,213.631,>=$5M,30,16.1,482.0,2.86,1.546,2.2,False
+840,Lloydminster,2023,ALL,All,all,164.789,>=$5M,27,14.4,390.0,2.445,1.386,1.788,False
+840,Lloydminster,2023,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+840,Lloydminster,2023,SECONDARY,Secondary,secondary,164.789,>=$5M,27,14.4,390.0,2.816,1.499,2.014,False
+840,Lloydminster,2024,ALL,All,all,183.724,>=$5M,34,16.9,573.0,2.995,1.693,1.984,False
+840,Lloydminster,2024,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+840,Lloydminster,2024,SECONDARY,Secondary,secondary,183.226,>=$5M,33,17.3,570.0,3.352,1.776,2.192,False
+840,Lloydminster,2025,ALL,All,all,184.41,>=$5M,36,16.1,578.0,2.982,1.715,1.923,False
+840,Lloydminster,2025,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
+840,Lloydminster,2025,SECONDARY,Secondary,secondary,183.912,>=$5M,35,16.4,575.0,3.335,1.801,2.124,False
 555,London,2017,ALL,All,all,524.958,>=$5M,132,13.2,1737.0,0.942,0.881,0.816,False
 555,London,2017,PRIMARY,Primary,primary,,>=$5M,<2,,,,,,True
 555,London,2017,SECONDARY,Secondary,secondary,282.958,>=$5M,131,10.2,1337.0,0.541,0.885,0.655,False
@@ -2159,33 +2159,33 @@ region_uid,region_name,year,NAICS6,NAICSD,defence_type,total_sales_M,sales_bucke
 532,Oshawa,2025,ALL,All,all,218.373,>=$5M,81,15.9,1290.0,0.794,0.646,0.86,False
 532,Oshawa,2025,PRIMARY,Primary,primary,18.756,>=$5M,10,12.1,121.0,0.63,1.069,0.813,False
 532,Oshawa,2025,SECONDARY,Secondary,secondary,199.617,>=$5M,71,16.5,1169.0,0.814,0.611,0.866,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2017,ALL,All,all,1633.153,>=$5M,457,12.9,5885.0,1.424,1.202,1.228,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2017,PRIMARY,Primary,primary,333.43,>=$5M,11,53.1,584.0,4.768,2.477,2.956,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2017,SECONDARY,Secondary,secondary,1299.723,>=$5M,446,11.9,5301.0,1.207,1.187,1.154,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2018,ALL,All,all,1670.901,>=$5M,473,12.7,6018.0,1.393,1.216,1.188,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2018,PRIMARY,Primary,primary,341.963,>=$5M,12,50.6,607.0,4.788,2.537,2.996,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2018,SECONDARY,Secondary,secondary,1328.938,>=$5M,461,11.7,5411.0,1.178,1.2,1.113,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2019,ALL,All,all,1843.242,>=$5M,531,12.7,6757.0,1.226,1.134,1.04,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2019,PRIMARY,Primary,primary,350.496,>=$5M,13,48.5,630.0,2.835,1.978,1.903,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2019,SECONDARY,Secondary,secondary,1492.746,>=$5M,518,11.8,6127.0,1.082,1.122,0.994,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2020,ALL,All,all,1837.208,>=$5M,526,12.7,6698.0,1.024,1.124,0.84,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2020,PRIMARY,Primary,primary,350.496,>=$5M,13,48.5,630.0,3.123,1.985,2.087,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2020,SECONDARY,Secondary,secondary,1486.712,>=$5M,513,11.8,6068.0,0.884,1.111,0.79,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2021,ALL,All,all,1789.67,>=$5M,512,12.7,6489.0,1.277,1.118,1.081,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2021,PRIMARY,Primary,primary,350.496,>=$5M,13,48.5,630.0,3.118,1.951,2.104,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2021,SECONDARY,Secondary,secondary,1439.174,>=$5M,499,11.7,5859.0,1.116,1.106,1.027,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2022,ALL,All,all,1932.89,>=$5M,597,11.6,6917.0,1.263,1.082,1.077,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2022,PRIMARY,Primary,primary,391.638,>=$5M,31,24.3,752.0,1.93,0.772,1.111,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2022,SECONDARY,Secondary,secondary,1541.252,>=$5M,566,10.9,6165.0,1.161,1.106,1.073,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2023,ALL,All,all,1484.191,>=$5M,590,10.2,5990.0,1.098,1.066,1.001,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2023,PRIMARY,Primary,primary,91.979,>=$5M,31,8.6,267.0,0.516,0.742,0.397,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2023,SECONDARY,Secondary,secondary,1392.212,>=$5M,559,10.2,5723.0,1.186,1.093,1.078,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2024,ALL,All,all,1770.25,>=$5M,618,14.3,8824.0,1.233,1.049,1.02,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2024,PRIMARY,Primary,primary,156.852,>=$5M,33,18.5,611.0,1.002,0.75,0.707,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2024,SECONDARY,Secondary,secondary,1613.398,>=$5M,585,14.0,8213.0,1.261,1.073,1.055,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2025,ALL,All,all,1754.74,>=$5M,630,14.1,8861.0,1.202,1.043,1.007,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2025,PRIMARY,Primary,primary,144.977,>=$5M,32,18.0,576.0,0.917,0.711,0.659,False
-505,Ottawa - Gatineau (Ontario part / partie de l'Ontario),2025,SECONDARY,Secondary,secondary,1609.763,>=$5M,598,13.9,8285.0,1.236,1.07,1.045,False
+505,Ottawa - Gatineau,2017,ALL,All,all,1633.153,>=$5M,457,12.9,5885.0,1.424,1.202,1.228,False
+505,Ottawa - Gatineau,2017,PRIMARY,Primary,primary,333.43,>=$5M,11,53.1,584.0,4.768,2.477,2.956,False
+505,Ottawa - Gatineau,2017,SECONDARY,Secondary,secondary,1299.723,>=$5M,446,11.9,5301.0,1.207,1.187,1.154,False
+505,Ottawa - Gatineau,2018,ALL,All,all,1670.901,>=$5M,473,12.7,6018.0,1.393,1.216,1.188,False
+505,Ottawa - Gatineau,2018,PRIMARY,Primary,primary,341.963,>=$5M,12,50.6,607.0,4.788,2.537,2.996,False
+505,Ottawa - Gatineau,2018,SECONDARY,Secondary,secondary,1328.938,>=$5M,461,11.7,5411.0,1.178,1.2,1.113,False
+505,Ottawa - Gatineau,2019,ALL,All,all,1843.242,>=$5M,531,12.7,6757.0,1.226,1.134,1.04,False
+505,Ottawa - Gatineau,2019,PRIMARY,Primary,primary,350.496,>=$5M,13,48.5,630.0,2.835,1.978,1.903,False
+505,Ottawa - Gatineau,2019,SECONDARY,Secondary,secondary,1492.746,>=$5M,518,11.8,6127.0,1.082,1.122,0.994,False
+505,Ottawa - Gatineau,2020,ALL,All,all,1837.208,>=$5M,526,12.7,6698.0,1.024,1.124,0.84,False
+505,Ottawa - Gatineau,2020,PRIMARY,Primary,primary,350.496,>=$5M,13,48.5,630.0,3.123,1.985,2.087,False
+505,Ottawa - Gatineau,2020,SECONDARY,Secondary,secondary,1486.712,>=$5M,513,11.8,6068.0,0.884,1.111,0.79,False
+505,Ottawa - Gatineau,2021,ALL,All,all,1789.67,>=$5M,512,12.7,6489.0,1.277,1.118,1.081,False
+505,Ottawa - Gatineau,2021,PRIMARY,Primary,primary,350.496,>=$5M,13,48.5,630.0,3.118,1.951,2.104,False
+505,Ottawa - Gatineau,2021,SECONDARY,Secondary,secondary,1439.174,>=$5M,499,11.7,5859.0,1.116,1.106,1.027,False
+505,Ottawa - Gatineau,2022,ALL,All,all,1932.89,>=$5M,597,11.6,6917.0,1.263,1.082,1.077,False
+505,Ottawa - Gatineau,2022,PRIMARY,Primary,primary,391.638,>=$5M,31,24.3,752.0,1.93,0.772,1.111,False
+505,Ottawa - Gatineau,2022,SECONDARY,Secondary,secondary,1541.252,>=$5M,566,10.9,6165.0,1.161,1.106,1.073,False
+505,Ottawa - Gatineau,2023,ALL,All,all,1484.191,>=$5M,590,10.2,5990.0,1.098,1.066,1.001,False
+505,Ottawa - Gatineau,2023,PRIMARY,Primary,primary,91.979,>=$5M,31,8.6,267.0,0.516,0.742,0.397,False
+505,Ottawa - Gatineau,2023,SECONDARY,Secondary,secondary,1392.212,>=$5M,559,10.2,5723.0,1.186,1.093,1.078,False
+505,Ottawa - Gatineau,2024,ALL,All,all,1770.25,>=$5M,618,14.3,8824.0,1.233,1.049,1.02,False
+505,Ottawa - Gatineau,2024,PRIMARY,Primary,primary,156.852,>=$5M,33,18.5,611.0,1.002,0.75,0.707,False
+505,Ottawa - Gatineau,2024,SECONDARY,Secondary,secondary,1613.398,>=$5M,585,14.0,8213.0,1.261,1.073,1.055,False
+505,Ottawa - Gatineau,2025,ALL,All,all,1754.74,>=$5M,630,14.1,8861.0,1.202,1.043,1.007,False
+505,Ottawa - Gatineau,2025,PRIMARY,Primary,primary,144.977,>=$5M,32,18.0,576.0,0.917,0.711,0.659,False
+505,Ottawa - Gatineau,2025,SECONDARY,Secondary,secondary,1609.763,>=$5M,598,13.9,8285.0,1.236,1.07,1.045,False
 566,Owen Sound,2017,ALL,All,all,34.26,>=$5M,7,18.3,128.0,0.778,0.532,0.898,False
 566,Owen Sound,2017,PRIMARY,Primary,primary,,<$5M,<2,,,,,,True
 566,Owen Sound,2017,SECONDARY,Secondary,secondary,34.26,>=$5M,7,18.3,128.0,0.828,0.538,0.937,False
