@@ -61,6 +61,46 @@
         'Enterprises with 500 or more employees': '--brandDarkBlue'
     };
 
+    const sizeLabels = {
+        'Enterprises with less than 100 employees':       '< 100 employees',
+        'Enterprises with between 100 and 249 employees': '100–249 employees',
+        'Enterprises with between 250 and 499 employees': '250–499 employees',
+        'Enterprises with 500 or more employees':         '500+ employees',
+    };
+
+    const b4ShortLabels = {
+        'Simulation Systems for Naval':              'Naval Simulation',
+        'Simulation Systems for Aircraft':           'Air/Land Simulation',
+        'Unmanned Aerial Systems':                   'UAS/Drones',
+        'Military Aircraft Maintenance':             'Aircraft Maint.',
+        'Aircraft Fabrication':                      'Aircraft Fabrication',
+        'Combat Vehicles Maintenance':               'Combat Vehicle Maint.',
+        'Combat Vehicles and Components':            'Combat Vehicles',
+        'Naval Ship Maintenance':                    'Naval Ship Maint.',
+        'Naval Vessel Construction':                 'Naval Construction',
+        "Naval Ships' Structural":                   'Naval Structures',
+        'Naval Ship-Borne Mission':                  'Naval Mission Systems',
+        'Land-Based Communications':                 'Land Comms',
+        'Airborne Communications':                   'Airborne Comms',
+        'Land-Based Sensor':                         'Land Sensors',
+        'Airborne Sensor':                           'Airborne Sensors',
+        'Military Space Systems':                    'Space Systems',
+        'Firearms, Ammunition':                      'Firearms & Ammo',
+        'Firearms and Other Weapon':                 'Firearms & Weapons',
+        'Ammunition, Missiles':                      'Ammo & Missiles',
+        'Other Defence':                             'Other Defence',
+        'Military Personal Protect':                 'Personal Protection',
+        'Military Training':                         'Training Services',
+        'Land-Based Mission System':                 'Land Mission Systems',
+        'Naval Vessel Mission':                      'Naval Mission Systems',
+        'Aircraft Mission Systems':                  'Aircraft Mission Systems',
+    };
+
+    function shortB4Label(full) {
+        const key = Object.keys(b4ShortLabels).find(k => full.startsWith(k));
+        return key ? b4ShortLabels[key] : full.slice(0, 18);
+    }
+
     function formatCurrency(val) {
 		if (val >= 1e9) return `$${(val / 1e9).toFixed(2)}B`;
 		if (val >= 1e6) return `$${(val / 1e6).toFixed(1)}M`;
@@ -178,15 +218,23 @@
             .style('max-width', '260px');
 
         const xL0 = 0, xL1 = nodeW, xR0 = W - nodeW;
-        let yL = marginY, yR = marginY;
+        const maxTotal = Math.max(lowTotal, highTotal);
+
+        // Total drawable height for each side, proportional to firm count
+        const totalHL = lowTotal  > 0 ? (lowTotal  / maxTotal) * usableH : 0;
+        const totalHR = highTotal > 0 ? (highTotal / maxTotal) * usableH : 0;
+
+        // Center both sides vertically so neither floats to top
+        let yL = marginY + (usableH - totalHL) / 2;
+        let yR = marginY + (usableH - totalHR) / 2;
 
         sizeCategoryOrder.forEach((label) => {
             const lo = lowItems.find(d => d.size === label);
             const hi = highItems.find(d => d.size === label);
             const vL = lo ? (lo[metricDef.id] ?? 0) : 0;
             const vH = hi ? (hi[metricDef.id] ?? 0) : 0;
-            const hL = lowTotal  > 0 ? (vL / lowTotal)  * usableH : 0;
-            const hR = highTotal > 0 ? (vH / highTotal) * usableH : 0;
+            const hL = lowTotal  > 0 ? (vL / lowTotal)  * totalHL : 0;
+            const hR = highTotal > 0 ? (vH / highTotal) * totalHR : 0;
             const color = catColors[label];
 
             const lT = yL, lB = yL + hL;
@@ -245,7 +293,7 @@
                 .attr('dominant-baseline', 'middle')
                 .attr('font-family', 'OpenSans').attr('font-size', 11).attr('fill', '#fff')
                 .style('pointer-events', 'none')
-                .text(label);
+                .text(sizeLabels[label] ?? label);
 
             yL += hL + padBetween;
             yR += hR + padBetween;
@@ -375,7 +423,7 @@
             if (!el || items.length === 0) return;
 
             // Truncate long labels for a cleaner radar chart
-            const labels = items.map((d) => d.category.length > 25 ? d.category.slice(0, 25) + '...' : d.category);
+            const labels = items.map((d) => shortB4Label(d.category));
             const rawValues = items.map((d) => d.amount);
             const percentValues = rawValues.map((v) => (v / total) * 100);
             const fullLabels = items.map((d) => d.category); // full labels for tooltips
@@ -474,7 +522,7 @@
     }
 </script>
 
-<!-- <Password /> -->
+<Password />
 
 <Logo logoType="White" backgroundColor="var(--brandGray90)"/>
 
@@ -643,7 +691,7 @@
 
         <div class="text">
             <h3>Share of sales by company size</h3>
-            
+<!--             
             <div class="waffle-legend" style="margin-top: 16px; margin-bottom: 8px;">
                 {#each sizeCategoryOrder as label}
                     <div class="waffle-legend-row">
@@ -651,7 +699,7 @@
                         <span class="waffle-label">{label}</span>
                     </div>
                 {/each}
-            </div>
+            </div> -->
                 <p>Flow of {sizeMetricOptions.find(m => m.id === waffleMetric)?.label.toLowerCase()} by company size across the two selected years.</p>
                 <div class="filter-group inline-filters">
                     <span class="filter-label">Metric</span>
@@ -669,6 +717,11 @@
 <Footer />
 
 <style>
+    .sankey-chart {
+        width: 100%;
+        height: 420px;
+        position: relative;
+    }
     .year-pair {
         display: flex;
         align-items: center;
@@ -737,9 +790,9 @@
         display: flex;
         overflow-x: hidden;        /* no scroll — constrained to text width */
         gap: 16px;
-        padding-bottom: 16px;
-        border-left: 1px solid var(--brandGray);
-        border-right: 1px solid var(--brandGray);
+        /* padding-bottom: 16px; */
+        /* border-left: 1px solid var(--brandGray);
+        border-right: 1px solid var(--brandGray); */
         width: 100%;
         box-sizing: border-box;
     }

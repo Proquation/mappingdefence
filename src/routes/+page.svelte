@@ -133,9 +133,23 @@
 
 		<p>
 			Recent commitments in the Defence sector under the Carney administration brings about a question of where are these funds allocated, and how are they distributed?
-			Although Budget 2025 outlines broad programs for investment, the question remains as to what this entails for different regions across Canada and the employees that work in this sector.
 		</p>
 
+		<p>
+			Last November, the Finance Minister announced the <a href="https://budget.canada.ca/2025/report-rapport/pdf/budget-2025.pdf">Canada Strong Budget 2025</a>, initiliazing an economic shift to increasing defence spending in Canada.
+			Then, on February 17, 2026, Carney launched <a href="https://www.canada.ca/en/department-national-defence/corporate/reports-publications/industrial-strategy/security-sovereignty-prosperity.html#toc1">Canada's Defence Industrial Strategy</a>, highlighting commitments on growing the defence sector such as the "build-partner-buy" program. 
+		</p>
+
+		<p>
+			In addition, Canada has been selected to host the Defence, Security and Resilience Bank (DSRB), a newly formed international financial institution to increase private defence spending, especially for Small Medium Enterprises (SMEs).
+			This strategy captures a couple key elements; sovereignty of the industrial sector and military reinforcement, a push and pull between ISED and the DND. 
+			What this means for Canada is in the next 10 years, we will be seeing an increase in the share of defence acquisitions, defence research and development, defence revenue and exports, and 125,000 new jobs.
+		</p>
+
+		<p>	
+			Although the Defence Industrial Strategy outlines broad programs for investment, the question remains as to what this entails for different regions across Canada and the employees that work in this sector.
+			The articles in this page cover the current and historial landscape of defence spending across metropolitan regions in Canada to discover what areas could see increased investment and growth.
+		</p>
 
 		<ul>
 		<li>

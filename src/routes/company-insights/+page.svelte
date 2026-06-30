@@ -32,6 +32,7 @@
 	let naicsOptions = []; // [{code, desc}] of individual NAICS codes
 
 	let lqBasis = 'sales'; // sales vs. firms vs. jobs
+	let colourType = 'lq';   // 'lq' | 'totals'
 
 	// Per-geometry data + geojson caches
 	const aggData = {}; // { csd: [...rows], cma: [...], prov: [...] }
@@ -104,12 +105,15 @@
 		return gj;
 	}
 
-	let csdGeojson = null, cmaGeojson = null, provinceGeojson = null;
+	let csdGeojson = null, cmaGeojson = null, provinceGeojson = null, provinceSimple = null;
 	$: if (mounted) {
-		if (selectedGeometry === 'csd') ensureGeojson('csd_boundaries').then((g) => (csdGeojson = g));
+		if (selectedGeometry === 'csd') {
+			ensureGeojson('csd_boundaries').then((g) => (csdGeojson = g));
+			ensureGeojson('province-boundaries-simple').then((g) => (provinceGeojson = g)); // ← add
+		}
 		if (selectedGeometry === 'cma') {
 			ensureGeojson('cma_boundaries').then((g) => (cmaGeojson = g));
-			ensureGeojson('province_boundaries').then((g) => (provinceGeojson = g));
+			ensureGeojson('province-boundaries-simple').then((g) => (provinceGeojson = g));
 		}
 	}
 
@@ -122,12 +126,16 @@
 		const lookup = {};
 		const lqKey = { sales: 'lq_sales', firms: 'lq_firms', jobs: 'lq_jobs' }[lqBasis];
 		activeRows.forEach((r) => {
+			const absVal = lqBasis === 'sales' ? r.total_sales_M
+						: lqBasis === 'jobs'  ? r.total_jobs
+						: (r.suppressed ? null : Number(r.n_firms) || null);
 			lookup[r.region_uid] = {
 				sales: r.total_sales_M,
 				n_firms: r.n_firms,
 				total_jobs: r.total_jobs,
 				avg_employees: r.avg_employees,
-				lq: r[lqKey]
+				lq: r[lqKey],
+				absVal              // the raw value for the active basis
 			};
 		});
 		return lookup;
@@ -174,7 +182,6 @@
 		<div class="status error">{loadError}</div>
 	{:else}
 		<div class="text" style="margin-bottom: 0px;">
-			<h3>Filter the map</h3>
 			<div class="filter-row">
 				<div class="filter-group">
 					<span class="filter-label">Geography</span>
@@ -211,11 +218,19 @@
  
 				{#if selectedGeometry === 'cma' || selectedGeometry === 'prov' || selectedGeometry === 'csd'}
 					<div class="filter-group">
-						<span class="filter-label">LQ basis (bubble colour)</span>
+						<span class="filter-label">Metric</span>
 						<select class="year-select" bind:value={lqBasis}>
 							<option value="sales">Sales</option>
 							<option value="firms">Firms</option>
 							<option value="jobs">Jobs</option>
+						</select>
+					</div>
+
+					<div class="filter-group">
+						<span class="filter-label">Colour by metric type</span>
+						<select class="year-select" bind:value={colourType}>
+							<option value="totals">Totals</option>
+							<option value="lq">Location Quotients</option>
 						</select>
 					</div>
 				{/if}
@@ -224,11 +239,11 @@
  
 		<section class="map-block">
 			{#if selectedGeometry === 'csd'}
-				<DefenceMap geojson={csdGeojson} {recordByUid} {lqBasis} {formatSales} />
+				<DefenceMap geojson={csdGeojson} {recordByUid} {lqBasis} {colourType} {formatSales} {provinceGeojson} />
 			{:else if selectedGeometry === 'cma'}
-				<CmaCartogram rows={activeRows} {cmaGeojson} {provinceGeojson} {lqBasis} {formatSales} />
+				<CmaCartogram rows={activeRows} {cmaGeojson} {provinceGeojson} {lqBasis} {colourType} {formatSales} />
 			{:else}
-				<ProvinceCartogram rows={activeRows} {provinceGeojson} {lqBasis} {formatSales} />
+				<ProvinceCartogram rows={activeRows} {provinceGeojson} {lqBasis} {colourType} {formatSales} />
 			{/if}
 		</section>
 	{/if}
@@ -290,8 +305,8 @@
 	.filter-group {
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
-		margin-bottom: 16px;
+		/* gap: 8px; */
+		/* margin-bottom: 16px; */
 	}
 
 	.filter-row {
@@ -304,18 +319,25 @@
 	.filter-label {
 		font-family: OpenSansBold;
 		font-size: 13px;
-		color: var(--brandGray90);
+		margin-bottom: 3px;
+		color: var(--brandWhite);
 	}
 
 	.year-select {
 		max-width: 280px;
-		padding: 6px 10px;
-		border: 1px solid var(--brandGray);
-		border-radius: 5px;
-		background: var(--brandWhite);
-		color: var(--brandGray90);
+		padding: 4px 6px;
+		border: 1px solid var(--brandWhite);
+		border-radius: 3px;
+		background: var(--brandGray90);
+		color: var(--brandWhite);
 		font-family: OpenSans;
 		font-size: 13px;
+	}
+
+	.year-select option,
+	.year-select optgroup {
+		background: var(--brandGray90);
+		color: var(--brandWhite);
 	}
 
 	.year-select :global(option.opt-primary) {
