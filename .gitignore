@@ -26,3 +26,5 @@ vite.config.ts.timestamp-*
 *.dbf
 *.shx
 *.prj
+
+*.mbtiles
