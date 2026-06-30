@@ -1,42 +1,39 @@
-# sv
+# Mapping estimated allocation of defence resources at the CSD, CMA and province level
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+This project serves to map where defence spending is going in Canada through historical business data and NAICS codes.
 
-## Creating a project
+## Definitions
 
-If you're seeing this, you've probably already done this step. Congrats!
+Primary defence is when the 6 digit NAICS code is primarily used for defence, which is based on the nature of the product.
 
-```sh
-# create a new project
-npx sv create my-app
-```
+Secondary defence is categorized as when the NAICS codes are related to defence, but contains many other industries.
 
-To recreate this project with the same configuration:
+The following NAICS codes were selected to determine what businesses are deemed as defence related:
 
-```sh
-# recreate this project
-npx sv create --template minimal --types jsdoc --install npm defencemap
-```
+{PLACEHOLDER}
 
-## Developing
+## Data download
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+csd_agg.csv
+cma_rural_agg.csv
 
-```sh
-npm run dev
+{PLACEHOLDER}
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+## Data sources
 
-## Building
+The NAICS codes selected were from the following data sources:
+- Data axle historical business data from the University of Toronto
+- ISED
+- Purdue
+- HS codes
 
-To create a production version of your app:
+## Steps
 
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+1. Gather a list of NAICS codes
+2. Filter the data axle historical business data for those specific NAICS codes
+3. Convert the postal code values into longitude and latitute values
+4. Aggregate the business data to CSDs, CMAs, and provinces using the long/lat values while omitting data for any geometries with less than 2 firms for privacy.
+5. Gather total values across each year to normalize each geometry
+6. Calculate the location quotients 
+7. Place the numerator and denominator files into the /data folder in static
+8. Done!

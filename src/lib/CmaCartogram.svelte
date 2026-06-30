@@ -276,25 +276,25 @@
 		node.filter((d) => d.r >= labelMinR)
 			.append('text')
 			.attr('text-anchor', 'middle')
-			.attr('dy', d => d.r >= labelMinR + 6 ? '-0.15em' : '0.35em')
+			.attr('dy', '0.20em')
 			.style('font-family', 'OpenSansBold')
 			.style('font-size', (d) => `${Math.min(11, Math.max(8, d.r * 0.35))}px`)
 			.style('fill', '#ffffff')
 			.style('pointer-events', 'none')
-			.style('text-shadow', '0 1px 3px rgba(0,0,0,0.8), 0 0 6px rgba(0,0,0,0.6)')
+			.style('text-shadow', '0 1px 3px rgba(0,0,0,0.8)')
 			.text((d) => shortCmaName(d.name));
 			
 
 		// Second line (sales) only for larger bubbles
-		node.filter((d) => d.r >= labelMinR + 6 && !d.suppressed)
-			.append('text')
-			.attr('text-anchor', 'middle')
-			.attr('dy', '1.1em')
-			.style('font-family', 'OpenSans')
-			.style('font-size', '9px')
-			.style('fill', 'rgba(255,255,255,0.75)')
-			.style('pointer-events', 'none')
-			.text((d) => formatSales(d.sales));
+		// node.filter((d) => d.r >= labelMinR + 6 && !d.suppressed)
+		// 	.append('text')
+		// 	.attr('text-anchor', 'middle')
+		// 	.attr('dy', '1.1em')
+		// 	.style('font-family', 'OpenSans')
+		// 	.style('font-size', '9px')
+		// 	.style('fill', 'rgba(255,255,255,0.75)')
+		// 	.style('pointer-events', 'none')
+		// 	.text((d) => formatSales(d.sales));
 	}
 
 	function showPopup(d) {

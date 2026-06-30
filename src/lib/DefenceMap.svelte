@@ -1,7 +1,18 @@
 <script>
 	import { onDestroy, onMount } from 'svelte';
-	import maplibregl from 'maplibre-gl';
 	import 'maplibre-gl/dist/maplibre-gl.css';
+
+	import maplibregl from 'maplibre-gl';
+	import { Protocol } from 'pmtiles';
+	import { base } from '$app/paths';
+
+	// register pmtiles:// protocol once, before creating the map
+	const protocol = new Protocol();
+	maplibregl.addProtocol('pmtiles', protocol.tile);
+
+	const SOURCE_ID = 'csd';
+	const SRC_LAYER = 'csd';          // MUST match tippecanoe --layer=csd
+	const FILL_LAYER = 'csd-fill';
 
 	
 	export let geojson = null;
@@ -14,8 +25,8 @@
 
 	let map, mapContainer, mapLoaded = false, popup;
 
-	const SOURCE_ID = 'regions';
-	const FILL_LAYER = 'region-fill';
+	// const SOURCE_ID = 'regions';
+	// const FILL_LAYER = 'region-fill';
 	const LINE_LAYER = 'region-line';
 
 	let UNDER = '#ff6b4a';
@@ -94,28 +105,41 @@
 			const m = Math.max(1, absClamp);
 			return [
 				'case',
-				['==', ['get', 'lq_value'], null], '#2a2a3a',
-				['interpolate', ['linear'], ['get', 'lq_value'], lqMin, UNDER, 1, MID, lqMax, OVER]
+				['==', ['feature-state', 'abs_value'], null], '#2a2a3a',
+				['interpolate', ['linear'], ['feature-state', 'abs_value'], 0, SEQ_LO, m, SEQ_HI]
 			];
 		}
 		const c = Math.max(2, lqClamp);
 		return [
 			'case',
-			['==', ['get', 'lq_value'], null], '#2a2a3a',
-			['interpolate', ['linear'], ['get', 'lq_value'], 1/c, UNDER, 1, MID, c, OVER]
+			['==', ['feature-state', 'lq_value'], null], '#2a2a3a',
+			['interpolate', ['linear'], ['feature-state', 'lq_value'], 1/c, UNDER, 1, MID, c, OVER]
 		];
 	}
 
-	function updateChoropleth() {
-		if (!mapLoaded || !map) return;
-		const src = map.getSource(SOURCE_ID);
-		if (src) src.setData(enrichGeojson(geojson, recordByUid));
-		if (map.getLayer(FILL_LAYER)) {
-			map.setPaintProperty(FILL_LAYER, 'fill-color', fillColorExpression());
+
+	function applyData() {
+		if (!mapLoaded) return;
+		map.removeFeatureState({ source: SOURCE_ID, sourceLayer: SRC_LAYER });
+		for (const [uid, rec] of Object.entries(recordByUid)) {
+			map.setFeatureState(
+				{ source: SOURCE_ID, sourceLayer: SRC_LAYER, id: uid },
+				{
+					lq_value:  Number.isFinite(rec.lq)     ? rec.lq     : null,
+					abs_value: Number.isFinite(rec.absVal) ? rec.absVal : null,
+					sales_value: Number.isFinite(rec.sales) ? rec.sales : null,
+					n_firms: rec.n_firms ?? null,
+					total_jobs: Number.isFinite(rec.total_jobs) ? rec.total_jobs : null,
+					avg_employees: Number.isFinite(rec.avg_employees) ? rec.avg_employees : null
+				}
+			);
 		}
+		if (map.getLayer(FILL_LAYER)) map.setPaintProperty(FILL_LAYER, 'fill-color', fillColorExpression());
 	}
 
-	$: if (mapLoaded && (geojson || recordByUid || lqBasis || colourType)) updateChoropleth();
+	// re-apply whenever data or mode changes
+	$: if (mapLoaded && (recordByUid || lqBasis || colourType)) applyData();
+
 
 	onMount(() => {
 		const style = getComputedStyle(document.documentElement);
@@ -139,32 +163,58 @@
 					paint: { 'line-color': '#333333', 'line-width': 0.8, 'line-opacity': 0.9 } });
 			}
 
-			map.addSource(SOURCE_ID, { type: 'geojson', data: enrichGeojson(geojson, recordByUid) });
+			// map.addSource(SOURCE_ID, { type: 'geojson', data: enrichGeojson(geojson, recordByUid) });
+			// map.addLayer({
+			// 	id: FILL_LAYER, type: 'fill', source: SOURCE_ID,
+			// 	paint: { 'fill-color': fillColorExpression(), 'fill-opacity': 0.8 }
+			// });
+			// map.addLayer({
+			// 	id: LINE_LAYER, type: 'line', source: SOURCE_ID,
+			// 	paint: { 'line-color': 'rgba(255,255,255,0.15)', 'line-width': 0.4, 'line-opacity': 0.6 }
+			// });
+
+			map.addSource(SOURCE_ID, {
+				type: 'vector',
+				url: `pmtiles://${base}/pmtiles/csd.pmtiles`,
+				promoteId: 'region_uid'
+			});
+
 			map.addLayer({
-				id: FILL_LAYER, type: 'fill', source: SOURCE_ID,
-				paint: { 'fill-color': fillColorExpression(), 'fill-opacity': 0.8 }
+				id: FILL_LAYER,
+				type: 'fill',
+				source: SOURCE_ID,
+				'source-layer': SRC_LAYER,
+				paint: {
+					'fill-color': fillColorExpression(),   // reads feature-state, see below
+					'fill-opacity': 0.85
+				}
 			});
 			map.addLayer({
-				id: LINE_LAYER, type: 'line', source: SOURCE_ID,
-				paint: { 'line-color': 'rgba(255,255,255,0.15)', 'line-width': 0.4, 'line-opacity': 0.6 }
+				id: 'csd-line', type: 'line', source: SOURCE_ID, 'source-layer': SRC_LAYER,
+				paint: { 'line-color': 'rgba(255,255,255,0.12)', 'line-width': 0.3 }
 			});
+
+			mapLoaded = true;
+			applyData();        // push current data into feature-state
 
 			map.on('mouseenter', FILL_LAYER, (event) => {
 				if (!event.features?.length) return;
 				map.getCanvas().style.cursor = 'pointer';
 				const p = event.features[0].properties;
-				if (popup) popup.remove();
-				const lqTxt = (p.lq_value == null || p.lq_value === '') ? 'N/A' : Number(p.lq_value).toFixed(2) + '×';
-				const firmsTxt = p.n_firms ?? 'N/A';
+				const uid = String(p.region_uid);
+				const name = p.region_name;
+				const rec = recordByUid[uid] || {};
+				const lqTxt = Number.isFinite(rec.lq) ? rec.lq.toFixed(2) + '×' : 'N/A';
+				const firmsTxt = rec.n_firms ?? 'N/A';
 
 				let rows;
 				if (lqBasis === 'firms') {
 					rows = `<div>LQ (firms): ${lqTxt}</div><div>Firms: ${firmsTxt}</div>`;
 				} else if (lqBasis === 'jobs') {
-					const jobsTxt = p.total_jobs == null ? 'N/A' : Number(p.total_jobs).toLocaleString();
+					const jobsTxt = Number.isFinite(rec.total_jobs) ? Number(rec.total_jobs).toLocaleString() : 'N/A';
 					rows = `<div>LQ (jobs): ${lqTxt}</div><div>Total jobs: ${jobsTxt}</div><div>Firms: ${firmsTxt}</div>`;
 				} else {
-					const salesTxt = p.sales_value == null ? 'Suppressed / no data' : formatSales(Number(p.sales_value));
+					const salesTxt = Number.isFinite(rec.sales) ? formatSales(rec.sales) : 'Suppressed / no data';
 					rows = `<div>LQ (sales): ${lqTxt}</div><div>Sales: ${salesTxt}</div><div>Firms: ${firmsTxt}</div>`;
 				}
 
@@ -172,7 +222,7 @@
 					.setLngLat(event.lngLat)
 					.setHTML(`
 						<div style="font-family:OpenSans,sans-serif;font-size:13px;line-height:1.6;background:#1e2433;color:#e0e0e0;padding:10px;border-radius:8px;">
-							<div style="font-weight:600;margin-bottom:4px;color:#ffffff;">${p.region_name}</div>
+							<div style="font-weight:600;margin-bottom:4px;color:#ffffff;">${name}</div>
 							${rows}
 						</div>`)
 					.addTo(map);
@@ -184,7 +234,7 @@
 			});
 
 			mapLoaded = true;
-			updateChoropleth();
+			// updateChoropleth();
 		});
 
 		map.on('style.load', () => {
@@ -218,9 +268,8 @@
 		<div class="ramp-wrap">
 			<div class="ramp" style="background: linear-gradient(to right, {SEQ_LO} 0%, {SEQ_HI} 100%)"></div>
 			<div class="ticks">
-				<span style="left:0%">{lqMin.toFixed(2)}×</span>
-				<span style="left: clamp(7%, {midPct}%, 92%)" class="tick-strong">1.0×</span>
-				<span style="left:100%">{lqMax.toFixed(1)}×</span>
+				<span style="left:0%">{lqBasis === 'sales' ? formatSales(0) : '0'}</span>
+				<span style="left:100%">{lqBasis === 'sales' ? formatSales(absClamp) : Math.round(absClamp).toLocaleString()}</span>
 			</div>
 		</div>
 	{:else}

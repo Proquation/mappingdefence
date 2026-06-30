@@ -12,6 +12,7 @@
 	import DefenceMap from '$lib/DefenceMap.svelte';
 	import CmaCartogram from '$lib/CmaCartogram.svelte';
 	import ProvinceCartogram from '$lib/ProvinceCartogram.svelte';
+	import RankingTables from '$lib/RankingTables.svelte';
 
 	let isLoading = true;
 	let loadError = '';
@@ -31,7 +32,7 @@
 	let yearOptions = [];
 	let naicsOptions = []; // [{code, desc}] of individual NAICS codes
 
-	let lqBasis = 'sales'; // sales vs. firms vs. jobs
+	let lqBasis = 'jobs'; // sales vs. firms vs. jobs
 	let colourType = 'lq';   // 'lq' | 'totals'
 
 	// Per-geometry data + geojson caches
@@ -246,7 +247,12 @@
 				<ProvinceCartogram rows={activeRows} {provinceGeojson} {lqBasis} {colourType} {formatSales} />
 			{/if}
 		</section>
+		
+		<RankingTables
+		csdRows={aggData.csd || []} cmaRows={aggData.cma || []} provRows={aggData.prov || []}
+		{lqBasis} {colourType} {selectedYear} {selectedMode} {selectedGeometry} {formatSales} />
 	{/if}
+
 
 	<div class="text" style="margin-bottom: 0px;">
 		<h3>Data sources and methods</h3>
