@@ -51,6 +51,16 @@
 		layers: [{ id: 'background', type: 'background', paint: { 'background-color': '#333333' } }]
 	};
 
+	$: MAP_STYLE = {
+		version: 8,
+		glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
+		sources: {},
+		layers: [{ id: 'background', type: 'background', paint: { 'background-color': mapBg } }]
+	};
+
+	$: labelColor = darkMode ? '#ffffff' : '#111111';
+	$: labelShadow = darkMode ? '0 1px 3px rgba(0,0,0,0.8)' : '0 1px 2px rgba(255,255,255,0.8)';
+
 	const RURAL_POINTS = {
 		RURAL_ON: [-84.5, 49.5],
 		RURAL_QC: [-72.0, 52.0],
@@ -68,6 +78,41 @@
 	};
 
 	let centroidByUid = {};
+
+	export let usGeojson = null;
+	export let darkMode = true;
+
+	$: mapBg      = darkMode ? '#333333' : '#e8e8e8';
+	$: provFill   = darkMode ? '#1a1a1a' : '#F2F2F2';
+	$: provLine   = darkMode ? '#333333' : '#b0b0b0';
+	$: usFill     = darkMode ? '#1a1a1a' : '#F2F2F2';
+	$: usLine     = darkMode ? '#333333' : '#a8a8a8';
+
+	// React to darkMode toggle — update background and layers
+	$: if (mapLoaded) {
+		map.setPaintProperty('background', 'background-color', mapBg);
+		if (map.getLayer('prov-fill')) map.setPaintProperty('prov-fill', 'fill-color', provFill);
+		if (map.getLayer('prov-line')) map.setPaintProperty('prov-line', 'line-color', provLine);
+		if (map.getLayer('us-fill'))  map.setPaintProperty('us-fill',  'fill-color', usFill);
+		if (map.getLayer('us-line'))  map.setPaintProperty('us-line',  'line-color', usLine);
+	}
+
+	$: if (mapLoaded && usGeojson) addUsLayer();
+
+	function addUsLayer() {
+		if (!map) return;
+		if (map.getSource('us')) {
+			map.getSource('us').setData(usGeojson);
+			return;
+		}
+		// Insert US below province layers
+		const beforeLayer = map.getLayer('prov-fill') ? 'prov-fill' : undefined;
+		map.addSource('us', { type: 'geojson', data: usGeojson });
+		map.addLayer({ id: 'us-fill', type: 'fill', source: 'us',
+			paint: { 'fill-color': usFill, 'fill-opacity': 1 } }, beforeLayer);
+		map.addLayer({ id: 'us-line', type: 'line', source: 'us',
+			paint: { 'line-color': usLine, 'line-width': 0.5 } }, beforeLayer);
+	}
 
 	function computeCentroids() {
 		const c = {};
@@ -144,13 +189,40 @@
 			});
 	})();
 
+	$: noDataColor = darkMode ? '#666666' : '#666666';
+
+	function colorFor(b) {
+		if (colourType === 'totals') {
+			if (b.suppressed || !(b.colorVal > 0)) return noDataColor;
+			const t = Math.min(1, b.colorVal / Math.max(1, absClamp));
+			return d3.interpolateRgb(SEQ_LO, SEQ_HI)(t);
+		}
+		return lqColor(b.colorVal);
+	}
+
+	function lqColor(lq) {
+		if (lq == null) return noDataColor;
+		if (lq >= 1) {
+			const t = Math.min(1, (lq - 1) / (lqClamp - 1));
+			return d3.interpolateRgb(MID, OVER)(t);
+		}
+		const t = Math.min(1, (1 - lq) / (1 - 1 / lqClamp));
+		return d3.interpolateRgb(MID, UNDER)(t);
+	}
+
+	// $: totalMetric = (() => {
+	// 	if (lqBasis === 'sales') return bubbles.map((b) => b.sales).filter(Number.isFinite).reduce((s, v) => s + v, 0);
+	// 	if (lqBasis === 'jobs')  return bubbles.map((b) => b.total_jobs).filter(Number.isFinite).reduce((s, v) => s + v, 0);
+	// 	return bubbles.filter((b) => !b.suppressed).map((b) => Number(b.n_firms) || 0).reduce((s, v) => s + v, 0);
+	// })();
+
 	$: totalMetric = (() => {
-		if (lqBasis === 'sales') return bubbles.map((b) => b.sales).filter(Number.isFinite).reduce((s, v) => s + v, 0);
-		if (lqBasis === 'jobs')  return bubbles.map((b) => b.total_jobs).filter(Number.isFinite).reduce((s, v) => s + v, 0);
-		return bubbles.filter((b) => !b.suppressed).map((b) => Number(b.n_firms) || 0).reduce((s, v) => s + v, 0);
+		if (lqBasis === 'sales') return cmaBubbles.map(b => b.sales).filter(Number.isFinite).reduce((s, v) => s + v, 0);
+		if (lqBasis === 'jobs')  return cmaBubbles.map(b => b.total_jobs).filter(Number.isFinite).reduce((s, v) => s + v, 0);
+		return cmaBubbles.filter(b => !b.suppressed).map(b => Number(b.n_firms) || 0).reduce((s, v) => s + v, 0);
 	})();
 
-	$: totalLabel   = lqBasis === 'sales' ? 'Total sales (shown)' : lqBasis === 'jobs' ? 'Total jobs (shown)' : 'Total firms (shown)';
+	$: totalLabel   = lqBasis === 'sales' ? 'Total sales (shown, excl. rural)' : lqBasis === 'jobs' ? 'Total jobs (shown, excl. rural)' : 'Total firms (shown, excl. rural)';
 	$: totalDisplay = lqBasis === 'sales' ? formatSales(totalMetric) : totalMetric.toLocaleString();
 
 	$: maxSales = bubbles.length ? Math.max(...bubbles.map((b) => b.sizeVal), 1) : 1;
@@ -169,6 +241,9 @@
 
 	$: if (mapLoaded && provinceGeojson) addProvinceLayer();
 
+	$: cmaBubbles = bubbles.filter(b => !String(b.uid).startsWith('RURAL_'));
+	$: ruralBubbles = bubbles.filter(b => String(b.uid).startsWith('RURAL_'));
+
 	function addProvinceLayer() {
 		if (!map) return;
 		if (map.getSource('prov')) {
@@ -176,15 +251,11 @@
 			return;
 		}
 		map.addSource('prov', { type: 'geojson', data: provinceGeojson });
-		map.addLayer(
-			{ id: 'prov-fill', type: 'fill', source: 'prov',
-			paint: { 'fill-color': '#1a1a1a', 'fill-opacity': 1 } },
-		);
-		map.addLayer(
-			{ id: 'prov-line', type: 'line', source: 'prov',
-			paint: { 'line-color': '#333333', 'line-width': 0.8, 'line-opacity': 0.9 } },
-		);
-		drawBubbles(); // keep SVG on top
+		map.addLayer({ id: 'prov-fill', type: 'fill', source: 'prov',
+			paint: { 'fill-color': provFill, 'fill-opacity': 1 } });
+		map.addLayer({ id: 'prov-line', type: 'line', source: 'prov',
+			paint: { 'line-color': provLine, 'line-width': 0.8, 'line-opacity': 0.9 } });
+		drawBubbles();
 	}
 
 	function radiusPx(v) {
@@ -202,25 +273,25 @@
 		return vals[Math.floor(vals.length*0.95)] ?? vals[vals.length-1];
 	})();
 
-	function colorFor(b) {
-		if (colourType === 'totals') {
-			if (b.suppressed || !(b.colorVal > 0)) return '#3a3a4a';
-			const t = Math.min(1, b.colorVal / Math.max(1, absClamp));
-			return d3.interpolateRgb(SEQ_LO, SEQ_HI)(t);
-		}
-		return lqColor(b.colorVal);   // colorVal is the LQ here
-	}
+	// function colorFor(b) {
+	// 	if (colourType === 'totals') {
+	// 		if (b.suppressed || !(b.colorVal > 0)) return '#3a3a4a';
+	// 		const t = Math.min(1, b.colorVal / Math.max(1, absClamp));
+	// 		return d3.interpolateRgb(SEQ_LO, SEQ_HI)(t);
+	// 	}
+	// 	return lqColor(b.colorVal);   // colorVal is the LQ here
+	// }
 
 
-	function lqColor(lq) {
-		if (lq == null) return '#3a3a4a';
-		if (lq >= 1) {
-			const t = Math.min(1, (lq - 1) / (lqClamp - 1));
-			return d3.interpolateRgb(MID, OVER)(t);
-		}
-		const t = Math.min(1, (1 - lq) / (1 - 1 / lqClamp));
-		return d3.interpolateRgb(MID, UNDER)(t);
-	}
+	// function lqColor(lq) {
+	// 	if (lq == null) return '#3a3a4a';
+	// 	if (lq >= 1) {
+	// 		const t = Math.min(1, (lq - 1) / (lqClamp - 1));
+	// 		return d3.interpolateRgb(MID, OVER)(t);
+	// 	}
+	// 	const t = Math.min(1, (1 - lq) / (1 - 1 / lqClamp));
+	// 	return d3.interpolateRgb(MID, UNDER)(t);
+	// }
 
 	function project(lngLat) { return map.project(lngLat); }
 
@@ -238,27 +309,24 @@
 	function drawBubbles() {
 		if (!mapLoaded || !markerLayer) return;
 		const zoom = map.getZoom();
-		const zoomScale = 1 + Math.max(0, zoom - 3.2) * 0.18;
-		// Label threshold: lower zoom = only biggest bubbles labelled
-		const labelMinR = zoom < 3.2 ? 30 : zoom < 4.5 ? 22 : zoom < 5.5 ? 16 : zoom < 6.5 ? 12 : 8;
-
+		// Scale factor: smaller at low zoom, full size at high zoom
+		const zoomScale = Math.max(0.1, (zoom - 2) / 2);  // no upper cap, grows unbounded
+		//const labelMinR = zoom < 2 ? 999 : zoom < 5.5 ? 22 : zoom < 6.5 ? 16 : 12;
+		const labelMinR = zoom < 2 ? 999 : zoom < 4 ? 14 : zoom < 5.5 ? 12 : 8;
 		const svg = d3.select(markerLayer);
 		svg.selectAll('*').remove();
 
-		const nodes = bubbles.map((b) => {
+		const allNodes = cmaBubbles.map((b) => {
 			const p = project(b.lngLat);
-			return { ...b, x: p.x, y: p.y, r: radiusPx(b.sizeVal) * zoomScale };
+			const baseR = radiusPx(b.sizeVal);
+			return { ...b, x: p.x, y: p.y, r: Math.max(3, baseR * zoomScale) };
 		});
 
-		const sim = d3.forceSimulation(nodes)
-			.force('x', d3.forceX((d) => project(d.lngLat).x).strength(0.25))
-			.force('y', d3.forceY((d) => project(d.lngLat).y).strength(0.25))
-			.force('collide', d3.forceCollide((d) => d.r + 1).strength(0.9))
-			.stop();
-		for (let i = 0; i < 120; i++) sim.tick();
-
 		const g = svg.append('g');
-		const node = g.selectAll('g').data(nodes).join('g')
+
+		const node = g.selectAll('g.bubble')
+			.data(allNodes)
+			.join('g').attr('class', 'bubble')
 			.attr('transform', (d) => `translate(${d.x},${d.y})`)
 			.style('cursor', 'pointer')
 			.on('mouseenter', (event, d) => showPopup(d))
@@ -267,57 +335,51 @@
 		node.append('circle')
 			.attr('r', (d) => d.r)
 			.attr('fill', (d) => colorFor(d))
-			.attr('stroke', (d) => String(d.uid).startsWith('RURAL_') ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.2)')
-			.attr('stroke-width', (d) => String(d.uid).startsWith('RURAL_') ? 1.5 : 0.6)
-			.attr('stroke-dasharray', (d) => String(d.uid).startsWith('RURAL_') ? '3,2' : 'none')
+			.attr('stroke', darkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)')
+			.attr('stroke-width', 0.6)
 			.attr('fill-opacity', 0.85);
 
-		// Labels — zoom-dependent
-		node.filter((d) => d.r >= labelMinR)
-			.append('text')
+		node.filter((d) => d.r >= labelMinR || d.sizeVal >= sizeClamp * 0.3)
+    		.append('text')
 			.attr('text-anchor', 'middle')
-			.attr('dy', '0.20em')
+			.attr('dy', '0.35em')
 			.style('font-family', 'OpenSansBold')
 			.style('font-size', (d) => `${Math.min(11, Math.max(8, d.r * 0.35))}px`)
-			.style('fill', '#ffffff')
+			.style('fill', labelColor)
 			.style('pointer-events', 'none')
-			.style('text-shadow', '0 1px 3px rgba(0,0,0,0.8)')
+			.style('text-shadow', labelShadow)
 			.text((d) => shortCmaName(d.name));
-			
-
-		// Second line (sales) only for larger bubbles
-		// node.filter((d) => d.r >= labelMinR + 6 && !d.suppressed)
-		// 	.append('text')
-		// 	.attr('text-anchor', 'middle')
-		// 	.attr('dy', '1.1em')
-		// 	.style('font-family', 'OpenSans')
-		// 	.style('font-size', '9px')
-		// 	.style('fill', 'rgba(255,255,255,0.75)')
-		// 	.style('pointer-events', 'none')
-		// 	.text((d) => formatSales(d.sales));
 	}
 
 	function showPopup(d) {
 		if (popup) popup.remove();
-		const lqTxt = d.lq == null ? 'N/A' : d.lq.toFixed(2) + '×';
-		
+
+		function firmsTxt(n_firms) {
+			if (n_firms === '0' || n_firms == null) return 'No firms';
+			if (n_firms === '<2') return '1 firm (suppressed)';
+			return `${Number(n_firms).toLocaleString()} firms`;
+		}
+
+		const noData = (d.n_firms === '0' || d.n_firms == null);
+		const lqTxt = noData ? 'No data' : d.lq == null ? 'Suppressed' : d.lq.toFixed(2) + '×';
+
 		let rows;
 		if (lqBasis === 'firms') {
 			rows = `
 				<div>LQ (firms): ${lqTxt}</div>
-				<div>Firms: ${d.n_firms ?? 'N/A'}</div>`;
+				<div>Firms: ${firmsTxt(d.n_firms)}</div>`;
 		} else if (lqBasis === 'jobs') {
 			const jobsTxt = d.total_jobs == null ? 'N/A' : Number(d.total_jobs).toLocaleString();
 			rows = `
 				<div>LQ (jobs): ${lqTxt}</div>
 				<div>Total jobs: ${jobsTxt}</div>
-				<div>Firms: ${d.n_firms ?? 'N/A'}</div>`;
+				<div>Firms: ${firmsTxt(d.n_firms)}</div>`;
 		} else {
 			const salesTxt = d.suppressed ? 'Suppressed' : formatSales(d.sales);
 			rows = `
 				<div>LQ (sales): ${lqTxt}</div>
 				<div>Sales: ${salesTxt}</div>
-				<div>Firms: ${d.n_firms ?? 'N/A'}</div>`;
+				<div>Firms: ${firmsTxt(d.n_firms)}</div>`;
 		}
 
 		const popupLngLat = map.unproject([d.x, d.y]);
@@ -334,9 +396,15 @@
 	$: if (mapLoaded && (bubbles || colourType)) drawBubbles();
 
 			onMount(() => {
-				map = new maplibregl.Map({
-					container: mapContainer,
-					style: DARK_STYLE,
+					map = new maplibregl.Map({
+						container: mapContainer,
+						style: {
+							version: 8,
+							glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
+							sources: {},
+							layers: [{ id: 'background', type: 'background', 
+								paint: { 'background-color': darkMode ? '#333333' : '#e8e8e8' } }]
+						},
 					center: [-95, 53], zoom: 3.2, minZoom: 2, maxZoom: 10,
 					attributionControl: false,
 					projection: 'globe'
@@ -386,11 +454,11 @@
 	onDestroy(() => { if (popup) popup.remove(); if (map) map.remove(); map = null; });
 </script>
 
-<div class="map-wrapper">
+<div class="map-wrapper" class:light={!darkMode}>
 	<div class="map" bind:this={mapContainer}></div>
-	<div class="total-overlay">
-		<div class="total-label">{totalLabel}</div>
-		<div class="total-value">{totalDisplay}</div>
+	<div class="total-overlay" style="background:{darkMode ? '#1e2433' : '#ffffff'}; color:{darkMode ? '#ffffff' : '#111111'}; border-color:{darkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'};">
+		<div class="total-label" style="color:{darkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)'};">{totalLabel}</div>
+		<div class="total-value" style="color:{darkMode ? '#ffffff' : '#111111'};">{totalDisplay}</div>
 	</div>
 </div>
 
@@ -422,6 +490,37 @@
 	</div>
 </div>
 
+<!-- Rural table -->
+{#if ruralBubbles.length}
+<div class="rural-table">
+    <div class="rural-title">Rural regions</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Region</th>
+                <th>LQ ({lqBasis})</th>
+                <th>{lqBasis === 'jobs' ? 'Total jobs' : lqBasis === 'sales' ? 'Sales' : 'Firms'}</th>
+                <th>Firms</th>
+            </tr>
+        </thead>
+        <tbody>
+            {#each ruralBubbles.sort((a,b) => (b.lq ?? -1) - (a.lq ?? -1)) as b}
+            <tr>
+                <td>{b.name}</td>
+                <td>{b.lq == null ? 'N/A' : b.lq.toFixed(2) + '×'}</td>
+                <td>
+                    {#if lqBasis === 'jobs'}{b.total_jobs == null ? 'N/A' : Number(b.total_jobs).toLocaleString()}
+                    {:else if lqBasis === 'sales'}{b.suppressed ? 'Suppressed' : formatSales(b.sales)}
+                    {:else}{b.n_firms ?? 'N/A'}{/if}
+                </td>
+                <td>{b.n_firms ?? 'N/A'}</td>
+            </tr>
+            {/each}
+        </tbody>
+    </table>
+</div>
+{/if}
+
 <style>
 	:global(.maplibregl-popup-tip) {
 		border-top-color: #1e2433 !important;
@@ -436,11 +535,20 @@
 	.total-label { font-size: 11px; color: rgba(255,255,255,0.6); font-family: OpenSansBold; margin-bottom: 2px; }
 	.total-value { font-size: 20px; font-family: TradeGothicBold; color: #ffffff; }
 
-	.rural-note {
-		display: flex; align-items: center; gap: 6px;
-		margin-top: 6px; color: rgba(255,255,255,0.6);
+	.rural-table {
+		max-width: 680px; width: 100%; margin: 16px auto 0;
+		font-family: OpenSans; font-size: 12px; color: var(--brandWhite);
 	}
-
+	.rural-title { font-family: OpenSansBold; margin-bottom: 8px; font-size: 13px; }
+	.rural-table table { width: 100%; border-collapse: collapse; }
+	.rural-table th {
+		text-align: left; font-family: OpenSansBold; padding: 6px 8px;
+		border-bottom: 1px solid rgba(255,255,255,0.2); font-size: 11px;
+	}
+	.rural-table td { padding: 5px 8px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+	.rural-table th:not(:first-child),
+	.rural-table td:not(:first-child) { text-align: right; }
+	.rural-table tr:hover td { background: rgba(255,255,255,0.04); }
 	/* .ramp-lq { background: linear-gradient(to right, #ff6b4a, #CCCCCC, #4db8ff); }
 	.ramp-seq { background: linear-gradient(to right, #1a2a4a, #4db8ff); } */
 	.legend-bar {
@@ -473,6 +581,12 @@
 		content: ''; position: absolute; bottom: 16px; left: 50%;
 		width: 1px; height: 12px; background: var(--brandGray90);
 	}
+	.map-wrapper :global(.maplibregl-ctrl-bottom-left .maplibregl-ctrl) { 
+		filter: invert(1) brightness(0.7); 
+	}
+	.map-wrapper.light :global(.maplibregl-ctrl-bottom-left .maplibregl-ctrl) { 
+		filter: none; 
+	}
 	.map-wrapper {
 		position: relative; width: 100%; max-width: 1080px; margin: 0 auto;
 		height: 62vh; min-height: 460px; border: 1px solid rgba(255,255,255,0.1);
@@ -494,5 +608,4 @@
 		padding: 0 !important; box-shadow: 0 4px 20px rgba(0,0,0,0.6) !important;
 	}
 	:global(.maplibregl-popup-close-button) { color: #ffffff; }
-	:global(.maplibregl-ctrl-bottom-left .maplibregl-ctrl) { filter: invert(1) brightness(0.7); }
 </style>

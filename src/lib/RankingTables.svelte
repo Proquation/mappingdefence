@@ -66,44 +66,46 @@
 <div class="rankings">
     <div class="rank-col">
         <h4>{active.title}</h4>
-        <!-- <div style="color:red">DEBUG geom={selectedGeometry}</div> -->
+                <!-- <div style="color:red">DEBUG geom={selectedGeometry}</div> -->
         <table>
             <thead>
+            <tr>
+                <th class="rk">#</th>
+                <th>Region</th>
+                {#if colourType !== 'totals'}<th class="num">LQ ({lqBasis})</th>{/if}
+                <th class="num">{metricLabel}</th>
+                <th class="num">Firms</th>
+            </tr>
+        </thead>
+        <tbody>
+            {#each active.list as r, i}
                 <tr>
-                    <th class="rk">#</th>
-                    <th>Region</th>
-                    <th class="num">{metricLabel}</th>
-                    <th class="num">Firms</th>
-                    {#if colourType !== 'totals'}<th class="num">LQ ({lqBasis})</th>{/if}
+                    <td class="rk">{i + 1}</td>
+                    <td class="name">{r.region_name}</td>
+                    {#if colourType !== 'totals'}
+                        <td class="num">{Number.isFinite(lqVal(r)) ? lqVal(r).toFixed(2) + '×' : '—'}</td>
+                    {/if}
+                    <td class="num">{fmtAbs(r)}</td>
+                    <td class="num">{firmsVal(r)}</td>
                 </tr>
-            </thead>
-            <tbody>
-                {#each active.list as r, i}
-                    <tr>
-                        <td class="rk">{i + 1}</td>
-                        <td class="name">{r.region_name}</td>
-                        <td class="num">{fmtAbs(r)}</td>
-                        <td class="num">{firmsVal(r)}</td>
-                        {#if colourType !== 'totals'}
-                            <td class="num">{Number.isFinite(lqVal(r)) ? lqVal(r).toFixed(2) + '×' : '—'}</td>
-                        {/if}
-                    </tr>
-                {:else}
-                    <tr><td colspan={colourType === 'totals' ? 4 : 5} class="empty">No data for this selection</td></tr>
-                {/each}
-            </tbody>
+            {:else}
+                <tr><td colspan={colourType === 'totals' ? 4 : 5} class="empty">No data for this selection</td></tr>
+            {/each}
+        </tbody>
         </table>
     </div>
 </div>
 
 <style>
-    .rankings { max-width: 680px; margin: 24px auto 0; font-family: OpenSans; }
-    .rank-col h4 { width: 680px; font-family: OpenSansBold; font-size: 14px; color: var(--brandWhite);}
+    .rankings { width: 680px; margin: 24px auto 0; font-family: OpenSans; }
+    .rank-col h4 { font-family: OpenSansBold; font-size: 13px; color: var(--brandWhite); margin-bottom: 8px; width: 100%;}
     table { width: 100%; border-collapse: collapse; font-size: 12px; color: var(--brandWhite); }
-    th, td { padding: 4px 6px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
-    th { font-family: OpenSansBold; color: rgba(255,255,255,0.6); font-size: 11px; }
-    .rk { width: 22px; color: rgba(255,255,255,0.5); }
-    .num { text-align: right; font-variant-numeric: tabular-nums; }
-    .name { max-width: 680px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    th { text-align: left; font-family: OpenSansBold; padding: 6px 8px;
+        border-bottom: 1px solid rgba(255,255,255,0.2); font-size: 11px; }
+    td { padding: 5px 8px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .rk { width: 28px; color: rgba(255,255,255,0.5); }
+    .name { max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .empty { color: rgba(255,255,255,0.4); font-style: italic; }
+    tr:hover td { background: rgba(255,255,255,0.04); }
 </style>

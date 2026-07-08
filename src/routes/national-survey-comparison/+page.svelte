@@ -17,6 +17,7 @@
     let b4Data = [];
     let sizeData = [];
     let sankeyEl;
+    let overlayMode = false;
 
     let yearA = 2016;
     let yearB = 2024;
@@ -92,9 +93,49 @@
         'Military Personal Protect':                 'Personal Protection',
         'Military Training':                         'Training Services',
         'Land-Based Mission System':                 'Land Mission Systems',
-        'Naval Vessel Mission':                      'Naval Mission Systems',
+        'Naval-Based Vessel Mission':                'Naval Mission Systems',
         'Aircraft Mission Systems':                  'Aircraft Mission Systems',
     };
+
+    const categoryOrder = [
+        'Sales to Canadian federal government',
+        'Sales to non-government entities in Canadian defence, marine & aerospace sectors',
+        'Sales to other Canadian customers',
+        'Domestic breakdown not specified',
+        'Sales to U.S. federal government',
+        'Sales to non-government entities in U.S. defence, marine & aerospace sectors',
+        'Sales to other U.S. customers',
+        'U.S. export breakdown not specified',
+        'Sales to Central America, Caribbean, Mexico and South America',
+        'Sales to United Kingdom',
+        'Sales to Europe other than United Kingdom',
+        'Sales to Middle East and Africa',
+        'Sales to Australia',
+        'Sales to New Zealand',
+        'Sales to Asia and Oceania - Other than Australia & New Zealand',
+        'Other countries breakdown not specified',
+        'Breakdown not specified for any category',
+    ];
+
+    const regionColors = {
+        canada: 'var(--brandLightBlue)',
+        us: 'var(--brandMedBlue)',
+        world: 'rgba(255,255,255,0.5)',
+        unknown: 'rgba(255,255,255,0.2)',
+    };
+
+    $: allCategories = (() => {
+        const cats = [...new Set(b1Data.map(d => d.category))];
+        return cats.sort((a, b) => {
+            const ai = categoryOrder.indexOf(a);
+            const bi = categoryOrder.indexOf(b);
+            // known categories in explicit order, unknown ones at the end
+            if (ai === -1 && bi === -1) return a.localeCompare(b);
+            if (ai === -1) return 1;
+            if (bi === -1) return -1;
+            return ai - bi;
+        });
+    })();
 
     function shortB4Label(full) {
         const key = Object.keys(b4ShortLabels).find(k => full.startsWith(k));
@@ -141,8 +182,7 @@
         if (text.includes('united states') || text.includes('u.s.')) return 'us';
         if (text.includes('canadian') || text.startsWith('domestic')) return 'canada';
         if (text.includes('breakdown not specified for any category')) return 'unknown';
-        if (text.includes('other countries')) return 'notcanada';
-        return 'notcanada';
+        return 'world';
     }
 
     function getRowValue(row, label) {
@@ -153,9 +193,9 @@
     function normalizeCategory(cat) {
         const c = cat.trim();
         if (c.includes('non-government') && c.includes('Canadian'))
-            return 'Sales to non-government entities in Canadian defence & aerospace sectors';
+            return 'Sales to non-government entities in Canadian defence, marine & aerospace sectors';
         if (c.includes('non-government') && (c.includes('U.S.') || c.includes('US')))
-            return 'Sales to non-government entities in U.S. defence & aerospace sectors';
+            return 'Sales to non-government entities in U.S. defence, marine & aerospace sectors';
         if (c.startsWith('Sales to Central America'))
             return 'Sales to Central America, Caribbean, Mexico and South America';
         if (c === 'Sales to Asia and Oceania')
@@ -170,6 +210,22 @@
         const g = parseInt(full.slice(2, 4), 16);
         const b = parseInt(full.slice(4, 6), 16);
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    const regionGroups = [
+        { id: 'canada', label: 'Canada' },
+        { id: 'us', label: 'United States' },
+        { id: 'world', label: 'Rest of World' },
+    ];
+    let selectedRegions = new Set(['canada', 'us', 'world']);
+
+    function toggleRegion(id) {
+        if (selectedRegions.has(id) && selectedRegions.size > 1) {
+            selectedRegions.delete(id);
+        } else {
+            selectedRegions.add(id);
+        }
+        selectedRegions = selectedRegions;
     }
 
     async function renderSankey() {
@@ -354,16 +410,16 @@
     });
 
     // Get all unique categories across all years, sorted by most recent year amount
-    $: allCategories = (() => {
-        const latestYear = Math.max(...years);
-        const latestItems = b1Data.filter(d => d.year === latestYear);
-        const cats = [...new Set(b1Data.map(d => d.category))];
-        return cats.sort((a, b) => {
-            const aVal = latestItems.find(d => d.category === a)?.amount ?? 0;
-            const bVal = latestItems.find(d => d.category === b)?.amount ?? 0;
-            return bVal - aVal;
-        });
-    })();
+    // $: allCategories = (() => {
+    //     const latestYear = Math.max(...years);
+    //     const latestItems = b1Data.filter(d => d.year === latestYear);
+    //     const cats = [...new Set(b1Data.map(d => d.category))];
+    //     return cats.sort((a, b) => {
+    //         const aVal = latestItems.find(d => d.category === a)?.amount ?? 0;
+    //         const bVal = latestItems.find(d => d.category === b)?.amount ?? 0;
+    //         return bVal - aVal;
+    //     });
+    // })();
 
     $: {
         const _m = waffleMetric;
@@ -417,6 +473,84 @@
 
     async function renderCharts() {
         await ensurePlotly();
+
+
+        if (overlayMode) {
+            // Single combined chart — use first el
+            const el = chartEls[selectedYears[0]];
+            if (!el) return;
+
+            const traces = b4ByYear.map(({ year, items, total }, i) => {
+                const labels = items.map(d => shortB4Label(d.category));
+                const rawValues = items.map(d => d.amount);
+                const percentValues = rawValues.map(v => (v / total) * 100);
+                const fullLabels = items.map(d => d.category);
+                labels.push(labels[0]);
+                rawValues.push(rawValues[0]);
+                percentValues.push(percentValues[0]);
+                fullLabels.push(fullLabels[0]);
+                const activeValues = spiderViewMode === 'percent' ? percentValues : rawValues;
+                const color = i === 0
+                    ? resolveCssColor('--brandLightBlue') || '#6FC7EA'
+                    : resolveCssColor('--brandMedGreen') || '#8DBF2E';
+                return {
+                    type: 'scatterpolar',
+                    r: activeValues,
+                    theta: labels,
+                    fill: 'toself',
+                    mode: 'lines+markers',
+                    name: String(year),
+                    marker: { color, size: 6 },
+                    line: { color },
+                    fillcolor: hexToRgba(color.startsWith('#') ? color : '#6FC7EA', 0.12),
+                    hoverinfo: 'text',
+                    hovertemplate: spiderViewMode === 'percent'
+                        ? `<b>%{text}</b><br>${year}: %{r:.1f}%<extra></extra>`
+                        : `<b>%{text}</b><br>${year}: $%{r:,.0f}<extra></extra>`,
+                    text: fullLabels,
+                    hoverlabel: {
+                        bgcolor: '#1e3765',
+                        bordercolor: color,
+                        font: { family: 'OpenSans', size: 12, color: '#ffffff' },
+                        namelength: -1
+                    }
+                };
+            });
+
+            const layout = {
+                polar: {
+                    bgcolor: 'rgba(0,0,0,0)',
+                    radialaxis: {
+                        visible: true,
+                        ticksuffix: spiderViewMode === 'percent' ? '%' : '',
+                        color: 'rgba(255,255,255,0.6)',
+                        gridcolor: 'rgba(255,255,255,0.12)',
+                        linecolor: 'rgba(255,255,255,0.2)',
+                        tickfont: { color: 'rgba(255,255,255,0.7)', family: 'OpenSans', size: 10 }
+                    },
+                    angularaxis: {
+                        tickfont: { size: 10, family: 'OpenSans', color: 'rgba(255,255,255,0.85)' },
+                        gridcolor: 'rgba(255,255,255,0.12)',
+                        linecolor: 'rgba(255,255,255,0.2)'
+                    }
+                },
+                showlegend: true,
+                legend: { font: { family: 'OpenSans', color: '#ffffff' }, bgcolor: 'rgba(0,0,0,0)' },
+                margin: { l: 80, r: 80, t: 20, b: 40 },
+                height: 480,
+                autosize: true,
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                hovermode: 'closest'
+            };
+
+            Plotly.react(el, traces, layout, { displayModeBar: false, responsive: true });
+
+            // Clear the second chart el
+            const el2 = chartEls[selectedYears[1]];
+            if (el2) Plotly.purge(el2);
+            return;
+        }
 
         b4ByYear.forEach(({ year, items, total }) => {
             const el = chartEls[year];
@@ -520,9 +654,10 @@
     $: if (yearB === yearA) {
         yearB = years.find(y => y !== yearA) ?? years[0];
     }
+
 </script>
 
-<Password />
+<!-- <Password /> -->
 
 <Logo logoType="White" backgroundColor="var(--brandGray90)"/>
 
@@ -579,13 +714,20 @@
                     <button class="filter-toggle-button {spiderViewMode === 'percent' ? 'selected' : ''}" on:click={() => (spiderViewMode = 'percent')}>
                         Show Percent
                     </button>
+                    <button class="filter-toggle-button {overlayMode ? 'selected' : ''}" on:click={() => { overlayMode = !overlayMode; setTimeout(renderCharts, 50); }}>
+                        Overlay
+                    </button>
                 </div>
             </div>
         </div>
 
         <div class="spider-scroll-wrapper">
-            {#each selectedYears as y}
-                <div class="spider-chart" bind:this={chartEls[y]}></div>
+            {#each selectedYears as y, i}
+                <div class="spider-chart" 
+                    class:hidden={overlayMode && i === 1}
+                    class:overlay={overlayMode && i === 0}
+                    bind:this={chartEls[y]}>
+                </div>
             {/each}
         </div>
 
@@ -649,11 +791,15 @@
             </div>
             <div class="filter-group inline-filters">
                 <span class="filter-label">Region</span>
-                <select class="year-select" bind:value={selectedRegion}>
-                    {#each regions as r}
-                        <option value={r}>{regionLabels[r]}</option>
+                <div class="button-group">
+                    {#each regionGroups as r}
+                        <button
+                            class="filter-toggle-button {selectedRegions.has(r.id) ? 'selected' : ''}"
+                            on:click={() => toggleRegion(r.id)}>
+                            {r.label}
+                        </button>
                     {/each}
-                </select>
+                </div>
             </div>
             <div class="table-wrap">
                 <table class="data-table">
@@ -666,9 +812,15 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {#each allCategories.filter(cat => selectedRegion === 'all' || resolveRegion(cat) === selectedRegion || (selectedRegion === 'notcanada' && resolveRegion(cat) === 'notcanada')) as cat}
+                        {#each allCategories.filter(cat => {
+                            const r = resolveRegion(cat);
+                            return selectedRegions.has(r) || (selectedRegions.has('world') && r === 'unknown');
+                        }) as cat}
+                            {@const region = resolveRegion(cat)}
                             <tr>
-                                <td class="align-left cell-category">{cat}</td>
+                                <td class="align-left cell-category">
+                                    <span class="region-bar" style="background:{regionColors[region]}"></span>{cat}
+                                </td>
                                 {#each locAllYears as { items, total }}
                                     {@const val = items.find(d => d.category === cat)?.amount ?? 0}
                                     <td>{val > 0 ? formatValue(val, total, locViewMode) : '—'}</td>
@@ -679,7 +831,10 @@
                             <td class="align-left cell-category">Total</td>
                             {#each locAllYears as { total, items }}
                                 {@const filteredTotal = items
-                                    .filter(d => selectedRegion === 'all' || resolveRegion(d.category) === selectedRegion || (selectedRegion === 'notcanada' && resolveRegion(d.category) === 'notcanada'))
+                                    .filter(d => {
+                                        const r = resolveRegion(d.category);
+                                        return selectedRegions.has(r) || (selectedRegions.has('world') && r === 'unknown');
+                                    })
                                     .reduce((sum, d) => sum + d.amount, 0)}
                                 <td>{formatValue(filteredTotal, filteredTotal, locViewMode)}</td>
                             {/each}
@@ -710,13 +865,37 @@
                     </select>
                 </div>
                 <div class="sankey-chart" bind:this={sankeyEl}></div>
-            </div>
+
+                <h3>Data methods and source</h3>
+                <p>
+                    Data comes from the <a href="https://www.statcan.gc.ca/en/survey/business/2933">Canadian Defence, Aerospace and Commercial and Civil Marine Sectors Survey</a> (CDACCMS). 
+                    The survey creates a general summary of the businesses engaged in the defence, aerospace, marine and cybersecurity sectors in Canada to match with the Statistics Canada Business Register.
+                    A more detailed finding of the most recent survey can be found here INSERT LINK, whereas this serves to compare across all years to see recent trends.
+                </p>
+        </div>
+
+        
     {/if}
 </main>
 
 <Footer />
 
 <style>
+    .hidden { display: none; }
+    .region-bar {
+        display: inline-block;
+        width: 3px;
+        height: 1em;
+        border-radius: 2px;
+        margin-right: 8px;
+        vertical-align: middle;
+        flex-shrink: 0;
+    }
+
+    .cell-category {
+        display: flex;
+        align-items: center;
+    }
     .sankey-chart {
         width: 100%;
         height: 420px;
@@ -795,6 +974,11 @@
         border-right: 1px solid var(--brandGray); */
         width: 100%;
         box-sizing: border-box;
+    }
+
+    .spider-chart.overlay {
+        flex: 1 1 100%;
+        height: 500px;
     }
 
     .spider-chart {

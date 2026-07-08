@@ -39,6 +39,10 @@
 	const aggData = {}; // { csd: [...rows], cma: [...], prov: [...] }
 	const geojsonCache = {};
 
+	let usGeojson = null;
+	let darkMode = true;
+
+
 	function formatSales(value) {
 		if (!Number.isFinite(value)) return 'N/A';
 		if (value >= 1000) return `$${(value / 1000).toFixed(2)}B`;
@@ -111,10 +115,12 @@
 		if (selectedGeometry === 'csd') {
 			ensureGeojson('csd_boundaries').then((g) => (csdGeojson = g));
 			ensureGeojson('province-boundaries-simple').then((g) => (provinceGeojson = g)); // ← add
+			ensureGeojson('us_nation').then((g) => (usGeojson = g));
 		}
 		if (selectedGeometry === 'cma') {
 			ensureGeojson('cma_boundaries').then((g) => (cmaGeojson = g));
 			ensureGeojson('province-boundaries-simple').then((g) => (provinceGeojson = g));
+			ensureGeojson('us_nation').then((g) => (usGeojson = g));
 		}
 	}
 
@@ -149,7 +155,7 @@
 	});
 </script>
 
-<Password />
+<!-- <Password /> -->
 
 <Logo logoType="White" backgroundColor="var(--brandGray90)"/>
 
@@ -189,6 +195,13 @@
 					<select class="year-select" bind:value={selectedGeometry}>
 						{#each geometries as g}<option value={g.id}>{g.label}</option>{/each}
 					</select>
+				</div>
+
+				<div class="filter-group">
+					<span class="filter-label">Map style</span>
+					<button class="toggle-btn" on:click={() => darkMode = !darkMode}>
+						{darkMode ? 'Light' : 'Dark'}
+					</button>
 				</div>
  
 				<div class="filter-group">
@@ -240,14 +253,13 @@
  
 		<section class="map-block">
 			{#if selectedGeometry === 'csd'}
-				<DefenceMap geojson={csdGeojson} {recordByUid} {lqBasis} {colourType} {formatSales} {provinceGeojson} />
+				<DefenceMap geojson={csdGeojson} {recordByUid} {lqBasis} {colourType} {formatSales} {provinceGeojson} {usGeojson} {darkMode} />
 			{:else if selectedGeometry === 'cma'}
-				<CmaCartogram rows={activeRows} {cmaGeojson} {provinceGeojson} {lqBasis} {colourType} {formatSales} />
+				<CmaCartogram rows={activeRows} {cmaGeojson} {provinceGeojson} {lqBasis} {colourType} {formatSales} {usGeojson} {darkMode} />
 			{:else}
-				<ProvinceCartogram rows={activeRows} {provinceGeojson} {lqBasis} {colourType} {formatSales} />
+				<ProvinceCartogram rows={activeRows} {provinceGeojson} {lqBasis} {colourType} {formatSales} {usGeojson} {darkMode} />
 			{/if}
 		</section>
-		
 		<RankingTables
 		csdRows={aggData.csd || []} cmaRows={aggData.cma || []} provRows={aggData.prov || []}
 		{lqBasis} {colourType} {selectedYear} {selectedMode} {selectedGeometry} {formatSales} />
@@ -273,6 +285,13 @@
 		<p>
 			To protect firm-level confidentiality, regions with fewer than three firms in a given category and
 			year have their exact sales suppressed and appear as "no data" on the map.
+		</p>
+
+		<p>
+			Download data:
+			<a href="{base}/data/csd_agg.csv" download>Census Subdivisions</a> ·
+			<a href="{base}/data/cma_rural_agg.csv" download>Census Metropolitan Areas</a> ·
+			<a href="{base}/data/prov_agg.csv" download>Provinces</a>
 		</p>
 	</div>
 </main>
@@ -328,6 +347,18 @@
 		margin-bottom: 3px;
 		color: var(--brandWhite);
 	}
+
+	.toggle-btn {
+		padding: 4px 10px;
+		border: 1px solid var(--brandWhite);
+		border-radius: 3px;
+		background: var(--brandGray90);
+		color: var(--brandWhite);
+		font-family: OpenSans;
+		font-size: 13px;
+		cursor: pointer;
+	}
+	.toggle-btn:hover { background: rgba(255,255,255,0.1); }
 
 	.year-select {
 		max-width: 280px;

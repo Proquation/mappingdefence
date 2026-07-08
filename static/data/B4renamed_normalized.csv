@@ -1,107 +1,85 @@
-Goods and Services,Sales of Goods and Services,Year
-Ammunition and Other Munitions,"528,584,986",2022
-Missiles and Rockets,"104,774,592",2022
-Firearms and Other Weapons,"88,640,495",2022
-Military Space Systems and Launch Vehicles,"73,943,779",2022
-Airborne Sensor and Fire Control Systems,"1,071,151,042",2022
-Land-Based Sensor and Fire Control Systems,"406,993,358",2022
-Airborne Communications and Navigation Systems,"375,868,525",2022
-Land-Based Communications and Navigation Systems,"621,696,087",2022
-Naval Ship-Borne Mission Systems and Components,"643,438,602",2022
-"Naval Ships' Structural Elements, Platform Systems, Parts and Components","332,715,246",2022
-"Naval Vessel Construction, Conversions, Architecture, Engineering and Related Services","1,776,979,321",2022
-Naval Ship Maintenance and Repair Services,"1,070,632,031",2022
-Combat Vehicles and Components,"1,975,060,892",2022
-Combat Vehicles Maintenance and Repair Services,"181,838,574",2022
-"Aircraft Fabrication, Structures and Components","1,445,924,277",2022
-Military Aircraft Maintenance and Repair Services,"2,079,143,232",2022
-Unmanned Aerial Systems/Vehicles and Components,"168,930,867",2022
-Simulation Systems for Aircraft,"238,783,900",2022
-Simulation Systems for Naval Vessels,"16,961,011",2022
-Simulation Systems for Land Vehicles or Other Applications,"16,228,525",2022
-Military Training Services,"365,918,369",2022
-"Military Personal Protective Equipment, Load Carriage Systems and Operational Clothing","198,234,077",2022
-Other Defence,"528,186,410",2022
-Ammunition and Other Munitions,"408,365,530",2020
-Missiles and Rockets,"126,891,803",2020
-Firearms and Other Weapons,"106,350,078",2020
-Military Space Systems and Launch Vehicles,"70,704,636",2020
-Airborne Sensor and Fire Control Systems,"994,181,470",2020
-Land-Based Sensor and Fire Control Systems,"332,564,053",2020
-Airborne Communications and Navigation Systems,"377,610,671",2020
-Land-Based Communications and Navigation Systems,"507,845,649",2020
-Naval Ship-Borne Mission Systems and Components,"480,265,905",2020
-"Naval Ships' Structural Elements, Platform Systems, Parts and Components","415,459,845",2020
-"Naval Vessel Construction, Conversions, Architecture, Engineering and Related Services","1,331,866,629",2020
-Naval Ship Maintenance and Repair Services,"775,234,432",2020
-Combat Vehicles and Components,"2,131,512,853",2020
-Combat Vehicles Maintenance and Repair Services,"303,021,503",2020
-"Aircraft Fabrication, Structures and Components","1,416,086,478",2020
-Military Aircraft Maintenance and Repair Services,"1,339,505,777",2020
-Unmanned Aerial Systems/Vehicles and Components,"63,556,985",2020
-Simulation Systems for Aircraft,"235,430,669",2020
-Simulation Systems for Naval Vessels,"9,235,218",2020
-Simulation Systems for Land Vehicles or Other Applications,"27,861,283",2020
-Military Training Services,"355,998,765",2020
-"Military Personal Protective Equipment, Load Carriage Systems and Operational Clothing","166,503,552",2020
-Other Defence,"636,232,827",2020
-"Ammunition, Missiles, Rockets and Related Components","436,935,300",2018
-Firearms and Other Weapons,"109,090,331",2018
-Military Space Systems and Launch Vehicles,"81,824,130",2018
-Airborne Sensor and Fire Control Systems,"843,888,515",2018
-Land-Based Sensor and Fire Control Systems,"234,506,113",2018
-Airborne Communications and Navigation Systems,"516,207,452",2018
-Land-Based Communications and Navigation Systems,"500,010,314",2018
-Naval Ship-Borne Mission Systems and Components,"481,157,390",2018
-"Naval Ships' Structural Elements, Platform Systems, Parts and Components","452,634,325",2018
-"Naval Vessel Construction, Conversions, Architecture, Engineering and Related Services","660,649,157",2018
-Naval Ship Maintenance and Repair Services,"529,330,433",2018
-Combat Vehicles and Components,"1,751,447,519",2018
-Combat Vehicles Maintenance and Repair Services,"479,805,115",2018
-"Aircraft Fabrication, Structures and Components","738,691,929",2018
-Military Aircraft Maintenance and Repair Services,"1,203,557,655",2018
-Unmanned Aerial Systems/Vehicles and Components,"87,304,058",2018
-Simulation Systems for Aircraft,"324,694,686",2018
-Simulation Systems for Naval Vessels,"15,504,582",2018
-Simulation Systems for Land Vehicles or Other Applications,"12,113,379",2018
-Military Training Services,"504,598,002",2018
-"Military Personal Protective Equipment, Load Carriage Systems and Operational Clothing","189,319,835",2018
-Other Defence,"526,581,850",2018
-"Firearms, Ammunition, Missiles, Rockets, and Other Munitions","536,351,728",2016
-Military Space Systems and Launch Vehicles,"18,863,894",2016
-Airborne Sensor and Fire Control Systems,"644,826,478",2016
-Land-Based Sensor and Fire Control Systems,"311,570,256",2016
-Airborne Communications and Navigation Systems,"415,388,330",2016
-Land-Based Communications and Navigation Systems,"239,230,774",2016
-Naval Ship-Borne Mission Systems and Components,"439,793,038",2016
-"Naval Ships' Structural Elements, Platform Systems, Parts and Components","101,680,590",2016
-"Naval Vessel Construction, Conversions, Architecture, Engineering and Related Services","638,308,073",2016
-Naval Ship Maintenance and Repair Services,"645,451,983",2016
-Combat Vehicles and Components,"2,352,297,053",2016
-Combat Vehicles Maintenance and Repair Services,"369,422,795",2016
-"Aircraft Fabrication, Structures and Components","715,820,247",2016
-Military Aircraft Maintenance and Repair Services,"1,113,387,239",2016
-Unmanned Aerial Systems/Vehicles and Components,"69,910,408",2016
-Simulation Systems for Aircraft,"265,397,458",2016
-Simulation Systems for Naval Vessels,"88,518,711",2016
-Simulation Systems for Land Vehicles or Other Applications,"10,304,851",2016
-Military Training Services,"363,119,993",2016
-"Military Personal Protective Equipment, Load Carriage Systems and Operational Clothing","98,418,251",2016
-Other Defence,"649,516,359",2016
-"Ammunition, Missiles, and Rockets","847,328,194",2024
-Firearms and Other Weapons,"130,683,798",2024
-Military Space Systems and Launch Vehicles,"86,024,784",2024
-Aircraft Mission Systems and Simulation Systems,"2,012,812,491",2024
-Land-Based Mission Systems and Simulation Systems,"1,133,491,787",2024
-Naval Vessel Mission Systems and Simulation Systems,"1,101,189,346",2024
-"Naval Ships' Structural Elements, Platform Systems, Parts and Components","527,476,257",2024
-"Naval Vessel Construction, Conversions, Architecture, Engineering and Related Services","1,809,206,744",2024
-Naval Ship Maintenance and Repair Services,"1,294,516,134",2024
-Combat Vehicles and Components,"1,637,558,991",2024
-Combat Vehicles Maintenance and Repair Services,"672,983,045",2024
-"Aircraft Fabrication, Structures and Components","1,754,982,973",2024
-Military Aircraft Maintenance and Repair Services,"2,165,741,706",2024
-Unmanned Aerial Systems/Vehicles and Components,"270,868,992",2024
-Military Training Services,"742,242,991",2024
-"Military Personal Protective Equipment, Load Carriage Systems and Operational Clothing","265,301,219",2024
-Other Defence,"804,686,225",2024
+Goods and Services,Year,Sales of Goods and Services
+"Aircraft Fabrication, Structures and Components",2016,715820247
+Aircraft Mission Systems and Simulation Systems,2016,1325612266
+"Ammunition, Missiles, and Rockets",2016,536351728
+Combat Vehicles Maintenance and Repair Services,2016,369422795
+Combat Vehicles and Components,2016,2352297053
+Land-Based Mission Systems and Simulation Systems,2016,561105881
+Military Aircraft Maintenance and Repair Services,2016,1113387239
+"Military Personal Protective Equipment, Load Carriage Systems and Operational Clothing",2016,98418251
+Military Space Systems and Launch Vehicles,2016,18863894
+Military Training Services,2016,363119993
+Naval Ship Maintenance and Repair Services,2016,645451983
+"Naval Ships' Structural Elements, Platform Systems, Parts and Components",2016,101680590
+"Naval Vessel Construction, Conversions, Architecture, Engineering and Related Services",2016,638308073
+Naval Vessel Mission Systems and Simulation Systems,2016,528311749
+Other Defence,2016,649516359
+Unmanned Aerial Systems/Vehicles and Components,2016,69910408
+"Aircraft Fabrication, Structures and Components",2018,738691929
+Aircraft Mission Systems and Simulation Systems,2018,1684790653
+"Ammunition, Missiles, and Rockets",2018,436935300
+Combat Vehicles Maintenance and Repair Services,2018,479805115
+Combat Vehicles and Components,2018,1751447519
+Firearms and Other Weapons,2018,109090331
+Land-Based Mission Systems and Simulation Systems,2018,746629806
+Military Aircraft Maintenance and Repair Services,2018,1203557655
+"Military Personal Protective Equipment, Load Carriage Systems and Operational Clothing",2018,189319835
+Military Space Systems and Launch Vehicles,2018,81824130
+Military Training Services,2018,504598002
+Naval Ship Maintenance and Repair Services,2018,529330433
+"Naval Ships' Structural Elements, Platform Systems, Parts and Components",2018,452634325
+"Naval Vessel Construction, Conversions, Architecture, Engineering and Related Services",2018,660649157
+Naval Vessel Mission Systems and Simulation Systems,2018,496661972
+Other Defence,2018,526581850
+Unmanned Aerial Systems/Vehicles and Components,2018,87304058
+"Aircraft Fabrication, Structures and Components",2020,1416086478
+Aircraft Mission Systems and Simulation Systems,2020,1607222810
+"Ammunition, Missiles, and Rockets",2020,535257333
+Combat Vehicles Maintenance and Repair Services,2020,303021503
+Combat Vehicles and Components,2020,2131512853
+Firearms and Other Weapons,2020,106350078
+Land-Based Mission Systems and Simulation Systems,2020,868270985
+Military Aircraft Maintenance and Repair Services,2020,1339505777
+"Military Personal Protective Equipment, Load Carriage Systems and Operational Clothing",2020,166503552
+Military Space Systems and Launch Vehicles,2020,70704636
+Military Training Services,2020,355998765
+Naval Ship Maintenance and Repair Services,2020,775234432
+"Naval Ships' Structural Elements, Platform Systems, Parts and Components",2020,415459845
+"Naval Vessel Construction, Conversions, Architecture, Engineering and Related Services",2020,1331866629
+Naval Vessel Mission Systems and Simulation Systems,2020,489501123
+Other Defence,2020,636232827
+Unmanned Aerial Systems/Vehicles and Components,2020,63556985
+"Aircraft Fabrication, Structures and Components",2022,1445924277
+Aircraft Mission Systems and Simulation Systems,2022,1685803467
+"Ammunition, Missiles, and Rockets",2022,633359578
+Combat Vehicles Maintenance and Repair Services,2022,181838574
+Combat Vehicles and Components,2022,1975060892
+Firearms and Other Weapons,2022,88640495
+Land-Based Mission Systems and Simulation Systems,2022,1044917970
+Military Aircraft Maintenance and Repair Services,2022,2079143232
+"Military Personal Protective Equipment, Load Carriage Systems and Operational Clothing",2022,198234077
+Military Space Systems and Launch Vehicles,2022,73943779
+Military Training Services,2022,365918369
+Naval Ship Maintenance and Repair Services,2022,1070632031
+"Naval Ships' Structural Elements, Platform Systems, Parts and Components",2022,332715246
+"Naval Vessel Construction, Conversions, Architecture, Engineering and Related Services",2022,1776979321
+Naval Vessel Mission Systems and Simulation Systems,2022,660399613
+Other Defence,2022,528186410
+Unmanned Aerial Systems/Vehicles and Components,2022,168930867
+"Aircraft Fabrication, Structures and Components",2024,1754982973
+Aircraft Mission Systems and Simulation Systems,2024,2012812491
+"Ammunition, Missiles, and Rockets",2024,847328194
+Combat Vehicles Maintenance and Repair Services,2024,672983045
+Combat Vehicles and Components,2024,1637558991
+Firearms and Other Weapons,2024,130683798
+Land-Based Mission Systems and Simulation Systems,2024,1133491787
+Military Aircraft Maintenance and Repair Services,2024,2165741706
+"Military Personal Protective Equipment, Load Carriage Systems and Operational Clothing",2024,265301219
+Military Space Systems and Launch Vehicles,2024,86024784
+Military Training Services,2024,742242991
+Naval Ship Maintenance and Repair Services,2024,1294516134
+"Naval Ships' Structural Elements, Platform Systems, Parts and Components",2024,527476257
+"Naval Vessel Construction, Conversions, Architecture, Engineering and Related Services",2024,1809206744
+Naval Vessel Mission Systems and Simulation Systems,2024,1101189346
+Other Defence,2024,804686225
+Unmanned Aerial Systems/Vehicles and Components,2024,270868992
