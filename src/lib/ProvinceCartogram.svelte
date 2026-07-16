@@ -10,6 +10,7 @@
 	export let formatSales = (v) => `${v}`;
 	export let usGeojson = null;
 	export let darkMode = true;
+	export let compareRows = []; // rows for the comparison year, same shape as `rows`
 
 	let map, mapContainer, mapLoaded = false, popup, markerLayer;
 
@@ -67,6 +68,40 @@
 	$: if (mapLoaded && usGeojson) addUsLayer();
 	$: if (mapLoaded && provinceGeojson) addProvinceLayer();
 
+	$: compareLqByUid = (() => {
+		const m = {};
+		compareRows.forEach(r => {
+			const v = r[lqField];
+			m[r.region_uid] = Number.isFinite(v) ? v : null;
+		});
+		return m;
+	})();
+
+	$: bubbles = (() => {
+		if (!mapLoaded || !rows.length) return [];
+		return rows
+			.filter((r) => centroidByUid[r.region_uid])
+			.map((r) => {
+				const firms = (r.suppressed === true || r.suppressed === 'True') ? 0 : Number(r.n_firms) || 0;
+				const sales = Number.isFinite(r.total_sales_M) ? r.total_sales_M : 0;
+				const jobs  = Number.isFinite(r.total_jobs) ? r.total_jobs : 0;
+				const absBasis = lqBasis === 'jobs' ? jobs : lqBasis === 'firms' ? firms : sales;
+				const lqVal = Number.isFinite(r[lqField]) ? r[lqField] : null;
+				const compareLq = compareLqByUid[r.region_uid] ?? null;
+				const lqDiff = (Number.isFinite(lqVal) && Number.isFinite(compareLq)) ? lqVal - compareLq : null;
+				return {
+					uid: r.region_uid, name: r.region_name,
+					sales, n_firms: r.n_firms, total_jobs: r.total_jobs, avg_employees: r.avg_employees,
+					suppressed: r.suppressed === true || r.suppressed === 'True',
+					lngLat: centroidByUid[r.region_uid],
+					lq: lqVal,
+					lqDiff,
+					colorVal: colourType === 'totals' ? absBasis : colourType === 'yoy' ? lqDiff : lqVal,
+					sizeVal: colourType === 'totals' ? (lqVal ?? 0) : absBasis
+				};
+			});
+	})();
+
 	function addUsLayer() {
 		if (!map) return;
 		if (map.getSource('us')) { map.getSource('us').setData(usGeojson); return; }
@@ -95,38 +130,33 @@
 		return vals[Math.floor(vals.length*0.95)] ?? vals[vals.length-1];
 	})();
 
+	$: yoyClamp = (() => {
+		const vals = bubbles.map(b => b.lqDiff).filter(v => Number.isFinite(v)).map(Math.abs).sort((a, b) => a - b);
+		if (!vals.length) return 1;
+		return Math.max(0.1, vals[Math.floor(vals.length * 0.95)] ?? vals[vals.length - 1]);
+	})();
+
+	function yoyColor(diff) {
+		if (diff == null) return noDataColor;
+		if (diff >= 0) {
+			const t = Math.min(1, diff / yoyClamp);
+			return d3.interpolateRgb(MID, OVER)(t);
+		}
+		const t = Math.min(1, -diff / yoyClamp);
+		return d3.interpolateRgb(MID, UNDER)(t);
+	}
+
 	function colorFor(b) {
 		if (colourType === 'totals') {
 			if (b.suppressed || !(b.colorVal > 0)) return noDataColor;
 			const t = Math.min(1, b.colorVal / Math.max(1, absClamp));
 			return d3.interpolateRgb(SEQ_LO, SEQ_HI)(t);
 		}
+		if (colourType === 'yoy') return yoyColor(b.lqDiff);
 		return lqColor(b.colorVal);
 	}
 
 	$: lqField = { sales: 'lq_sales', firms: 'lq_firms', jobs: 'lq_jobs' }[lqBasis];
-
-	$: bubbles = (() => {
-		if (!mapLoaded || !rows.length) return [];
-		return rows
-			.filter((r) => centroidByUid[r.region_uid])
-			.map((r) => {
-				const firms = (r.suppressed === true || r.suppressed === 'True') ? 0 : Number(r.n_firms) || 0;
-				const sales = Number.isFinite(r.total_sales_M) ? r.total_sales_M : 0;
-				const jobs  = Number.isFinite(r.total_jobs) ? r.total_jobs : 0;
-				const absBasis = lqBasis === 'jobs' ? jobs : lqBasis === 'firms' ? firms : sales;
-				const lqVal = Number.isFinite(r[lqField]) ? r[lqField] : null;
-				return {
-					uid: r.region_uid, name: r.region_name,
-					sales, n_firms: r.n_firms, total_jobs: r.total_jobs, avg_employees: r.avg_employees,
-					suppressed: r.suppressed === true || r.suppressed === 'True',
-					lngLat: centroidByUid[r.region_uid],
-					lq: lqVal,
-					colorVal: colourType === 'totals' ? absBasis : lqVal,
-					sizeVal: colourType === 'totals' ? (lqVal ?? 0) : absBasis
-				};
-			});
-	})();
 
 	$: totalMetric = (() => {
 		if (lqBasis === 'sales') return bubbles.map(b => b.sales).filter(Number.isFinite).reduce((s, v) => s + v, 0);
@@ -221,8 +251,11 @@
 			.text(d => d.suppressed ? '' : formatSales(d.sales));
 	}
 
+
 	function showPopup(d) {
 		if (popup) popup.remove();
+		const yoyTxt = d.lqDiff == null ? 'N/A' : (d.lqDiff >= 0 ? '+' : '') + d.lqDiff.toFixed(2) + '×';
+
 		function firmsTxt(n) {
 			if (n === '0' || n == null) return 'No firms';
 			if (n === '<2') return '1 firm (suppressed)';
@@ -232,13 +265,13 @@
 		const lqTxt = noData ? 'No data' : d.lq == null ? 'Suppressed' : d.lq.toFixed(2) + '×';
 		let rowsHtml;
 		if (lqBasis === 'firms') {
-			rowsHtml = `<div>LQ (firms): ${lqTxt}</div><div>Firms: ${firmsTxt(d.n_firms)}</div>`;
+			rowsHtml = `<div>LQ (firms): ${lqTxt}</div><div>LQ change: ${yoyTxt}</div><div>Firms: ${firmsTxt(d.n_firms)}</div>`;
 		} else if (lqBasis === 'jobs') {
 			const jobsTxt = d.total_jobs == null ? 'N/A' : Number(d.total_jobs).toLocaleString();
-			rowsHtml = `<div>LQ (jobs): ${lqTxt}</div><div>Total jobs: ${jobsTxt}</div><div>Firms: ${firmsTxt(d.n_firms)}</div>`;
+			rowsHtml = `<div>LQ (jobs): ${lqTxt}</div><div>LQ change: ${yoyTxt}</div><div>Total jobs: ${jobsTxt}</div><div>Firms: ${firmsTxt(d.n_firms)}</div>`;
 		} else {
 			const salesTxt = d.suppressed ? 'Suppressed' : formatSales(d.sales);
-			rowsHtml = `<div>LQ (sales): ${lqTxt}</div><div>Sales: ${salesTxt}</div><div>Firms: ${firmsTxt(d.n_firms)}</div>`;
+			rowsHtml = `<div>LQ (sales): ${lqTxt}</div><div>LQ change: ${yoyTxt}</div><div>Sales: ${salesTxt}</div><div>Firms: ${firmsTxt(d.n_firms)}</div>`;
 		}
 		const popupLngLat = map.unproject([d.x, d.y]);
 		popup = new maplibregl.Popup({ closeButton: false, closeOnClick: true })
@@ -316,6 +349,18 @@
 					<span style="left:100%">{lqBasis === 'sales' ? formatSales(absClamp) : Math.round(absClamp).toLocaleString()}+</span>
 				</div>
 			</div>
+
+		{:else if colourType === 'yoy'}
+			<div class="legend-title">Change in LQ ({lqBasis})</div>
+			<div class="ramp-wrap">
+				<div class="ramp" style="background: linear-gradient(to right, {UNDER} 0%, {MID} 50%, {OVER} 100%)"></div>
+				<div class="ticks">
+					<span style="left:0%">−{yoyClamp.toFixed(2)}×</span>
+					<span style="left:50%" class="tick-strong">0</span>
+					<span style="left:100%">+{yoyClamp.toFixed(2)}×</span>
+				</div>
+			</div>
+			<div class="legend-note">Positive = LQ increased between the two selected years</div>
 		{:else}
 			<div class="legend-title">Location quotient ({lqBasis})</div>
 			<div class="ramp-wrap">

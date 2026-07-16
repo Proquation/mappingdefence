@@ -39,6 +39,9 @@
 	const aggData = {}; // { csd: [...rows], cma: [...], prov: [...] }
 	const geojsonCache = {};
 
+	let compareYear = null;
+
+
 	let usGeojson = null;
 	let darkMode = true;
 
@@ -84,6 +87,7 @@
 			const allRows = [...aggData.csd, ...aggData.cma, ...aggData.prov];
 			yearOptions = [...new Set(allRows.map((r) => r.year))].sort((a, b) => a - b);
 			selectedYear = yearOptions[yearOptions.length - 1];
+			compareYear = yearOptions[yearOptions.length - 2] ?? yearOptions[0];
  
 			const naicsMap = new Map();
 			allRows.forEach((r) => {
@@ -127,6 +131,10 @@
 
 	$: activeRows = (aggData[selectedGeometry] || []).filter(
 		(r) => r.year === selectedYear && r.NAICS6 === selectedMode
+	);
+
+	$: compareRows = (aggData[selectedGeometry] || []).filter(
+		(r) => r.year === compareYear && r.NAICS6 === selectedMode
 	);
  
 	$: recordByUid = (() => {
@@ -257,7 +265,7 @@
 			{:else if selectedGeometry === 'cma'}
 				<CmaCartogram rows={activeRows} {cmaGeojson} {provinceGeojson} {lqBasis} {colourType} {formatSales} {usGeojson} {darkMode} />
 			{:else}
-				<ProvinceCartogram rows={activeRows} {provinceGeojson} {lqBasis} {colourType} {formatSales} {usGeojson} {darkMode} />
+				<ProvinceCartogram rows={activeRows} compareRows = {compareRows} {provinceGeojson} {lqBasis} {colourType} {formatSales} {usGeojson} {darkMode} />
 			{/if}
 		</section>
 		<RankingTables

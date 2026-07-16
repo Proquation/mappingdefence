@@ -95,6 +95,7 @@
 		if (map.getLayer('prov-line')) map.setPaintProperty('prov-line', 'line-color', provLine);
 		if (map.getLayer('us-fill'))  map.setPaintProperty('us-fill',  'fill-color', usFill);
 		if (map.getLayer('us-line'))  map.setPaintProperty('us-line',  'line-color', usLine);
+		drawBubbles();  // ← add this line
 	}
 
 	$: if (mapLoaded && usGeojson) addUsLayer();
