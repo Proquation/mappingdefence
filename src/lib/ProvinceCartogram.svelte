@@ -4,24 +4,24 @@
 	import 'maplibre-gl/dist/maplibre-gl.css';
 	import * as d3 from 'd3';
 	import { base } from '$app/paths';
+
 	export let rows = [];
 	export let provinceGeojson = null;
 	export let lqBasis = 'sales';
 	export let formatSales = (v) => `${v}`;
 	export let usGeojson = null;
 	export let darkMode = true;
-	export let compareRows = []; // rows for the comparison year, same shape as `rows`
-
+	export let compareRows = [];
+	export let colourType = 'lq';
 	export let militaryGeojson = null;
 	export let showMilitaryBases = false;
 
-	
-	const MIL_COLORS = {
-		'Canadian Army': '#2ECC71',         // bright green — infantry/land
-		'Royal Canadian Airforce': '#9B59B6', // purple — air
-		'Royal Canadian Navy': '#F1C40F',   // yellow — navy
-		'All Services': '#573F3E'           // near-white/silver — joint
-	};
+	let map, mapContainer, mapLoaded = false, popup, markerLayer;
+
+	const UNDER = '#ff6b4a';
+	const MID   = '#CCCCCC';
+	const OVER  = '#4db8ff';
+	const SEQ_LO = '#1a2a4a', SEQ_HI = '#4db8ff';
 
 	const MIL_ICONS = {
 		'Canadian Army': `${base}/img/Badge_of_the_Canadian_Army.svg`,
@@ -29,12 +29,6 @@
 		'Royal Canadian Navy': `${base}/img/Badge_of_the_Royal_Canadian_Navy.svg`,
 		'All Services': `${base}/img/Badge_of_the_Canadian_Armed_Forces.png`
 	};
-	
-	let map, mapContainer, mapLoaded = false, popup, markerLayer;
-
-	const UNDER = '#ff6b4a';
-	const MID   = '#CCCCCC';
-	const OVER  = '#4db8ff';
 
 	let centroidByUid = {};
 
@@ -55,9 +49,6 @@
 	};
 	function computeCentroids() { centroidByUid = { ...PROV_POINTS }; }
 
-	export let colourType = 'lq';
-	const SEQ_LO = '#1a2a4a', SEQ_HI = '#4db8ff';
-
 	$: mapBg    = darkMode ? '#333333' : '#e8e8e8';
 	$: provFill = darkMode ? '#1a1a1a' : '#F2F2F2';
 	$: provLine = darkMode ? '#333333' : '#b0b0b0';
@@ -66,13 +57,6 @@
 	$: noDataColor = darkMode ? '#666666' : '#666666';
 	$: labelColor  = darkMode ? '#ffffff' : '#111111';
 	$: labelShadow = darkMode ? '0 1px 3px rgba(0,0,0,0.8), 0 0 6px rgba(0,0,0,0.6)' : '0 1px 2px rgba(255,255,255,0.8)';
-
-	$: MAP_STYLE = {
-		version: 8,
-		glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
-		sources: {},
-		layers: [{ id: 'background', type: 'background', paint: { 'background-color': mapBg } }]
-	};
 
 	$: if (mapLoaded) {
 		map.setPaintProperty('background', 'background-color', mapBg);
@@ -94,6 +78,8 @@
 		});
 		return m;
 	})();
+
+	$: lqField = { sales: 'lq_sales', firms: 'lq_firms', jobs: 'lq_jobs' }[lqBasis];
 
 	$: bubbles = (() => {
 		if (!mapLoaded || !rows.length) return [];
@@ -119,66 +105,6 @@
 				};
 			});
 	})();
-
-	
-	function addMilitaryLayer() {
-		if (!map || !militaryGeojson) return;
-		if (map.getSource('military')) {
-			map.getSource('military').setData(militaryGeojson);
-		} else {
-			map.addSource('military', { type: 'geojson', data: militaryGeojson });
-			map.addLayer({
-				id: 'military-points', type: 'circle', source: 'military',
-				paint: {
-					'circle-radius': 5,
-					'circle-color': [
-						'match', ['get', 'Type'],
-						'Canadian Army', MIL_COLORS['Canadian Army'],
-						'Royal Canadian Airforce', MIL_COLORS['Royal Canadian Airforce'],
-						'Royal Canadian Navy', MIL_COLORS['Royal Canadian Navy'],
-						'All Services', MIL_COLORS['All Services'],
-						'#999999'
-					],
-					'circle-stroke-width': 1,
-					'circle-stroke-color': darkMode ? '#ffffff' : '#000000'
-				}
-			});
-		}
-		map.setLayoutProperty('military-points', 'visibility', showMilitaryBases ? 'visible' : 'none');
-	}
-
-	function drawMilitaryPoints(g) {
-		if (!showMilitaryBases || !militaryGeojson) return;
-		const ICON_SIZE = 20; // px
-
-		const milNodes = militaryGeojson.features.map(f => {
-			const p = map.project(f.geometry.coordinates);
-			return { x: p.x, y: p.y, name: f.properties.Name, type: f.properties.Type };
-		});
-
-		g.selectAll('image.mil-marker')
-			.data(milNodes)
-			.join('image')
-			.attr('class', 'mil-marker')
-			.attr('href', d => MIL_ICONS[d.type] || MIL_ICONS['All Services'])
-			.attr('x', d => d.x - ICON_SIZE / 2)
-			.attr('y', d => d.y - ICON_SIZE / 2)
-			.attr('width', ICON_SIZE)
-			.attr('height', ICON_SIZE)
-			.style('cursor', 'pointer')
-			.on('mouseenter', (event, d) => {
-				if (popup) popup.remove();
-				const lngLat = map.unproject([d.x, d.y]);
-				popup = new maplibregl.Popup({ closeButton: false })
-					.setLngLat(lngLat)
-					.setHTML(`<div style="font-family:OpenSans,sans-serif;font-size:12px;background:#1e2433;color:#fff;padding:6px 10px;border-radius:6px;">
-						<b>${d.name}</b><br>${d.type}</div>`)
-					.addTo(map);
-			})
-			.on('mouseleave', () => { if (popup) { popup.remove(); popup = null; } });
-	}
-
-	$: if (mapLoaded && militaryGeojson !== undefined && (bubbles || colourType || showMilitaryBases || darkMode)) drawBubbles();
 
 	function addUsLayer() {
 		if (!map) return;
@@ -234,8 +160,6 @@
 		return lqColor(b.colorVal);
 	}
 
-	$: lqField = { sales: 'lq_sales', firms: 'lq_firms', jobs: 'lq_jobs' }[lqBasis];
-
 	$: totalMetric = (() => {
 		if (lqBasis === 'sales') return bubbles.map(b => b.sales).filter(Number.isFinite).reduce((s, v) => s + v, 0);
 		if (lqBasis === 'jobs')  return bubbles.map(b => b.total_jobs).filter(Number.isFinite).reduce((s, v) => s + v, 0);
@@ -262,6 +186,21 @@
 		return 10 + t * 42;
 	}
 
+	function formatSizeVal(v) {
+		if (colourType === 'totals') return v.toFixed(2) + '×';
+		if (lqBasis === 'sales') return formatSales(v);
+		return Math.round(v).toLocaleString();
+	}
+
+	$: sizeLegendSteps = (() => {
+		if (!sizeClamp) return [];
+		const steps = [0.10, 0.25, 0.5, 1];
+		return steps.map(t => {
+			const val = sizeClamp * t;
+			return { val, r: radiusPx(val) };
+		});
+	})();
+
 	function lqColor(lq) {
 		if (lq == null) return noDataColor;
 		if (lq >= 1) {
@@ -281,6 +220,36 @@
 		};
 		const key = Object.keys(m).find(k => name?.includes(k));
 		return key ? m[key] : name;
+	}
+
+	function drawMilitaryPoints(g) {
+		if (!showMilitaryBases || !militaryGeojson) return;
+		const ICON_SIZE = 20;
+		const milNodes = militaryGeojson.features.map(f => {
+			const p = map.project(f.geometry.coordinates);
+			return { x: p.x, y: p.y, name: f.properties.Name, type: f.properties.Type };
+		});
+
+		g.selectAll('image.mil-marker')
+			.data(milNodes)
+			.join('image')
+			.attr('class', 'mil-marker')
+			.attr('href', d => MIL_ICONS[d.type] || MIL_ICONS['All Services'])
+			.attr('x', d => d.x - ICON_SIZE / 2)
+			.attr('y', d => d.y - ICON_SIZE / 2)
+			.attr('width', ICON_SIZE)
+			.attr('height', ICON_SIZE)
+			.style('cursor', 'pointer')
+			.on('mouseenter', (event, d) => {
+				if (popup) popup.remove();
+				const lngLat = map.unproject([d.x, d.y]);
+				popup = new maplibregl.Popup({ closeButton: false })
+					.setLngLat(lngLat)
+					.setHTML(`<div style="font-family:OpenSans,sans-serif;font-size:12px;background:#1e2433;color:#fff;padding:6px 10px;border-radius:6px;">
+						<b>${d.name}</b><br>${d.type}</div>`)
+					.addTo(map);
+			})
+			.on('mouseleave', () => { if (popup) { popup.remove(); popup = null; } });
 	}
 
 	function drawBubbles() {
@@ -328,9 +297,8 @@
 			.style('pointer-events', 'none')
 			.text(d => d.suppressed ? '' : formatSales(d.sales));
 
-		drawMilitaryPoints(g);  // ← add at the very end, after bubbles are appended
+		drawMilitaryPoints(g);
 	}
-
 
 	function showPopup(d) {
 		if (popup) popup.remove();
@@ -363,7 +331,7 @@
 			.addTo(map);
 	}
 
-	$: if (mapLoaded && (bubbles || colourType || darkMode)) drawBubbles();
+	$: if (mapLoaded && (bubbles || colourType || darkMode || showMilitaryBases || militaryGeojson)) drawBubbles();
 
 	onMount(() => {
 		map = new maplibregl.Map({
@@ -391,7 +359,7 @@
 			mapContainer.appendChild(overlay);
 			markerLayer = svg;
 			const mo = new MutationObserver(() => {
-				svg.querySelectorAll('circle, image').forEach((c) => (c.style.pointerEvents = 'auto'));
+				svg.querySelectorAll('circle, image').forEach(c => c.style.pointerEvents = 'auto');
 			});
 			mo.observe(svg, { childList: true, subtree: true });
 
@@ -402,34 +370,41 @@
 		});
 
 		map.on('style.load', () => { map.setProjection({ type: map.getZoom() < 7 ? 'globe' : 'mercator' }); });
-		map.on('zoom', () => { map.setProjection({ type: map.getZoom() < 7 ? 'globe' : 'mercator' }); drawBubbles(); });
-
-		map.on('mouseenter', 'military-points', (e) => {
-			map.getCanvas().style.cursor = 'pointer';
-			const p = e.features[0].properties;
-			if (popup) popup.remove();  // ← clear any existing popup first
-			popup = new maplibregl.Popup({ closeButton: false })
-				.setLngLat(e.lngLat)
-				.setHTML(`<div style="font-family:OpenSans,sans-serif;font-size:12px;background:#1e2433;color:#fff;padding:6px 10px;border-radius:6px;">
-					<b>${p.Name}</b><br>${p.Type}</div>`)
-				.addTo(map);
-		});
-		map.on('mouseleave', 'military-points', () => {
-			map.getCanvas().style.cursor = '';
-			if (popup) { popup.remove(); popup = null; }  // ← actually clear it
-		});
+		map.on('zoom', () => { map.setProjection({ type: map.getZoom() < 7 ? 'globe' : 'mercator' }); drawBubbles();});
 	});
 
 	onDestroy(() => { if (popup) popup.remove(); if (map) map.remove(); map = null; });
 </script>
 
-<div class="map-wrapper" class:light={!darkMode}>
-	<div class="map" bind:this={mapContainer}></div>
-	<div class="total-overlay"
-		style="background:{darkMode ? '#1e2433' : '#ffffff'}; border-color:{darkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'};">
-		<div class="total-label" style="color:{darkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)'};">{totalLabel}</div>
-		<div class="total-value" style="color:{darkMode ? '#ffffff' : '#111111'};">{totalDisplay}</div>
-	</div>
+<div class="map-row">
+    <div class="map-wrapper" class:light={!darkMode}>
+        <div class="map" bind:this={mapContainer}></div>
+        <div class="total-overlay"
+            style="background:{darkMode ? '#1e2433' : '#ffffff'}; border-color:{darkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'};">
+            <div class="total-label" style="color:{darkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)'};">{totalLabel}</div>
+            <div class="total-value" style="color:{darkMode ? '#ffffff' : '#111111'};">{totalDisplay}</div>
+        </div>
+    </div>
+
+    <div class="side-panel"
+        style="background:{darkMode ? '#1e2433' : '#ffffff'}; border-color:{darkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'};">
+        <div class="size-legend-title" style="color:{darkMode ? '#ffffff' : '#111111'};">
+            Bubble size — {colourType === 'totals' ? 'LQ' : lqBasis}
+        </div>
+        {#each sizeLegendSteps as step}
+            <div class="size-legend-item">
+                <svg width={step.r * 2 + 4} height={step.r * 2 + 4}>
+                    <circle
+                        cx={step.r + 2} cy={step.r + 2} r={step.r}
+                        fill="none"
+                        stroke={darkMode ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)'}
+                        stroke-width="1"
+                    />
+                </svg>
+                <span style="color:{darkMode ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.75)'};">{formatSizeVal(step.val)}</span>
+            </div>
+        {/each}
+    </div>
 </div>
 
 <div class="legend-bar">
@@ -444,7 +419,6 @@
 					<span style="left:100%">{lqBasis === 'sales' ? formatSales(absClamp) : Math.round(absClamp).toLocaleString()}+</span>
 				</div>
 			</div>
-
 		{:else if colourType === 'yoy'}
 			<div class="legend-title">Change in LQ ({lqBasis})</div>
 			<div class="ramp-wrap">
@@ -474,16 +448,16 @@
 
 {#if showMilitaryBases}
 <div class="legend-bar" style="margin-top: 4px;">
-    <div class="legend-inner">
-        <div class="legend-title">Canadian Forces Base (CFB)</div>
-        <div class="mil-legend-row">
+	<div class="legend-inner">
+		<div class="legend-title">Canadian Forces Base (CFB)</div>
+		<div class="mil-legend-row">
 			{#each Object.entries(MIL_ICONS) as [type, icon]}
 				<div class="mil-legend-item">
 					<img src={icon} alt={type} class="mil-icon" />{type}
 				</div>
 			{/each}
 		</div>
-    </div>
+	</div>
 </div>
 {/if}
 
@@ -492,9 +466,24 @@
 		border-top-color: #1e2433 !important;
 		border-bottom-color: #1e2433 !important;
 	}
+
 	.mil-legend-row { display: flex; gap: 16px; flex-wrap: wrap; }
 	.mil-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
 	.mil-icon { width: 16px; height: 16px; object-fit: contain; }
+	.map-row {
+		display: flex;
+		align-items: stretch;
+		gap: 12px;
+		max-width: 1600px;
+		margin: 0 auto;
+	}
+	.map-wrapper {
+		position: relative;
+		flex: 1 1 auto;
+		min-width: 0;
+		height: 62vh; min-height: 460px;
+		border: 1px solid rgba(255,255,255,0.1);
+	}
 	.total-overlay {
 		position: absolute; top: 12px; left: 12px;
 		border-radius: 6px; padding: 8px 12px; font-family: OpenSans;
@@ -502,6 +491,31 @@
 	}
 	.total-label { font-size: 11px; font-family: OpenSansBold; margin-bottom: 2px; }
 	.total-value { font-size: 20px; font-family: TradeGothicBold; }
+
+	.side-panel {
+		flex: 0 0 120px;
+		border: 1px solid;
+		padding: 10px 14px;
+		font-family: OpenSans;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 8px;
+		justify-content: center;
+	}
+	.size-legend-title {
+		font-size: 11px;
+		font-family: OpenSansBold;
+		margin-bottom: 4px;
+		text-align: center;
+	}
+	.size-legend-item {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 2px;
+		font-size: 11px;
+	}
 	.legend-bar {
 		max-width: 1080px; width: 100%; margin: 8px auto 0; padding: 8px 12px;
 		font-family: OpenSans; font-size: 12px; color: var(--brandWhite);
@@ -531,8 +545,11 @@
 		filter: none; 
 	}
 	.map-wrapper {
-		position: relative; width: 100%; max-width: 1080px; margin: 0 auto;
-		height: 62vh; min-height: 460px; border: 1px solid rgba(255,255,255,0.1);
+		position: relative;
+		flex: 1 1 auto;
+		min-width: 0;
+		height: 62vh; min-height: 460px;
+		border: 1px solid rgba(255,255,255,0.1);
 	}
 	.map { width: 100%; height: 100%; }
 	.swatch-grey { display: inline-block; width: 12px; height: 12px; background: #2a2a3a; border: 1px solid rgba(248,248,248,0.5); border-radius: 2px; }

@@ -25,6 +25,7 @@
 	export let darkMode = true;
 	export let militaryGeojson = null;
 	export let showMilitaryBases = false;
+	export let recordByUidCompare = {}; // comparison year lookup, same shape as recordByUid
 
 	
 	const MIL_COLORS = {
@@ -139,6 +140,14 @@
 				['interpolate', ['linear'], ['feature-state', 'abs_value'], 0, SEQ_LO, m, SEQ_HI]
 			];
 		}
+		if (colourType === 'yoy') {
+			const c = Math.max(0.1, yoyClamp);
+			return [
+				'case',
+				['==', ['feature-state', 'yoy_value'], null], noDataFill,
+				['interpolate', ['linear'], ['feature-state', 'yoy_value'], -c, UNDER, 0, MID, c, OVER]
+			];
+		}
 		const c = Math.max(2, lqClamp);
 		return [
 			'case',
@@ -151,6 +160,8 @@
 		if (!mapLoaded) return;
 		map.removeFeatureState({ source: SOURCE_ID, sourceLayer: SRC_LAYER });
 		for (const [uid, rec] of Object.entries(recordByUid)) {
+			const compareLq = recordByUidCompare[uid]?.lq ?? null;
+			const lqDiff = (Number.isFinite(rec.lq) && Number.isFinite(compareLq)) ? rec.lq - compareLq : null;
 			map.setFeatureState(
 				{ source: SOURCE_ID, sourceLayer: SRC_LAYER, id: uid },
 				{
@@ -159,12 +170,24 @@
 					sales_value: Number.isFinite(rec.sales) ? rec.sales : null,
 					n_firms: rec.n_firms ?? null,
 					total_jobs: Number.isFinite(rec.total_jobs) ? rec.total_jobs : null,
-					avg_employees: Number.isFinite(rec.avg_employees) ? rec.avg_employees : null
+					avg_employees: Number.isFinite(rec.avg_employees) ? rec.avg_employees : null,
+					yoy_value: lqDiff
 				}
 			);
 		}
 		if (map.getLayer(FILL_LAYER)) map.setPaintProperty(FILL_LAYER, 'fill-color', fillColorExpression());
 	}
+
+	$: if (mapLoaded && (recordByUid || recordByUidCompare || lqBasis || colourType || darkMode)) applyData();
+
+	$: yoyClamp = (() => {
+		const vals = Object.entries(recordByUid).map(([uid, rec]) => {
+			const compareLq = recordByUidCompare[uid]?.lq ?? null;
+			return (Number.isFinite(rec.lq) && Number.isFinite(compareLq)) ? Math.abs(rec.lq - compareLq) : null;
+		}).filter(Number.isFinite).sort((a, b) => a - b);
+		if (!vals.length) return 1;
+		return Math.max(0.1, vals[Math.floor(vals.length * 0.95)] ?? vals[vals.length - 1]);
+	})();
 
 	function drawMilitaryPoints() {
 		if (!map || !markerLayer) return;
@@ -249,14 +272,18 @@
 			map.on('mousemove', FILL_LAYER, (event) => {
 				if (!event.features?.length) return;
 				const uid = String(event.features[0].properties.region_uid);
-				if (uid === hoveredUid) return; // same feature, do nothing
+				if (uid === hoveredUid) return;
 				hoveredUid = uid;
 
-
-				map.getCanvas().style.cursor = 'pointer';
 				const p = event.features[0].properties;
 				const name = p.region_name;
 				const rec = recordByUid[uid] || {};
+
+				const compareLq = recordByUidCompare[uid]?.lq ?? null;
+				const lqDiff = (Number.isFinite(rec.lq) && Number.isFinite(compareLq)) ? rec.lq - compareLq : null;
+				const yoyTxt = lqDiff == null ? 'N/A' : (lqDiff >= 0 ? '+' : '') + lqDiff.toFixed(2) + '×';
+
+				map.getCanvas().style.cursor = 'pointer';
 
 				function firmsTxt(n) {
 					if (n === '0' || n == null) return 'No firms';
@@ -268,13 +295,13 @@
 
 				let rows;
 				if (lqBasis === 'firms') {
-					rows = `<div>LQ (firms): ${lqTxt}</div><div>Firms: ${firmsTxt(rec.n_firms)}</div>`;
+					rows = `<div>LQ (firms): ${lqTxt}</div><div>LQ change: ${yoyTxt}</div><div>Firms: ${firmsTxt(rec.n_firms)}</div>`;
 				} else if (lqBasis === 'jobs') {
 					const jobsTxt = Number.isFinite(rec.total_jobs) ? Number(rec.total_jobs).toLocaleString() : 'N/A';
-					rows = `<div>LQ (jobs): ${lqTxt}</div><div>Total jobs: ${jobsTxt}</div><div>Firms: ${firmsTxt(rec.n_firms)}</div>`;
+					rows = `<div>LQ (jobs): ${lqTxt}</div><div>LQ change: ${yoyTxt}</div><div>Total jobs: ${jobsTxt}</div><div>Firms: ${firmsTxt(rec.n_firms)}</div>`;
 				} else {
 					const salesTxt = Number.isFinite(rec.sales) ? formatSales(rec.sales) : 'Suppressed / no data';
-					rows = `<div>LQ (sales): ${lqTxt}</div><div>Sales: ${salesTxt}</div><div>Firms: ${firmsTxt(rec.n_firms)}</div>`;
+					rows = `<div>LQ (sales): ${lqTxt}</div><div>LQ change: ${yoyTxt}</div><div>Sales: ${salesTxt}</div><div>Firms: ${firmsTxt(rec.n_firms)}</div>`;
 				}
 
 				if (popup) popup.remove();
@@ -327,6 +354,17 @@
 					<span style="left:100%">{lqBasis === 'sales' ? formatSales(absClamp) : Math.round(absClamp).toLocaleString()}</span>
 				</div>
 			</div>
+		{:else if colourType === 'yoy'}
+			<div class="legend-title">Change in LQ ({lqBasis})</div>
+			<div class="ramp-wrap">
+				<div class="ramp" style="background: linear-gradient(to right, {UNDER} 0%, {MID} 50%, {OVER} 100%)"></div>
+				<div class="ticks">
+					<span style="left:0%">−{yoyClamp.toFixed(2)}×</span>
+					<span style="left:50%" class="tick-strong">0</span>
+					<span style="left:100%">+{yoyClamp.toFixed(2)}×</span>
+				</div>
+			</div>
+			<div class="legend-note">Positive = LQ increased between the two selected years</div>
 		{:else}
 			<div class="legend-title">Location quotient ({lqBasis})</div>
 			<div class="ramp-wrap">

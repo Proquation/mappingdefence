@@ -27,7 +27,7 @@
 	let selectedGeometry = 'cma';
 
 	// Mode: ALL / PRIMARY / SECONDARY / a specific NAICS6 code
-	let selectedMode = 'ALL';
+	let selectedMode = 'PRIMARY';
 	let selectedYear = null;
 	let yearOptions = [];
 	let naicsOptions = []; // [{code, desc}] of individual NAICS codes
@@ -39,7 +39,20 @@
 	const aggData = {}; // { csd: [...rows], cma: [...], prov: [...] }
 	const geojsonCache = {};
 
-	let compareYear = null;
+	$: compareYear = (() => {
+		if (!selectedYear || !yearOptions.length) return null;
+		const idx = yearOptions.indexOf(selectedYear);
+		return idx > 0 ? yearOptions[idx - 1] : yearOptions[0];
+	})();
+
+	$: recordByUidCompare = (() => {
+		const lookup = {};
+		const lqKey = { sales: 'lq_sales', firms: 'lq_firms', jobs: 'lq_jobs' }[lqBasis];
+		compareRows.forEach((r) => {
+			lookup[r.region_uid] = { lq: r[lqKey] };
+		});
+		return lookup;
+	})();
 
 
 	let usGeojson = null;
@@ -101,7 +114,6 @@
 			const allRows = [...aggData.csd, ...aggData.cma, ...aggData.prov];
 			yearOptions = [...new Set(allRows.map((r) => r.year))].sort((a, b) => a - b);
 			selectedYear = yearOptions[yearOptions.length - 1];
-			compareYear = yearOptions[yearOptions.length - 2] ?? yearOptions[0];
  
 			const naicsMap = new Map();
 			allRows.forEach((r) => {
@@ -132,11 +144,15 @@
 	$: if (mounted) {
 		if (selectedGeometry === 'csd') {
 			ensureGeojson('csd_boundaries').then((g) => (csdGeojson = g));
-			ensureGeojson('province-boundaries-simple').then((g) => (provinceGeojson = g)); // ← add
+			ensureGeojson('province-boundaries-simple').then((g) => (provinceGeojson = g));
 			ensureGeojson('us_nation').then((g) => (usGeojson = g));
 		}
 		if (selectedGeometry === 'cma') {
 			ensureGeojson('cma_boundaries').then((g) => (cmaGeojson = g));
+			ensureGeojson('province-boundaries-simple').then((g) => (provinceGeojson = g));
+			ensureGeojson('us_nation').then((g) => (usGeojson = g));
+		}
+		if (selectedGeometry === 'prov') {
 			ensureGeojson('province-boundaries-simple').then((g) => (provinceGeojson = g));
 			ensureGeojson('us_nation').then((g) => (usGeojson = g));
 		}
@@ -282,9 +298,9 @@
  
 		<section class="map-block">
 			{#if selectedGeometry === 'csd'}
-				<DefenceMap geojson={csdGeojson} {recordByUid} {lqBasis} {colourType} {formatSales} {provinceGeojson} {usGeojson} {darkMode} {militaryGeojson} {showMilitaryBases}/>
+				<DefenceMap geojson={csdGeojson} {recordByUid} {lqBasis} {colourType} {formatSales} {provinceGeojson} {usGeojson} {darkMode} {militaryGeojson} {recordByUidCompare} {showMilitaryBases}/>
 			{:else if selectedGeometry === 'cma'}
-				<CmaCartogram rows={activeRows} {cmaGeojson} {provinceGeojson} {lqBasis} {colourType} {formatSales} {usGeojson} {darkMode} {militaryGeojson} {showMilitaryBases}/>
+				<CmaCartogram rows={activeRows} compareRows={compareRows} {cmaGeojson} {provinceGeojson} {lqBasis} {colourType} {formatSales} {usGeojson} {darkMode} {militaryGeojson} {showMilitaryBases}/>
 			{:else}
 				<ProvinceCartogram rows={activeRows} compareRows = {compareRows} {provinceGeojson} {lqBasis} {colourType} {formatSales} {usGeojson} {darkMode} {militaryGeojson} {showMilitaryBases}/>
 			{/if}
