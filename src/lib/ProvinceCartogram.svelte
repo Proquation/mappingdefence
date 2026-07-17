@@ -3,7 +3,7 @@
 	import maplibregl from 'maplibre-gl';
 	import 'maplibre-gl/dist/maplibre-gl.css';
 	import * as d3 from 'd3';
-
+	import { base } from '$app/paths';
 	export let rows = [];
 	export let provinceGeojson = null;
 	export let lqBasis = 'sales';
@@ -21,6 +21,13 @@
 		'Royal Canadian Airforce': '#9B59B6', // purple — air
 		'Royal Canadian Navy': '#F1C40F',   // yellow — navy
 		'All Services': '#573F3E'           // near-white/silver — joint
+	};
+
+	const MIL_ICONS = {
+		'Canadian Army': `${base}/img/Badge_of_the_Canadian_Army.svg`,
+		'Royal Canadian Airforce': `${base}/img/Badge_of_the_RCAF.svg`,
+		'Royal Canadian Navy': `${base}/img/Badge_of_the_Royal_Canadian_Navy.svg`,
+		'All Services': `${base}/img/Badge_of_the_Canadian_Armed_Forces.png`
 	};
 	
 	let map, mapContainer, mapLoaded = false, popup, markerLayer;
@@ -142,20 +149,22 @@
 
 	function drawMilitaryPoints(g) {
 		if (!showMilitaryBases || !militaryGeojson) return;
+		const ICON_SIZE = 20; // px
+
 		const milNodes = militaryGeojson.features.map(f => {
-			const p = map.project(f.geometry.coordinates);  // ← use map.project directly
+			const p = map.project(f.geometry.coordinates);
 			return { x: p.x, y: p.y, name: f.properties.Name, type: f.properties.Type };
 		});
 
-		g.selectAll('circle.mil-marker')
+		g.selectAll('image.mil-marker')
 			.data(milNodes)
-			.join('circle')
+			.join('image')
 			.attr('class', 'mil-marker')
-			.attr('cx', d => d.x).attr('cy', d => d.y)
-			.attr('r', 5)
-			.attr('fill', d => MIL_COLORS[d.type] || '#999999')
-			.attr('stroke', darkMode ? '#ffffff' : '#000000')
-			.attr('stroke-width', 1)
+			.attr('href', d => MIL_ICONS[d.type] || MIL_ICONS['All Services'])
+			.attr('x', d => d.x - ICON_SIZE / 2)
+			.attr('y', d => d.y - ICON_SIZE / 2)
+			.attr('width', ICON_SIZE)
+			.attr('height', ICON_SIZE)
 			.style('cursor', 'pointer')
 			.on('mouseenter', (event, d) => {
 				if (popup) popup.remove();
@@ -169,7 +178,7 @@
 			.on('mouseleave', () => { if (popup) { popup.remove(); popup = null; } });
 	}
 
-	$: if (mapLoaded && (bubbles || colourType || showMilitaryBases)) drawBubbles();
+	$: if (mapLoaded && militaryGeojson !== undefined && (bubbles || colourType || showMilitaryBases || darkMode)) drawBubbles();
 
 	function addUsLayer() {
 		if (!map) return;
@@ -382,7 +391,7 @@
 			mapContainer.appendChild(overlay);
 			markerLayer = svg;
 			const mo = new MutationObserver(() => {
-				svg.querySelectorAll('g').forEach(c => c.style.pointerEvents = 'auto');
+				svg.querySelectorAll('circle, image').forEach((c) => (c.style.pointerEvents = 'auto'));
 			});
 			mo.observe(svg, { childList: true, subtree: true });
 
@@ -466,14 +475,14 @@
 {#if showMilitaryBases}
 <div class="legend-bar" style="margin-top: 4px;">
     <div class="legend-inner">
-        <div class="legend-title">Military bases (CFB)</div>
+        <div class="legend-title">Canadian Forces Base (CFB)</div>
         <div class="mil-legend-row">
-            {#each Object.entries(MIL_COLORS) as [type, color]}
-                <div class="mil-legend-item">
-                    <span class="mil-dot" style="background:{color}"></span>{type}
-                </div>
-            {/each}
-        </div>
+			{#each Object.entries(MIL_ICONS) as [type, icon]}
+				<div class="mil-legend-item">
+					<img src={icon} alt={type} class="mil-icon" />{type}
+				</div>
+			{/each}
+		</div>
     </div>
 </div>
 {/if}
@@ -485,7 +494,7 @@
 	}
 	.mil-legend-row { display: flex; gap: 16px; flex-wrap: wrap; }
 	.mil-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
-	.mil-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+	.mil-icon { width: 16px; height: 16px; object-fit: contain; }
 	.total-overlay {
 		position: absolute; top: 12px; left: 12px;
 		border-radius: 6px; padding: 8px 12px; font-family: OpenSans;
