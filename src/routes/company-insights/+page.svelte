@@ -45,6 +45,20 @@
 	let usGeojson = null;
 	let darkMode = true;
 
+	let militaryGeojson = null;
+	let showMilitaryBases = false;
+	let militaryTypeFilter = new Set(['Canadian Army', 'Royal Canadian Airforce', 'Royal Canadian Navy', 'All Services']);
+
+	async function ensureMilitaryGeojson() {
+		if (militaryGeojson) return;
+		militaryGeojson = await fetch(`${base}/geojson/military_bases_ca.geojson`).then(r => r.json());
+	}
+
+	function toggleMilitaryBases() {
+		showMilitaryBases = !showMilitaryBases;
+		if (showMilitaryBases) ensureMilitaryGeojson();
+	}
+
 
 	function formatSales(value) {
 		if (!Number.isFinite(value)) return 'N/A';
@@ -255,17 +269,24 @@
 							<option value="lq">Location Quotients</option>
 						</select>
 					</div>
+
+					<div class="filter-group">
+						<span class="filter-label">Military bases</span>
+						<button class="toggle-btn" on:click={toggleMilitaryBases}>
+							{showMilitaryBases ? 'Hide' : 'Show'}
+						</button>
+					</div>
 				{/if}
 			</div>
 		</div>
  
 		<section class="map-block">
 			{#if selectedGeometry === 'csd'}
-				<DefenceMap geojson={csdGeojson} {recordByUid} {lqBasis} {colourType} {formatSales} {provinceGeojson} {usGeojson} {darkMode} />
+				<DefenceMap geojson={csdGeojson} {recordByUid} {lqBasis} {colourType} {formatSales} {provinceGeojson} {usGeojson} {darkMode} {militaryGeojson} {showMilitaryBases}/>
 			{:else if selectedGeometry === 'cma'}
-				<CmaCartogram rows={activeRows} {cmaGeojson} {provinceGeojson} {lqBasis} {colourType} {formatSales} {usGeojson} {darkMode} />
+				<CmaCartogram rows={activeRows} {cmaGeojson} {provinceGeojson} {lqBasis} {colourType} {formatSales} {usGeojson} {darkMode} {militaryGeojson} {showMilitaryBases}/>
 			{:else}
-				<ProvinceCartogram rows={activeRows} compareRows = {compareRows} {provinceGeojson} {lqBasis} {colourType} {formatSales} {usGeojson} {darkMode} />
+				<ProvinceCartogram rows={activeRows} compareRows = {compareRows} {provinceGeojson} {lqBasis} {colourType} {formatSales} {usGeojson} {darkMode} {militaryGeojson} {showMilitaryBases}/>
 			{/if}
 		</section>
 		<RankingTables

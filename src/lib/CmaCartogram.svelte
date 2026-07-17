@@ -11,7 +11,16 @@
 	export let formatSales = (v) => `${v}`;
 
 	let map, mapContainer, mapLoaded = false, popup;
+	export let militaryGeojson = null;
+	export let showMilitaryBases = false;
 
+	
+	const MIL_COLORS = {
+		'Canadian Army': '#2ECC71',         // bright green — infantry/land
+		'Royal Canadian Airforce': '#9B59B6', // purple — air
+		'Royal Canadian Navy': '#F1C40F',   // yellow — navy
+		'All Services': '#573F3E'           // near-white/silver — joint
+	};
 
 	//darker 
 	// const UNDER = '#DB0707';
@@ -126,6 +135,64 @@
 		Object.assign(c, Object.fromEntries(Object.entries(RURAL_POINTS)));
 		centroidByUid = c;
 	}
+
+	function addMilitaryLayer() {
+		if (!map || !militaryGeojson) return;
+		if (map.getSource('military')) {
+			map.getSource('military').setData(militaryGeojson);
+		} else {
+			map.addSource('military', { type: 'geojson', data: militaryGeojson });
+			map.addLayer({
+				id: 'military-points', type: 'circle', source: 'military',
+				paint: {
+					'circle-radius': 5,
+					'circle-color': [
+						'match', ['get', 'Type'],
+						'Canadian Army', MIL_COLORS['Canadian Army'],
+						'Royal Canadian Airforce', MIL_COLORS['Royal Canadian Airforce'],
+						'Royal Canadian Navy', MIL_COLORS['Royal Canadian Navy'],
+						'All Services', MIL_COLORS['All Services'],
+						'#999999'
+					],
+					'circle-stroke-width': 1,
+					'circle-stroke-color': darkMode ? '#ffffff' : '#000000'
+				}
+			});
+		}
+		map.setLayoutProperty('military-points', 'visibility', showMilitaryBases ? 'visible' : 'none');
+	}
+
+	$: if (mapLoaded && (bubbles || colourType || showMilitaryBases)) drawBubbles();
+
+	function drawMilitaryPoints(g) {
+		if (!showMilitaryBases || !militaryGeojson) return;
+		const milNodes = militaryGeojson.features.map(f => {
+			const p = project(f.geometry.coordinates);
+			return { x: p.x, y: p.y, name: f.properties.Name, type: f.properties.Type };
+		});
+
+		g.selectAll('circle.mil-marker')
+			.data(milNodes)
+			.join('circle')
+			.attr('class', 'mil-marker')
+			.attr('cx', d => d.x).attr('cy', d => d.y)
+			.attr('r', 5)
+			.attr('fill', d => MIL_COLORS[d.type] || '#999999')
+			.attr('stroke', darkMode ? '#ffffff' : '#000000')
+			.attr('stroke-width', 1)
+			.style('cursor', 'pointer')
+			.on('mouseenter', (event, d) => {
+				if (popup) popup.remove();
+				const lngLat = map.unproject([d.x, d.y]);
+				popup = new maplibregl.Popup({ closeButton: false })
+					.setLngLat(lngLat)
+					.setHTML(`<div style="font-family:OpenSans,sans-serif;font-size:12px;background:#1e2433;color:#fff;padding:6px 10px;border-radius:6px;">
+						<b>${d.name}</b><br>${d.type}</div>`)
+					.addTo(map);
+			})
+			.on('mouseleave', () => { if (popup) { popup.remove(); popup = null; } });
+	}
+
 
 	function polygonCentroid(geom) {
 		let x = 0, y = 0, n = 0;
@@ -350,6 +417,9 @@
 			.style('pointer-events', 'none')
 			.style('text-shadow', labelShadow)
 			.text((d) => shortCmaName(d.name));
+
+	
+    	drawMilitaryPoints(g);  // ← add at the very end, after bubbles are appended
 	}
 
 	function showPopup(d) {
@@ -439,6 +509,21 @@
 				mapLoaded = true;
 				drawBubbles();
 
+				map.on('mouseenter', 'military-points', (e) => {
+					map.getCanvas().style.cursor = 'pointer';
+					const p = e.features[0].properties;
+					if (popup) popup.remove();  // ← clear any existing popup first
+					popup = new maplibregl.Popup({ closeButton: false })
+						.setLngLat(e.lngLat)
+						.setHTML(`<div style="font-family:OpenSans,sans-serif;font-size:12px;background:#1e2433;color:#fff;padding:6px 10px;border-radius:6px;">
+							<b>${p.Name}</b><br>${p.Type}</div>`)
+						.addTo(map);
+				});
+				map.on('mouseleave', 'military-points', () => {
+					map.getCanvas().style.cursor = '';
+					if (popup) { popup.remove(); popup = null; }  // ← actually clear it
+				});
+
 				map.on('move', drawBubbles);
 			});
 
@@ -522,6 +607,21 @@
 </div>
 {/if}
 
+{#if showMilitaryBases}
+<div class="legend-bar" style="margin-top: 4px;">
+    <div class="legend-inner">
+        <div class="legend-title">Military bases (CFB)</div>
+        <div class="mil-legend-row">
+            {#each Object.entries(MIL_COLORS) as [type, color]}
+                <div class="mil-legend-item">
+                    <span class="mil-dot" style="background:{color}"></span>{type}
+                </div>
+            {/each}
+        </div>
+    </div>
+</div>
+{/if}
+
 <style>
 	:global(.maplibregl-popup-tip) {
 		border-top-color: #1e2433 !important;
@@ -533,6 +633,9 @@
 		border-radius: 6px; padding: 8px 12px; font-family: OpenSans;
 		/* box-shadow: 0 2px 8px rgba(0,0,0,0.4); z-index: 1; pointer-events: none; */
 	}
+	.mil-legend-row { display: flex; gap: 16px; flex-wrap: wrap; }
+	.mil-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+	.mil-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 	.total-label { font-size: 11px; color: rgba(255,255,255,0.6); font-family: OpenSansBold; margin-bottom: 2px; }
 	.total-value { font-size: 20px; font-family: TradeGothicBold; color: #ffffff; }
 

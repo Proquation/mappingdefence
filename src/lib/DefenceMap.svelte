@@ -12,6 +12,7 @@
 	const SRC_LAYER = 'csd';
 	const FILL_LAYER = 'csd-fill';
 
+
 	export let geojson = null;
 	export let recordByUid = {};
 	export let formatSales = (v) => `${v}`;
@@ -20,8 +21,18 @@
 	export let provinceGeojson = null;
 	export let usGeojson = null;
 	export let darkMode = true;
+	export let militaryGeojson = null;
+	export let showMilitaryBases = false;
 
+	
+	const MIL_COLORS = {
+		'Canadian Army': '#2ECC71',        
+		'Royal Canadian Airforce': '#9B59B6', 
+		'Royal Canadian Navy': '#F1C40F',   
+		'All Services': '#573F3E'           
+	};
 	const SEQ_LO = '#1a2a4a', SEQ_HI = '#4db8ff';
+
 
 	let UNDER = '#ff6b4a';
 	let MID   = '#CCCCCC';
@@ -60,6 +71,37 @@
 
 	$: if (mapLoaded && usGeojson) addUsLayer();
 	$: if (mapLoaded && provinceGeojson) addProvinceLayer();
+
+	function addMilitaryLayer() {
+		if (!map || !militaryGeojson) return;
+		if (map.getSource('military')) {
+			map.getSource('military').setData(militaryGeojson);
+		} else {
+			map.addSource('military', { type: 'geojson', data: militaryGeojson });
+			map.addLayer({
+				id: 'military-points', type: 'circle', source: 'military',
+				paint: {
+					'circle-radius': 5,
+					'circle-color': [
+						'match', ['get', 'Type'],
+						'Canadian Army', MIL_COLORS['Canadian Army'],
+						'Royal Canadian Airforce', MIL_COLORS['Royal Canadian Airforce'],
+						'Royal Canadian Navy', MIL_COLORS['Royal Canadian Navy'],
+						'All Services', MIL_COLORS['All Services'],
+						'#999999'
+					],
+					'circle-stroke-width': 1,
+					'circle-stroke-color': darkMode ? '#ffffff' : '#000000'
+				}
+			});
+		}
+		map.setLayoutProperty('military-points', 'visibility', showMilitaryBases ? 'visible' : 'none');
+	}
+
+	$: if (mapLoaded && militaryGeojson) addMilitaryLayer();
+	$: if (mapLoaded && map.getLayer('military-points')) {
+		map.setLayoutProperty('military-points', 'visibility', showMilitaryBases ? 'visible' : 'none');
+	}
 
 	function addUsLayer() {
 		if (!map) return;
@@ -175,11 +217,30 @@
 			mapLoaded = true;
 			applyData();
 
+			map.on('mouseenter', 'military-points', (e) => {
+				map.getCanvas().style.cursor = 'pointer';
+				const p = e.features[0].properties;
+				if (popup) popup.remove();  // ← clear any existing popup first
+				popup = new maplibregl.Popup({ closeButton: false })
+					.setLngLat(e.lngLat)
+					.setHTML(`<div style="font-family:OpenSans,sans-serif;font-size:12px;background:#1e2433;color:#fff;padding:6px 10px;border-radius:6px;">
+						<b>${p.Name}</b><br>${p.Type}</div>`)
+					.addTo(map);
+			});
+			map.on('mouseleave', 'military-points', () => {
+				map.getCanvas().style.cursor = '';
+				if (popup) { popup.remove(); popup = null; }  // ← actually clear it
+			});
+
 			map.on('mousemove', FILL_LAYER, (event) => {
 				if (!event.features?.length) return;
 				const uid = String(event.features[0].properties.region_uid);
 				if (uid === hoveredUid) return; // same feature, do nothing
 				hoveredUid = uid;
+
+				const milFeatures = map.queryRenderedFeatures(event.point, { layers: ['military-points'] });
+				if (milFeatures.length) return;
+
 				map.getCanvas().style.cursor = 'pointer';
 				const p = event.features[0].properties;
 				const name = p.region_name;
@@ -219,6 +280,8 @@
 				map.getCanvas().style.cursor = '';
 				if (popup) { popup.remove(); popup = null; }
 			});
+
+			
 		});
 
 		map.on('style.load', () => { map.setProjection({ type: map.getZoom() < 7 ? 'globe' : 'mercator' }); });
@@ -268,11 +331,30 @@
 	</div>
 </div>
 
+{#if showMilitaryBases}
+<div class="legend-bar" style="margin-top: 4px;">
+    <div class="legend-inner">
+        <div class="legend-title">Military bases (CFB)</div>
+        <div class="mil-legend-row">
+            {#each Object.entries(MIL_COLORS) as [type, color]}
+                <div class="mil-legend-item">
+                    <span class="mil-dot" style="background:{color}"></span>{type}
+                </div>
+            {/each}
+        </div>
+    </div>
+</div>
+{/if}
+
 <style>
 	:global(.maplibregl-popup-tip) {
 		border-top-color: #1e2433 !important;
 		border-bottom-color: #1e2433 !important;
 	}
+
+	.mil-legend-row { display: flex; gap: 16px; flex-wrap: wrap; }
+	.mil-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+	.mil-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 	.total-overlay {
 		position: absolute; top: 12px; left: 12px;
 		border-radius: 6px; padding: 8px 12px; font-family: OpenSans; border: 1px solid;
