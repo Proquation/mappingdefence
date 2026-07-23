@@ -39,11 +39,25 @@
 	const aggData = {}; // { csd: [...rows], cma: [...], prov: [...] }
 	const geojsonCache = {};
 
+	let yearIndex = 0;
+	$: selectedYear = yearOptions[yearIndex] ?? null;
+
 	$: compareYear = (() => {
 		if (!selectedYear || !yearOptions.length) return null;
 		const idx = yearOptions.indexOf(selectedYear);
 		return idx > 0 ? yearOptions[idx - 1] : yearOptions[0];
 	})();
+
+	// $: latestYear = yearOptions.length ? yearOptions[yearOptions.length - 1] : null;
+	// $: earliestYear = yearOptions.length ? yearOptions[0] : null;
+
+	// $: effectiveYear = colourType === 'yoy' ? latestYear : selectedYear;
+
+	// $: compareYear = colourType === 'yoy' ? earliestYear : (() => {
+	// 	if (!selectedYear || !yearOptions.length) return null;
+	// 	const idx = yearOptions.indexOf(selectedYear);
+	// 	return idx > 0 ? yearOptions[idx - 1] : yearOptions[0];
+	// })();
 
 	$: recordByUidCompare = (() => {
 		const lookup = {};
@@ -114,7 +128,7 @@
  
 			const allRows = [...aggData.csd, ...aggData.cma, ...aggData.prov];
 			yearOptions = [...new Set(allRows.map((r) => r.year))].sort((a, b) => a - b);
-			selectedYear = yearOptions[yearOptions.length - 1];
+			yearIndex = yearOptions.length - 1;
  
 			const naicsMap = new Map();
 			allRows.forEach((r) => {
@@ -161,14 +175,17 @@
 
 
 	$: activeRows = (aggData[selectedGeometry] || []).filter(
-		(r) => r.year === selectedYear && 
-		(['ALL','PRIMARY','SECONDARY'].includes(selectedMode) 
-			? r.NAICS6 === selectedMode 
+		(r) => r.year === selectedYear &&
+		(['ALL','PRIMARY','SECONDARY'].includes(selectedMode)
+			? r.NAICS6 === selectedMode
 			: r.NAICS === selectedMode)
 	);
 
 	$: compareRows = (aggData[selectedGeometry] || []).filter(
-		(r) => r.year === compareYear && r.NAICS6 === selectedMode
+		(r) => r.year === compareYear &&
+		(['ALL','PRIMARY','SECONDARY'].includes(selectedMode)
+			? r.NAICS6 === selectedMode
+			: r.NAICS === selectedMode)
 	);
  
 	$: recordByUid = (() => {
@@ -255,12 +272,12 @@
 						<option value="ALL">All defence</option>
 						<option value="PRIMARY">Primary only</option>
 						<option value="SECONDARY">Secondary only</option>
-						<optgroup label="Primary NAICS">
+						<optgroup label="Core Defence Companies">
 							{#each naicsOptions.filter((n) => n.type === 'primary') as n}
 								<option value={n.code}>{n.code} — {n.desc}</option>
 							{/each}
 						</optgroup>
-						<optgroup label="Secondary NAICS">
+						<optgroup label="Defence Related Companies">
 							{#each naicsOptions.filter((n) => n.type === 'secondary') as n}
 								<option value={n.code}>{n.code} — {n.desc}</option>
 							{/each}
@@ -268,11 +285,28 @@
 					</select>
 				</div>
  
-				<div class="filter-group">
+				<!-- <div class="filter-group">
 					<span class="filter-label">Year</span>
-					<select class="year-select" bind:value={selectedYear}>
+					<select class="year-select" bind:value={selectedYear} disabled={colourType === 'yoy'}>
 						{#each yearOptions as year}<option value={year}>{year}</option>{/each}
 					</select>
+				</div> -->
+
+				<div class="filter-group">
+					<span class="filter-label">
+						Year{colourType === 'yoy' && compareYear !== selectedYear ? ` (${compareYear} → ${selectedYear})` : ''}
+					</span>
+					<div class="slider-row">
+						<input
+							type="range"
+							min="0"
+							max={yearOptions.length - 1}
+							step="1"
+							bind:value={yearIndex}
+							class="year-slider"
+						/>
+						<span class="year-slider-value">{selectedYear ?? ''}</span>
+					</div>
 				</div>
  
 				{#if selectedGeometry === 'cma' || selectedGeometry === 'prov' || selectedGeometry === 'csd'}
@@ -290,7 +324,7 @@
 						<select class="year-select" bind:value={colourType}>
 							<option value="totals">Totals</option>
 							<option value="lq">Location Quotients</option>
-							<option value="lq_change">LQ Change (2017 vs. 2025)</option>
+							<option value="yoy">LQ Change (year over year)</option>
 						</select>
 					</div>
 
@@ -364,7 +398,21 @@
 		flex-direction: column;
 		gap: 24px;
 	}
-
+	.slider-row {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+	.year-slider {
+		width: 140px;
+		accent-color: var(--brandWhite);
+	}
+	.year-slider-value {
+		font-family: OpenSansBold;
+		font-size: 13px;
+		color: var(--brandWhite);
+		min-width: 34px;
+	}
 	.status {
 		display: flex;
 		flex-direction: column;
