@@ -358,6 +358,15 @@
 			overlay.appendChild(svg);
 			mapContainer.appendChild(overlay);
 			markerLayer = svg;
+
+			overlay.addEventListener('wheel', (e) => {
+				e.preventDefault();
+				const rect = mapContainer.getBoundingClientRect();
+				const point = [e.clientX - rect.left, e.clientY - rect.top];
+				const zoomDelta = -e.deltaY * 0.003; // tune sensitivity to taste
+				map.zoomTo(map.getZoom() + zoomDelta, { around: map.unproject(point) });
+			}, { passive: false });
+			
 			const mo = new MutationObserver(() => {
 				svg.querySelectorAll('circle, image').forEach(c => c.style.pointerEvents = 'auto');
 			});

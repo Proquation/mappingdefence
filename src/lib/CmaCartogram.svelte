@@ -397,6 +397,15 @@
 			overlay.appendChild(svg);
 			mapContainer.appendChild(overlay);
 			markerLayer = svg;
+
+			overlay.addEventListener('wheel', (e) => {
+				e.preventDefault();
+				const rect = mapContainer.getBoundingClientRect();
+				const point = [e.clientX - rect.left, e.clientY - rect.top];
+				const zoomDelta = -e.deltaY * 0.005; // tune sensitivity to taste
+				map.zoomTo(map.getZoom() + zoomDelta, { around: map.unproject(point) });
+			}, { passive: false });
+			
 			const mo = new MutationObserver(() => {
 				svg.querySelectorAll('circle, image').forEach((c) => (c.style.pointerEvents = 'auto'));
 			});
@@ -518,7 +527,7 @@
             <tr>
                 <th>Region</th>
                 <th>LQ ({lqBasis})</th>
-                <th>{lqBasis === 'jobs' ? 'Total jobs' : lqBasis === 'sales' ? 'Sales' : 'Firms'}</th>
+                <th>{lqBasis === 'jobs' ? 'Jobs' : lqBasis === 'sales' ? 'Sales' : 'Firms'}</th>
                 <th>Firms</th>
             </tr>
         </thead>

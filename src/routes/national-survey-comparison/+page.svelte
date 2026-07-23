@@ -666,7 +666,7 @@
     <div class="text">
         <AuthorDate
 			authors="<a href='https://schoolofcities.utoronto.ca/people/karen-chapple/' target='_blank'>Karen Chapple</a>, <a href='https://discover.research.utoronto.ca/8035-tara-vinodrai' target='_blank'>Tara Vinodrai</a>, <a href='https://www.linkedin.com/in/yihoi-jung-0b95351b5/' target='_blank'>Yihoi Jung</a>, Sarah Gibbons, Andrew Feng"
-            date="May 2026."
+            date="Last updated July 23, 2026."
         />
         <p>
             Data comes from the Canadian Defence, Aerospace and Commercial and Civil Marine Sectors Survey (CDACCMS).

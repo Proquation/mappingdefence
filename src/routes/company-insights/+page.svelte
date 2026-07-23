@@ -60,7 +60,7 @@
 
 	let militaryGeojson = null;
 	let showMilitaryBases = false;
-	let militaryTypeFilter = new Set(['Canadian Army', 'Royal Canadian Airforce', 'Royal Canadian Navy', 'All Services']);
+	let militaryTypeFilter = new Set(['Canadian Army', 'Royal Canadian fAirforce', 'Royal Canadian Navy', 'All Services']);
 
 	async function ensureMilitaryGeojson() {
 		if (militaryGeojson) return;
@@ -85,6 +85,7 @@
 			region_name: r.region_name,
 			year: Number(r.year),
 			NAICS6: String(r.NAICS6).trim(),
+			NAICS: String(r.NAICS).trim(),   // ← add
 			NAICSD: r.NAICSD,
 			defence_type: r.defence_type,
 			total_sales_M: r.total_sales_M === '' ? null : Number(r.total_sales_M),
@@ -117,8 +118,8 @@
  
 			const naicsMap = new Map();
 			allRows.forEach((r) => {
-				if (!['ALL', 'PRIMARY', 'SECONDARY'].includes(r.NAICS6) && !naicsMap.has(r.NAICS6)) {
-					naicsMap.set(r.NAICS6, { desc: r.NAICSD, type: r.defence_type });
+				if (!['ALL', 'PRIMARY', 'SECONDARY'].includes(r.NAICS6) && !naicsMap.has(r.NAICS)) {
+					naicsMap.set(r.NAICS, { desc: r.NAICSD, type: r.defence_type });
 				}
 			});
 			naicsOptions = [...naicsMap.entries()]
@@ -160,7 +161,10 @@
 
 
 	$: activeRows = (aggData[selectedGeometry] || []).filter(
-		(r) => r.year === selectedYear && r.NAICS6 === selectedMode
+		(r) => r.year === selectedYear && 
+		(['ALL','PRIMARY','SECONDARY'].includes(selectedMode) 
+			? r.NAICS6 === selectedMode 
+			: r.NAICS === selectedMode)
 	);
 
 	$: compareRows = (aggData[selectedGeometry] || []).filter(
@@ -174,18 +178,21 @@
 			const absVal = lqBasis === 'sales' ? r.total_sales_M
 						: lqBasis === 'jobs'  ? r.total_jobs
 						: (r.suppressed ? null : Number(r.n_firms) || null);
+			const prevLq = recordByUidCompare[r.region_uid]?.lq ?? null;
+			const currLq = r[lqKey];
+			const lq_change = (currLq != null && prevLq != null) ? currLq - prevLq : null;
 			lookup[r.region_uid] = {
 				sales: r.total_sales_M,
 				n_firms: r.n_firms,
 				total_jobs: r.total_jobs,
 				avg_employees: r.avg_employees,
-				lq: r[lqKey],
-				absVal              // the raw value for the active basis
+				lq: currLq,
+				lq_change,
+				absVal
 			};
 		});
 		return lookup;
 	})();
-	
 
 	onMount(() => {
 		mounted = true;
@@ -202,7 +209,7 @@
 	<div class="text">
 		<AuthorDate
 			authors="<a href='https://schoolofcities.utoronto.ca/people/karen-chapple/' target='_blank'>Karen Chapple</a>, <a href='https://discover.research.utoronto.ca/8035-tara-vinodrai' target='_blank'>Tara Vinodrai</a>, <a href='https://www.linkedin.com/in/yihoi-jung-0b95351b5/' target='_blank'>Yihoi Jung</a>, <a href='https://www.linkedin.com/in/sarahbridgetgibbons/'>Sarah Gibbons</a>, Andrew Feng</AuthorDate>"
-			date="May 2026."
+			date="Last updated July 23, 2026."
 		/>
 		<p>
 			Defence spending in Canada has historically been difficult to gather. Canada has historically kept
@@ -283,6 +290,7 @@
 						<select class="year-select" bind:value={colourType}>
 							<option value="totals">Totals</option>
 							<option value="lq">Location Quotients</option>
+							<option value="lq_change">LQ Change (2017 vs. 2025)</option>
 						</select>
 					</div>
 
@@ -321,6 +329,9 @@
 			gathered a list of NAICS codes deemed to be at least partially defence related.
 		</p>
 		<p>
+			Jobs in this context refers to employees within headquarter firms, which is a metric given in the Data Axle.
+		</p>
+		<p>
 			"Primary defence" is deemed as NAICS codes where the companies' sales are their primarily
 			defence-related. "Secondary defence" is when defence is not the primary product that these companies
 			produce. For example, engineering services fall under many different sectors, but companies like <a
@@ -336,7 +347,8 @@
 			Download data:
 			<a href="{base}/data/csd_agg.csv" download>Census Subdivisions</a> ·
 			<a href="{base}/data/cma_rural_agg.csv" download>Census Metropolitan Areas</a> ·
-			<a href="{base}/data/prov_agg.csv" download>Provinces</a>
+			<a href="{base}/data/prov_agg.csv" download>Provinces</a> ·
+			<a href="{base}/data/Master NAICS Codes List - Full list.csv" download>NAICS codes used to filter the data axle</a>
 		</p>
 	</div>
 </main>
