@@ -731,49 +731,6 @@
             {/each}
         </div>
 
-        <!-- TOP CONTROLS & TOTAL EXPENDITURE -->
-        <!-- <div class="text">
-            <div class="dashboard-controls">
-                <div class="control-actions">
-                    <div class="metric-group">
-                        <div class="metric-card">
-                            <h4>Total Sales ({locYear})</h4>
-                            <div class="metric-val">{formatCurrency(locTotal)}</div>
-                        </div>
-                    </div>
-                    <div class="filter-group">
-                        <span class="filter-label">Sales metric</span>
-                        <div class="button-group">
-                            <button class="filter-toggle-button {locViewMode === 'raw' ? 'selected' : ''}" on:click={() => (locViewMode = 'raw')}>
-                                Show Raw
-                            </button>
-                            <button class="filter-toggle-button {locViewMode === 'percent' ? 'selected' : ''}" on:click={() => (locViewMode = 'percent')}>
-                                Show Percent
-                            </button>
-                        </div>
-                    </div>
-                    <div class="bottom-filters">
-                        <div class="filter-group">
-                            <span class="filter-label">Region</span>
-                            <select class="year-select" bind:value={selectedRegion}>
-                                {#each regions as r}
-                                    <option value={r}>{regionLabels[r]}</option>
-                                {/each}
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <span class="filter-label">Location year</span>
-                            <select class="year-select" bind:value={locYear}>
-                                {#each years as y}
-                                    <option value={y}>{y}</option>
-                                {/each}
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> -->
-
         <!-- TABULAR LIST: LOCATIONS -->
         <div class="text">
             <h3>Sales by location</h3>

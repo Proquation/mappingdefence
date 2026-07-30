@@ -55,8 +55,8 @@
 
 
 
-
-<Password/>
+<!-- 
+<Password/> -->
 
 
 <main>
@@ -158,7 +158,7 @@
 		</li>
 
 		<li>
-			<a href="./national-survey-comparison">Examine graphs from a national survey</a> on defence expenditures across Canada.
+			<a href="./production">Examine graphs from a national survey</a> on defence goods production across Canada.
 		</li>
 
 		<li>
@@ -170,11 +170,7 @@
 		</li>
 		
 		<li> 
-			<a href="./production">Explore where international defence spending happens</a>.
-		</li>
-
-		<li> 
-			Find out <a href="./production">what defence-related firms produce</a>.
+			<a href="./contracts">Explore where national and international defence spending happens</a> with contract data.
 		</li>
 
 		<li> 

@@ -17,7 +17,7 @@
 		{ name: "National survey breakdown", url: "./national-survey-comparison" },
 		{ name: "Company insights", url: "./company-insights"},
 		{ name: "Procurements", url: "./dnd-procurements"},
-		{ name: "International trade", url: "./international"},
+		{ name: "National/international trade", url: "./contracts"},
 		{ name: "Production", url: "./production"},
 		{ name: "Data and methods", url: "./methodology"}
 	];
