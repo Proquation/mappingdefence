@@ -56,16 +56,9 @@
 	function computeCentroids() {
 		console.log('>>> computeCentroids (world): features =', worldGeojson?.features?.length);
 		console.time('computeCentroidsWorld');
-
-		console.log('>>> computeCentroids (world): features =', worldGeojson?.features?.length);
-		if (worldGeojson?.features?.[0]) {
-			console.log('SAMPLE FEATURE PROPERTIES:', worldGeojson.features[0].properties);
-		}
-		console.time('computeCentroidsWorld');
 		const c = {};
 		if (worldGeojson) {
 			for (const f of worldGeojson.features) {
-				// Try to extract country name from properties (common fields)
 				const name =
 					f.properties?.COUNTRY ||
 					f.properties?.NAME ||
@@ -76,11 +69,13 @@
 					f.properties?.SOVEREIGNT ||
 					f.properties?.Country;
 				if (name) {
-					// Normalise name: trim and collapse spaces
 					const clean = name.trim().replace(/\s+/g, ' ');
-					c[clean] = polygonCentroid(f.geometry);
+					c[clean] = MANUAL_CENTROIDS[clean] || polygonCentroid(f.geometry);
 				}
 			}
+		}
+		for (const [name, coords] of Object.entries(MANUAL_CENTROIDS)) {
+			c[name] = coords;
 		}
 		centroidByName = c;
 		console.timeEnd('computeCentroidsWorld');
@@ -111,6 +106,19 @@
 		drawBubbles();
 	}
 
+	
+
+	$: if (mapLoaded && rows.length && Object.keys(centroidByName).length) {
+		const allDataCountries = [...new Set(rows.map(r => r.region_name))].sort();
+		const matched = allDataCountries.filter(name => centroidByName[resolveCountryName(name)]);
+		const unmatched = allDataCountries.filter(name => !centroidByName[resolveCountryName(name)]);
+
+		console.log('=== COUNTRY COVERAGE CHECK ===');
+		console.log('Total unique countries in data:', allDataCountries.length);
+		console.log('Matched to a map location:', matched.length);
+		console.log('UNMATCHED (excluded from map):', unmatched);
+	}
+
 
 
 	$: if (mapLoaded && worldGeojson && worldGeojson !== centroidsComputedFor) {
@@ -130,34 +138,68 @@
 	}
 
 
-	function polygonCentroid(geom) {
-		let x = 0, y = 0, n = 0;
-		const walk = (coords) => {
-			if (typeof coords[0] === 'number') { x += coords[0]; y += coords[1]; n++; }
-			else coords.forEach(walk);
-		};
-		walk(geom.coordinates);
-		return n ? [x / n, y / n] : [0, 0];
-	}
 
 	// ----- Build bubbles from rows -----
 	// Rows have: region_uid (like "COUNTRY_CANADA"), region_name (like "Canada"), year, tier, object_cluster,
 	// total_value, n_contracts, n_vendors
+
+	const COUNTRY_ALIASES = {
+		'United States of America': 'United States',
+		'United Kingdom of Great Britain and Northern Ireland': 'United Kingdom',
+		'Viet Nam': 'Vietnam',
+		'China, Hong Kong Special Administrative Region': 'Hong Kong'
+		// '-' is junk/placeholder data, not a real country — leave unmapped, see below
+	};
+
+	const MANUAL_CENTROIDS = {
+		'United States': [-98.5, 39.8],
+		'Kosovo': [20.9, 42.6], // approximate center of Kosovo
+		'China, Hong Kong Special Administrative Region': [114.17, 22.3]
+	};
+
+	function resolveCountryName(name) {
+		return COUNTRY_ALIASES[name] || name;
+	}
+
+	function ringVertexCount(ring) {
+		return ring.length;
+	}
+
+	function ringCentroid(ring) {
+		let x = 0, y = 0;
+		for (const [lng, lat] of ring) { x += lng; y += lat; }
+		return [x / ring.length, y / ring.length];
+	}
+
+	function polygonCentroid(geom) {
+		// Collect exterior rings only (first ring of each polygon), across Polygon or MultiPolygon
+		let rings = [];
+		if (geom.type === 'Polygon') {
+			rings = [geom.coordinates[0]];
+		} else if (geom.type === 'MultiPolygon') {
+			rings = geom.coordinates.map((poly) => poly[0]);
+		}
+		if (!rings.length) return [0, 0];
+
+		// Pick the ring with the most vertices as a proxy for "largest landmass"
+		const largest = rings.reduce((a, b) => (b.length > a.length ? b : a));
+		return ringCentroid(largest);
+	}
 	
 	$: bubbles = (() => {
 		if (!mapLoaded || !rows.length) return [];
-		const matched = rows.filter((r) => centroidByName[r.region_name]);
-		console.log('WORLD MATCH:', matched.length, '/', rows.length,
-			'unmatched sample:', rows.filter(r => !centroidByName[r.region_name]).slice(0, 10).map(r => r.region_name));
-		return matched.map((r) => {
+		console.log('Contains Kosovo?', Object.keys(centroidByName).filter(k => /kosovo/i.test(k)));
+		return rows
+			.filter((r) => centroidByName[resolveCountryName(r.region_name)])
+			.map((r) => {
 				const value   = Number.isFinite(r.total_value)  ? r.total_value  : 0;
 				const count   = Number.isFinite(r.n_contracts)  ? r.n_contracts  : 0;
 				const vendors = Number.isFinite(r.n_vendors)    ? r.n_vendors    : 0;
 				const metricVal = metric === 'count' ? count : metric === 'vendors' ? vendors : value;
 				return {
-					name: r.region_name,
+					name: resolveCountryName(r.region_name),
 					value, count, vendors,
-					lngLat: centroidByName[r.region_name],
+					lngLat: centroidByName[resolveCountryName(r.region_name)],
 					colorVal: metricVal,
 					sizeVal: metricVal
 				};
@@ -345,7 +387,7 @@
 				layers: [{ id: 'background', type: 'background',
 					paint: { 'background-color': darkMode ? '#333333' : '#e8e8e8' } }]
 			},
-			center: [0, 20], zoom: 1.8, minZoom: 1, maxZoom: 8,
+			center: [-75, 45], zoom: 2.1, minZoom: 1, maxZoom: 8,
 			attributionControl: false,
 			projection: 'globe'
 		});

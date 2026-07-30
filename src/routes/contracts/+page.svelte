@@ -73,15 +73,12 @@
 		}
 	}
 
-	$: {
-		if (aggData.cma && aggData.cma.length > 0 && cmaGeojson) {
-			const dataIds = new Set(aggData.cma.map(r => r.region_uid));
-			const geoIds = new Set(cmaGeojson.features.map(f => f.id || f.properties?.CMA_UID || f.properties?.id));
-			console.log('Sample data IDs:', Array.from(dataIds).slice(0, 5));
-			console.log('Sample geo IDs:', Array.from(geoIds).slice(0, 5));
-			console.log('Matching IDs:', [...dataIds].filter(id => geoIds.has(id)).length);
-		}
+	$: if (selectedGeometry === 'world' && selectedYear === 2021) {
+		const rawRows = (aggData.world || []).filter(r => r.region_name === 'Sri Lanka' && r.year === 2021);
+		console.log('SRI LANKA 2021 RAW ROWS:', rawRows);
 	}
+
+
 
 	let usGeojson = null;
 	let darkMode = true;
@@ -132,11 +129,11 @@
 	}
 
 	
-	$: filteredAllYears = (aggData[selectedGeometry] || []).filter(
-		(r) =>
-			(selectedTier === NO_FILTER || r.tier === selectedTier) &&
-			(selectedCluster === NO_FILTER || r.object_cluster === selectedCluster)
-	);
+	$: filteredAllYears = (aggData[selectedGeometry] || []).filter((r) => {
+		const tierMatch = selectedTier === NO_FILTER ? r.tier === 'ALL' : r.tier === selectedTier;
+		const clusterMatch = selectedCluster === NO_FILTER ? r.object_cluster === 'ALL' : r.object_cluster === selectedCluster;
+		return tierMatch && clusterMatch;
+	});
 
 
 	$: {
@@ -238,12 +235,11 @@
 	}
 
 	$: activeRows = aggregateByRegion(
-		(aggData[selectedGeometry] || []).filter(
-			(r) =>
-				r.year === selectedYear &&
-				(selectedTier === NO_FILTER || r.tier === selectedTier) &&
-				(selectedCluster === NO_FILTER || r.object_cluster === selectedCluster)
-		)
+		(aggData[selectedGeometry] || []).filter((r) => {
+			const tierMatch = selectedTier === NO_FILTER ? r.tier === 'ALL' : r.tier === selectedTier;
+			const clusterMatch = selectedCluster === NO_FILTER ? r.object_cluster === 'ALL' : r.object_cluster === selectedCluster;
+			return r.year === selectedYear && tierMatch && clusterMatch;
+		})
 	);
 
 	$: console.log('FILTER DEBUG:', {
