@@ -18,7 +18,7 @@
 	let map, mapContainer, mapLoaded = false, popup, markerLayer;
 
 	// Sequential ramp only — no LQ / diverging scale for contracts
-	const SEQ_LO = '#1a2a4a', SEQ_HI = '#4db8ff';
+	const SEQ_LO = '#a8d4f5', SEQ_HI = '#4db8ff';
 
 	const MIL_ICONS = {
 		'Canadian Army': `${base}/img/Badge_of_the_Canadian_Army.svg`,
@@ -64,13 +64,20 @@
 			paint: { 'line-color': usLine, 'line-width': 0.5 } }, beforeLayer);
 	}
 
+	function normalizeRegionUid(id) {
+		const s = String(id).trim();
+		return /^\d+$/.test(s) ? s.padStart(3, '0') : s;
+	}
+
+
 	function computeCentroids() {
 		console.log('>>> computeCentroids: START, features =', cmaGeojson?.features?.length);
 		console.time('computeCentroids');
 		const c = {};
 		if (cmaGeojson) {
 			for (const f of cmaGeojson.features) {
-				const uid = String(f.properties.region_uid);
+				
+				const uid = normalizeRegionUid(f.properties.region_uid);
 				c[uid] = polygonCentroid(f.geometry);
 			}
 		}
@@ -92,6 +99,13 @@
 	function shortCmaName(name) {
 		if (!name) return '';
 		return name.replace(/\s*[-–]\s*[A-Z]{2}$/, '').replace(/\s*\(CMA\).*$/, '').trim();
+	}
+
+	let centroidsComputedFor = null;
+
+	$: if (mapLoaded && cmaGeojson && cmaGeojson !== centroidsComputedFor) {
+		computeCentroids();
+		centroidsComputedFor = cmaGeojson;
 	}
 
 	// ---- Build bubbles directly from contracts_cma_agg.csv rows ----
@@ -121,7 +135,7 @@
 
 	function colorFor(b) {
 		if (!(b.colorVal > 0)) return noDataColor;
-		const t = Math.min(1, b.colorVal / Math.max(1, absClamp));
+		const t = Math.min(1, b.colorVal / Math.max(1, effectiveClamp));
 		return d3.interpolateRgb(SEQ_LO, SEQ_HI)(t);
 	}
 
@@ -142,22 +156,32 @@
 		: 'Total contract value (shown)';
 	$: totalDisplay = metric === 'value' ? formatValue(totalMetric) : totalMetric.toLocaleString();
 
-	$: sizeClamp = (() => {
-		const vals = bubbles.map(b => b.sizeVal).filter(v => v > 0).sort((a,b)=>a-b);
-		if (!vals.length) return 1;
-		return vals[Math.floor(vals.length * 0.95)] ?? vals[vals.length-1];
-	})();
 
-	$: absClamp = (() => {
-		const vals = bubbles.map(b => b.colorVal).filter(v => v > 0).sort((a,b)=>a-b);
-		if (!vals.length) return 1;
-		return vals[Math.floor(vals.length*0.95)] ?? vals[vals.length-1];
-	})();
+	export let sizeBins = null; // { thresholds: number[], radii: number[] } from parent, fixed across years for current filter
 
-	function radiusPx(v) {
-		const t = Math.sqrt(Math.min(v, sizeClamp) / sizeClamp);
-		return 3 + t * 25;
+	const DEFAULT_BINS = { thresholds: [1], radii: [3, 25] };
+	$: effectiveBins = sizeBins && sizeBins.thresholds?.length ? sizeBins : DEFAULT_BINS;
+	$: effectiveClamp = effectiveBins.thresholds[effectiveBins.thresholds.length - 1]; // used only for color gradient normalization
+
+	function radiusForValue(v) {
+		const { thresholds, radii } = effectiveBins;
+		for (let i = 0; i < thresholds.length; i++) {
+			if (v < thresholds[i]) return radii[i];
+		}
+		return radii[radii.length - 1];
 	}
+
+	$: sizeLegendSteps = (() => {
+		const { thresholds, radii } = effectiveBins;
+		return radii.map((rBase, i) => {
+			const r = Math.min(Math.max(3, rBase * currentZoomScale), MAX_LEGEND_R);
+			let label;
+			if (i === 0) label = `< ${formatSizeVal(thresholds[0])}`;
+			else if (i === radii.length - 1) label = `${formatSizeVal(thresholds[i - 1])}+`;
+			else label = `${formatSizeVal(thresholds[i - 1])}–${formatSizeVal(thresholds[i])}`;
+			return { r, label };
+		});
+	})();
 
 	function formatSizeVal(v) {
 		if (metric === 'value') return formatValue(v);
@@ -166,15 +190,6 @@
 
 	const MAX_LEGEND_R = 40;
 
-	$: sizeLegendSteps = (() => {
-		if (!sizeClamp) return [];
-		const steps = [0.1, 0.25, 0.5, 1];
-		return steps.map(t => {
-			const val = sizeClamp * t;
-			const baseR = radiusPx(val);
-			return { val, r: Math.min(Math.max(3, baseR * currentZoomScale), MAX_LEGEND_R) };
-		});
-	})();
 
 	function project(lngLat) { return map.project(lngLat); }
 
@@ -241,7 +256,7 @@
 		console.time('drawBubbles: build nodes');
 		const allNodes = cmaBubbles.map((b) => {
 			const p = project(b.lngLat);
-			const baseR = radiusPx(b.sizeVal);
+			const baseR = radiusForValue(b.sizeVal); // was radiusPx(b.sizeVal)
 			return { ...b, x: p.x, y: p.y, r: Math.max(3, baseR * zoomScale) };
 		});
 		console.timeEnd('drawBubbles: build nodes');
@@ -342,7 +357,6 @@
 			});
 			mo.observe(svg, { childList: true, subtree: true });
 
-			computeCentroids();
 			mapLoaded = true;
 			drawBubbles();
 
@@ -381,14 +395,10 @@
 			{#each sizeLegendSteps as step}
 				<div class="size-legend-item">
 					<svg width={step.r * 2 + 4} height={step.r * 2 + 4}>
-						<circle
-							cx={step.r + 2} cy={step.r + 2} r={step.r}
-							fill="none"
-							stroke={darkMode ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)'}
-							stroke-width="1"
-						/>
+						<circle cx={step.r + 2} cy={step.r + 2} r={step.r} fill="none"
+							stroke={darkMode ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)'} stroke-width="1" />
 					</svg>
-					<span style="color:{darkMode ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.75)'};">{formatSizeVal(step.val)}</span>
+					<span style="color:{darkMode ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.75)'};">{step.label}</span>
 				</div>
 			{/each}
 		</div>
@@ -404,7 +414,7 @@
 			<div class="ramp" style="background: linear-gradient(to right, {SEQ_LO} 0%, {SEQ_HI} 100%)"></div>
 			<div class="ticks">
 				<span style="left:0%">0</span>
-				<span style="left:100%">{metric === 'value' ? formatValue(absClamp) : Math.round(absClamp).toLocaleString()}+</span>
+				<span style="left:100%">{metric === 'value' ? formatValue(effectiveClamp) : Math.round(effectiveClamp).toLocaleString()}+</span>
 			</div>
 		</div>
 	</div>

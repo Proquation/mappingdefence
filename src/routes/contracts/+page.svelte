@@ -25,9 +25,9 @@
 	let selectedGeometry = 'cma';
 
 	// tier: "ALL" | "General Government Support" | "Industrial and Technical Support" | "Core Defence Industrial Complex"
-	let selectedTier = 'ALL';
-	// object_cluster: "ALL" | one of the 14 clusters
-	let selectedCluster = 'ALL';
+	// let selectedTier = 'ALL';
+	// // object_cluster: "ALL" | one of the 14 clusters
+	// let selectedCluster = 'ALL';
 
 	let yearOptions = [];
 	let clusterOptions = [];
@@ -42,13 +42,23 @@
 	let yearIndex = 0;
 	let selectedYear = null; 
 
+	const NO_FILTER = '__ANY__';
+
+	let selectedTier = NO_FILTER;
+	let selectedCluster = NO_FILTER;
+
 	$: {
 		if (aggData[selectedGeometry] && aggData[selectedGeometry].length > 0) {
 			const data = aggData[selectedGeometry];
 			const years = [...new Set(data.map(r => r.year))].sort();
-			const tiers = [...new Set(data.map(r => r.tier))].filter(Boolean).sort();
-			const clusters = [...new Set(data.map(r => r.object_cluster))].filter(Boolean).sort();
-			
+			const tiers = [...new Set(data.map(r => r.tier))]
+				.filter(t => Boolean(t) && t !== 'ALL')  // exclude the rollup pseudo-tier
+				.sort();
+
+			const clusters = [...new Set(data.map(r => r.object_cluster))]
+				.filter(c => Boolean(c) && c !== 'ALL')
+				.sort();
+
 			yearOptions = years;
 			tierOptions = tiers;
 			clusterOptions = clusters;
@@ -97,9 +107,14 @@
 		return `$${value.toFixed(0)}`;
 	}
 
+	function normalizeRegionUid(id) {
+		const s = String(id).trim();
+		return /^\d+$/.test(s) ? s.padStart(3, '0') : s;
+	}
+
 	function parseAgg(csvText) {
 		return csvParse(csvText).map((r) => ({
-			region_uid: String(r.region_uid).trim(),
+			region_uid: normalizeRegionUid(r.region_uid),
 			region_name: r.region_name,
 			year: Number(r.year),
 			tier: r.tier,
@@ -110,26 +125,68 @@
 		}));
 	}
 
-	// async function loadData() {
-	// 	console.time('loadData: total');
-	// 	try {
-			
-	// 		const [cma, prov] = await Promise.all([
-	// 			fetch(`${base}/data/contracts_cma_agg.csv`).then((r) => r.text()),
-	// 			fetch(`${base}/data/contracts_prov_agg.csv`).then((r) => r.text())
-	// 		]);
+	function roundToSigFigs(num, sig = 3) {
+		if (!num) return 0;
+		const magnitude = Math.pow(10, sig - Math.ceil(Math.log10(Math.abs(num))));
+		return Math.round(num * magnitude) / magnitude;
+	}
 
-	// 		aggData.cma = parseAgg(cma);
-	// 		aggData.prov = parseAgg(prov);
-	// 		aggData.world = parseAgg(world);
+	
+	$: filteredAllYears = (aggData[selectedGeometry] || []).filter(
+		(r) =>
+			(selectedTier === NO_FILTER || r.tier === selectedTier) &&
+			(selectedCluster === NO_FILTER || r.object_cluster === selectedCluster)
+	);
 
-	// 		console.log('CMA rows:', aggData.cma.length, 'Prov rows:', aggData.prov.length, 'World rows:', aggData.world.length);
 
-	// 	} finally {
-	// 		isLoading = false;
-	// 		console.timeEnd('loadData: total');
-	// 	}
-	// }
+	$: {
+		if (aggData.cma && aggData.cma.length > 0 && cmaGeojson) {
+			const dataIds = new Set(aggData.cma.map(r => r.region_uid));
+			const geoIds = new Set(cmaGeojson.features.map(f => normalizeRegionUid(f.properties.region_uid)));
+			console.log('DATA region_uid sample:', Array.from(dataIds).slice(0, 10));
+			console.log('GEO region_uid sample:', Array.from(geoIds).slice(0, 10));
+			console.log('DATA count:', dataIds.size, 'GEO count:', geoIds.size);
+			console.log('Matching:', [...dataIds].filter(id => geoIds.has(id)).length);
+			console.log('In DATA but not GEO:', [...dataIds].filter(id => !geoIds.has(id)).slice(0, 10));
+			console.log('In GEO but not DATA:', [...geoIds].filter(id => !dataIds.has(id)).slice(0, 10));
+		}
+	}
+
+	// Same tier/cluster filter as activeRows, but across ALL years
+	// $: filteredAllYears = (aggData[selectedGeometry] || []).filter(
+	// 	(r) => r.tier === selectedTier && r.object_cluster === selectedCluster
+	// );
+
+	function computeSizeBins(rows, field) {
+		const vals = rows
+			.map((r) => r[field])
+			.filter((v) => Number.isFinite(v) && v > 0)
+			.sort((a, b) => a - b);
+
+		if (!vals.length) return { thresholds: [1], radii: [3, 25] };
+
+		const quantile = (p) => {
+			const idx = (vals.length - 1) * p;
+			const lo = Math.floor(idx), hi = Math.ceil(idx);
+			if (lo === hi) return vals[lo];
+			return vals[lo] + (vals[hi] - vals[lo]) * (idx - lo);
+		};
+
+		// 4 cut points -> up to 5 bins
+		const raw = [0.50, 0.70, 0.90, 0.99].map(quantile);
+		const thresholds = [...new Set(raw.map((v) => roundToSigFigs(v, 2)))].sort((a, b) => a - b);
+
+		const allRadii = [4, 10, 17, 24, 32];
+		const radii = allRadii.slice(0, thresholds.length + 1);
+
+		return { thresholds, radii };
+	}
+
+	// direct reference to filteredAllYears so Svelte tracks the dependency correctly
+	$: sizeBins =
+		metric === 'count' ? computeSizeBins(filteredAllYears, 'n_contracts')
+		: metric === 'vendors' ? computeSizeBins(filteredAllYears, 'n_vendors')
+		: computeSizeBins(filteredAllYears, 'total_value');
 
 	async function ensureGeojson(file) {
 		if (geojsonCache[file]) return geojsonCache[file];
@@ -158,11 +215,35 @@
 		}
 	}
 
-	$: activeRows = (aggData[selectedGeometry] || []).filter(
-		(r) =>
-			r.year === selectedYear &&
-			r.tier === selectedTier &&
-			r.object_cluster === selectedCluster
+	function aggregateByRegion(rows) {
+		const byRegion = new Map();
+		for (const r of rows) {
+			const existing = byRegion.get(r.region_uid);
+			if (existing) {
+				existing.total_value += r.total_value || 0;
+				existing.n_contracts += r.n_contracts || 0;
+				existing.n_vendors += r.n_vendors || 0; // see vendor caveat below
+			} else {
+				byRegion.set(r.region_uid, {
+					region_uid: r.region_uid,
+					region_name: r.region_name,
+					year: r.year,
+					total_value: r.total_value || 0,
+					n_contracts: r.n_contracts || 0,
+					n_vendors: r.n_vendors || 0
+				});
+			}
+		}
+		return Array.from(byRegion.values());
+	}
+
+	$: activeRows = aggregateByRegion(
+		(aggData[selectedGeometry] || []).filter(
+			(r) =>
+				r.year === selectedYear &&
+				(selectedTier === NO_FILTER || r.tier === selectedTier) &&
+				(selectedCluster === NO_FILTER || r.object_cluster === selectedCluster)
+		)
 	);
 
 	$: console.log('FILTER DEBUG:', {
@@ -293,14 +374,16 @@
 	async function loadData() {
 		console.time('loadData: total');
 		try {
-			const [cma, prov, locRes] = await Promise.all([
+			const [cma, prov, world, locRes] = await Promise.all([
 				fetch(`${base}/data/contracts_cma_agg.csv`).then((r) => r.text()),
 				fetch(`${base}/data/contracts_prov_agg.csv`).then((r) => r.text()),
+				fetch(`${base}/data/contracts_world_agg.csv`).then((r) => r.text()),
 				fetch(`${base}/data/B1B2B3.csv`).then((r) => r.text())
 			]);
 
 			aggData.cma = parseAgg(cma);
 			aggData.prov = parseAgg(prov);
+			aggData.world = parseAgg(world);
 
 			b1Data = csvParse(locRes).map((row) => ({
 				category: normalizeCategory(row['Type of Sale'].trim()),
@@ -362,7 +445,7 @@
 				<div class="filter-group">
 					<span class="filter-label">Tier</span>
 					<select class="year-select" bind:value={selectedTier}>
-						<option value="ALL">All tiers</option>
+						<option value={NO_FILTER}>All tiers</option>
 						{#each tierOptions as t}<option value={t}>{t}</option>{/each}
 					</select>
 				</div>
@@ -370,7 +453,7 @@
 				<div class="filter-group">
 					<span class="filter-label">Industry cluster</span>
 					<select class="year-select" bind:value={selectedCluster}>
-						<option value="ALL">All clusters</option>
+						<option value={NO_FILTER}>All clusters</option>
 						{#each clusterOptions as c}<option value={c}>{c}</option>{/each}
 					</select>
 				</div>
@@ -420,6 +503,7 @@
 					{darkMode}
 					{militaryGeojson}
 					{showMilitaryBases}
+					{sizeBins}
 				/>
 			{:else if selectedGeometry === 'prov'}
 				<ContractsProvinceCartogram
@@ -431,6 +515,7 @@
 					{darkMode}
 					{militaryGeojson}
 					{showMilitaryBases}
+					{sizeBins}
 				/>
 			{:else if selectedGeometry === 'world'}
 				<ContractsWorldCartogram
@@ -441,6 +526,7 @@
 					{darkMode}
 					{militaryGeojson}
 					{showMilitaryBases}
+					{sizeBins}
 				/>
 			{/if}
 		</section>

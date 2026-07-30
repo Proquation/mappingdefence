@@ -16,7 +16,7 @@
 
 	let map, mapContainer, mapLoaded = false, popup, markerLayer;
 
-	const SEQ_LO = '#1a2a4a', SEQ_HI = '#4db8ff';
+	const SEQ_LO = '#a8d4f5', SEQ_HI = '#4db8ff';
 
 	const MIL_ICONS = {
 		'Canadian Army': `${base}/img/Badge_of_the_Canadian_Army.svg`,
@@ -42,7 +42,14 @@
 		'61': [-120.0, 64.5],
 		'62': [-94.0, 66.0]
 	};
-	function computeCentroids() { centroidByUid = { ...PROV_POINTS }; }
+
+	function computeCentroids() {
+		const normalized = {};
+		for (const [k, v] of Object.entries(PROV_POINTS)) {
+			normalized[normalizeRegionUid(k)] = v;
+		}
+		centroidByUid = normalized;
+	}
 
 	$: mapBg    = darkMode ? '#333333' : '#e8e8e8';
 	$: provFill = darkMode ? '#1a1a1a' : '#F2F2F2';
@@ -98,11 +105,16 @@
 		return key ? m[key] : name;
 	}
 
+	function normalizeRegionUid(id) {
+		const s = String(id).trim();
+		return /^\d+$/.test(s) ? s.padStart(3, '0') : s;
+	}
+
 	// ---- Build bubbles directly from contracts_prov_agg.csv rows ----
 	$: bubbles = (() => {
 		if (!mapLoaded || !rows.length) return [];
 		return rows
-			.filter((r) => centroidByUid[r.region_uid])
+			.filter((r) => centroidByUid[normalizeRegionUid(r.region_uid)])
 			.map((r) => {
 				const value    = Number.isFinite(r.total_value)  ? r.total_value  : 0;
 				const count    = Number.isFinite(r.n_contracts)  ? r.n_contracts  : 0;
@@ -112,7 +124,7 @@
 					uid: r.region_uid,
 					name: r.region_name,
 					value, count, vendors,
-					lngLat: centroidByUid[r.region_uid],
+					lngLat: centroidByUid[normalizeRegionUid(r.region_uid)],
 					colorVal: metricVal,
 					sizeVal: metricVal
 				};
@@ -136,36 +148,36 @@
 		: 'Total contract value (shown)';
 	$: totalDisplay = metric === 'value' ? formatValue(totalMetric) : totalMetric.toLocaleString();
 
-	$: sizeClamp = (() => {
-		const vals = bubbles.map(b => b.sizeVal).filter(v => v > 0).sort((a,b)=>a-b);
-		if (!vals.length) return 1;
-		return vals[Math.floor(vals.length * 0.95)] ?? vals[vals.length-1];
-	})();
+	export let sizeBins = null; // { thresholds, radii } from parent, fixed across years for current filter
 
-	$: absClamp = (() => {
-		const vals = bubbles.map(b => b.colorVal).filter(v => v > 0).sort((a,b)=>a-b);
-		if (!vals.length) return 1;
-		return vals[Math.floor(vals.length*0.95)] ?? vals[vals.length-1];
-	})();
+	const DEFAULT_BINS = { thresholds: [1], radii: [10, 42] };
+	$: effectiveBins = sizeBins && sizeBins.thresholds?.length ? sizeBins : DEFAULT_BINS;
+	$: absClamp = effectiveBins.thresholds[effectiveBins.thresholds.length - 1]; // for color gradient only
 
-	function radiusPx(v) {
-		const t = Math.sqrt(Math.min(v, sizeClamp) / sizeClamp);
-		return 10 + t * 42;
+	function radiusForValue(v) {
+		const { thresholds, radii } = effectiveBins;
+		for (let i = 0; i < thresholds.length; i++) {
+			if (v < thresholds[i]) return radii[i];
+		}
+		return radii[radii.length - 1];
 	}
+
+	$: sizeLegendSteps = (() => {
+		const { thresholds, radii } = effectiveBins;
+		return radii.map((r, i) => {
+			let label;
+			if (i === 0) label = `< ${formatSizeVal(thresholds[0])}`;
+			else if (i === radii.length - 1) label = `${formatSizeVal(thresholds[i - 1])}+`;
+			else label = `${formatSizeVal(thresholds[i - 1])}–${formatSizeVal(thresholds[i])}`;
+			return { r, label };
+		});
+	})();
+
 
 	function formatSizeVal(v) {
 		if (metric === 'value') return formatValue(v);
 		return Math.round(v).toLocaleString();
 	}
-
-	$: sizeLegendSteps = (() => {
-		if (!sizeClamp) return [];
-		const steps = [0.25, 0.6, 1];
-		return steps.map(t => {
-			const val = sizeClamp * t;
-			return { val, r: radiusPx(val) };
-		});
-	})();
 
 	function drawMilitaryPoints(g) {
 		if (!showMilitaryBases || !militaryGeojson) return;
@@ -204,7 +216,7 @@
 
 		const nodes = bubbles.map(b => {
 			const p = map.project(b.lngLat);
-			return { ...b, x: p.x, y: p.y, r: radiusPx(b.sizeVal) };
+			return { ...b, x: p.x, y: p.y, r: radiusForValue(b.sizeVal) }; // was radiusPx(b.sizeVal)
 		});
 
 		const sim = d3.forceSimulation(nodes)
@@ -341,8 +353,7 @@
 							stroke-width="1"
 						/>
 					</svg>
-					<span style="color:{darkMode ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.75)'};">{formatSizeVal(step.val)}</span>
-				</div>
+				<span style="color:{darkMode ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.75)'};">{step.label}</span>				</div>
 			{/each}
 		</div>
 	</div>

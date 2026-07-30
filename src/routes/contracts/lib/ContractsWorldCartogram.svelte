@@ -14,11 +14,14 @@
 	export let militaryGeojson = null;
 	export let showMilitaryBases = false;
 
+	let centroidsComputedFor = null;
+
+	
 	// ----- Map state -----
 	let map, mapContainer, mapLoaded = false, popup, markerLayer;
 
-	// Colour ramp (same as CMA)
-	const SEQ_LO = '#1a2a4a', SEQ_HI = '#4db8ff';
+	// Colour ramp
+	const SEQ_LO = '#a8d4f5', SEQ_HI = '#4db8ff';
 
 	// Military icons (reuse)
 	const MIL_ICONS = {
@@ -49,6 +52,40 @@
 
 	// ----- Add world country layer when geojson loads -----
 	$: if (mapLoaded && worldGeojson) addCountryLayer();
+	// ----- Compute centroids from world countries -----
+	function computeCentroids() {
+		console.log('>>> computeCentroids (world): features =', worldGeojson?.features?.length);
+		console.time('computeCentroidsWorld');
+
+		console.log('>>> computeCentroids (world): features =', worldGeojson?.features?.length);
+		if (worldGeojson?.features?.[0]) {
+			console.log('SAMPLE FEATURE PROPERTIES:', worldGeojson.features[0].properties);
+		}
+		console.time('computeCentroidsWorld');
+		const c = {};
+		if (worldGeojson) {
+			for (const f of worldGeojson.features) {
+				// Try to extract country name from properties (common fields)
+				const name =
+					f.properties?.COUNTRY ||
+					f.properties?.NAME ||
+					f.properties?.ADMIN ||
+					f.properties?.name ||
+					f.properties?.country ||
+					f.properties?.CNTRY_NAME ||
+					f.properties?.SOVEREIGNT ||
+					f.properties?.Country;
+				if (name) {
+					// Normalise name: trim and collapse spaces
+					const clean = name.trim().replace(/\s+/g, ' ');
+					c[clean] = polygonCentroid(f.geometry);
+				}
+			}
+		}
+		centroidByName = c;
+		console.timeEnd('computeCentroidsWorld');
+		console.log('<<< computeCentroidsWorld: DONE,', Object.keys(c).length, 'countries');
+	}
 
 	function addCountryLayer() {
 		if (!map) return;
@@ -74,33 +111,24 @@
 		drawBubbles();
 	}
 
-	// ----- Compute centroids from world countries -----
-	function computeCentroids() {
-		console.log('>>> computeCentroids (world): features =', worldGeojson?.features?.length);
-		console.time('computeCentroidsWorld');
-		const c = {};
-		if (worldGeojson) {
-			for (const f of worldGeojson.features) {
-				// Try to extract country name from properties (common fields)
-				const name =
-					f.properties?.NAME ||
-					f.properties?.ADMIN ||
-					f.properties?.name ||
-					f.properties?.country ||
-					f.properties?.CNTRY_NAME ||
-					f.properties?.SOVEREIGNT ||
-					f.properties?.Country;
-				if (name) {
-					// Normalise name: trim and collapse spaces
-					const clean = name.trim().replace(/\s+/g, ' ');
-					c[clean] = polygonCentroid(f.geometry);
-				}
-			}
-		}
-		centroidByName = c;
-		console.timeEnd('computeCentroidsWorld');
-		console.log('<<< computeCentroidsWorld: DONE,', Object.keys(c).length, 'countries');
+
+
+	$: if (mapLoaded && worldGeojson && worldGeojson !== centroidsComputedFor) {
+		computeCentroids();
+		centroidsComputedFor = worldGeojson;
 	}
+
+	function isVisibleOnGlobe(lngLat) {
+		if (map.getZoom() >= 7) return true; // mercator mode, no culling needed
+		const center = map.getCenter();
+		const toRad = (d) => (d * Math.PI) / 180;
+		const [lng, lat] = lngLat;
+		const lat1 = toRad(center.lat), lat2 = toRad(lat);
+		const dLng = toRad(lng - center.lng);
+		const cosC = Math.sin(lat1) * Math.sin(lat2) + Math.cos(lat1) * Math.cos(lat2) * Math.cos(dLng);
+		return cosC > 0;
+	}
+
 
 	function polygonCentroid(geom) {
 		let x = 0, y = 0, n = 0;
@@ -115,11 +143,13 @@
 	// ----- Build bubbles from rows -----
 	// Rows have: region_uid (like "COUNTRY_CANADA"), region_name (like "Canada"), year, tier, object_cluster,
 	// total_value, n_contracts, n_vendors
+	
 	$: bubbles = (() => {
 		if (!mapLoaded || !rows.length) return [];
-		return rows
-			.filter((r) => centroidByName[r.region_name]) // match by country name
-			.map((r) => {
+		const matched = rows.filter((r) => centroidByName[r.region_name]);
+		console.log('WORLD MATCH:', matched.length, '/', rows.length,
+			'unmatched sample:', rows.filter(r => !centroidByName[r.region_name]).slice(0, 10).map(r => r.region_name));
+		return matched.map((r) => {
 				const value   = Number.isFinite(r.total_value)  ? r.total_value  : 0;
 				const count   = Number.isFinite(r.n_contracts)  ? r.n_contracts  : 0;
 				const vendors = Number.isFinite(r.n_vendors)    ? r.n_vendors    : 0;
@@ -153,23 +183,32 @@
 		: 'Total contract value (shown)';
 	$: totalDisplay = metric === 'value' ? formatValue(totalMetric) : totalMetric.toLocaleString();
 
-	// Clamp values for colour and size (95th percentile)
-	$: sizeClamp = (() => {
-		const vals = bubbles.map(b => b.sizeVal).filter(v => v > 0).sort((a,b)=>a-b);
-		if (!vals.length) return 1;
-		return vals[Math.floor(vals.length * 0.95)] ?? vals[vals.length-1];
-	})();
+	export let sizeBins = null;
 
-	$: absClamp = (() => {
-		const vals = bubbles.map(b => b.colorVal).filter(v => v > 0).sort((a,b)=>a-b);
-		if (!vals.length) return 1;
-		return vals[Math.floor(vals.length*0.95)] ?? vals[vals.length-1];
-	})();
+	const DEFAULT_BINS = { thresholds: [1], radii: [3, 25] };
+	$: effectiveBins = sizeBins && sizeBins.thresholds?.length ? sizeBins : DEFAULT_BINS;
+	$: absClamp = effectiveBins.thresholds[effectiveBins.thresholds.length - 1];
 
-	function radiusPx(v) {
-		const t = Math.sqrt(Math.min(v, sizeClamp) / sizeClamp);
-		return 3 + t * 25;
+	function radiusForValue(v) {
+		const { thresholds, radii } = effectiveBins;
+		for (let i = 0; i < thresholds.length; i++) {
+			if (v < thresholds[i]) return radii[i];
+		}
+		return radii[radii.length - 1];
 	}
+
+	$: sizeLegendSteps = (() => {
+		const { thresholds, radii } = effectiveBins;
+		return radii.map((rBase, i) => {
+			const r = Math.min(Math.max(3, rBase * currentZoomScale), MAX_LEGEND_R);
+			let label;
+			if (i === 0) label = `< ${formatSizeVal(thresholds[0])}`;
+			else if (i === radii.length - 1) label = `${formatSizeVal(thresholds[i - 1])}+`;
+			else label = `${formatSizeVal(thresholds[i - 1])}–${formatSizeVal(thresholds[i])}`;
+			return { r, label };
+		});
+	})();
+
 
 	function formatSizeVal(v) {
 		if (metric === 'value') return formatValue(v);
@@ -178,15 +217,6 @@
 
 	const MAX_LEGEND_R = 40;
 
-	$: sizeLegendSteps = (() => {
-		if (!sizeClamp) return [];
-		const steps = [0.1, 0.25, 0.5, 1];
-		return steps.map(t => {
-			const val = sizeClamp * t;
-			const baseR = radiusPx(val);
-			return { val, r: Math.min(Math.max(3, baseR * currentZoomScale), MAX_LEGEND_R) };
-		});
-	})();
 
 	function project(lngLat) { return map.project(lngLat); }
 
@@ -232,19 +262,19 @@
 		}
 		console.time('drawBubblesWorld');
 		const zoom = map.getZoom();
-		const zoomScale = Math.max(0.1, (zoom - 2) / 2);
+		const zoomScale = Math.max(0.6, Math.min(2.5, (zoom - 0.5) / 1.5));
 		const labelMinR = zoom < 2 ? 999 : zoom < 4 ? 18 : zoom < 5.5 ? 12 : 8;
 		const svg = d3.select(markerLayer);
 		currentZoomScale = zoomScale;
-		svg.selectAll('*').remove();
+		svg.selectAll('*').remove()
+		const allNodes = bubbles
+			.filter((b) => isVisibleOnGlobe(b.lngLat))
+			.map((b) => {
+				const p = project(b.lngLat);
+				const baseR = radiusForValue(b.sizeVal);
+				return { ...b, x: p.x, y: p.y, r: Math.max(3, baseR * zoomScale) };
+		});;
 
-		console.time('drawBubblesWorld: build nodes');
-		const allNodes = bubbles.map((b) => {
-			const p = project(b.lngLat);
-			const baseR = radiusPx(b.sizeVal);
-			return { ...b, x: p.x, y: p.y, r: Math.max(3, baseR * zoomScale) };
-		});
-		console.timeEnd('drawBubblesWorld: build nodes');
 		console.log('nodes built:', allNodes.length);
 
 		console.time('drawBubblesWorld: d3 render');
@@ -390,7 +420,7 @@
 							stroke-width="1"
 						/>
 					</svg>
-					<span style="color:{darkMode ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.75)'};">{formatSizeVal(step.val)}</span>
+					<span style="color:{darkMode ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.75)'};">{step.label}</span>
 				</div>
 			{/each}
 		</div>
