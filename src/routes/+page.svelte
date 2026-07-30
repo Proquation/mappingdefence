@@ -152,13 +152,35 @@
 		</p>
 
 		<ul>
+		
+		<li> 
+			Learn about <a href="./definition">what defence means</a> in this context.
+		</li>
+
 		<li>
 			<a href="./national-survey-comparison">Examine graphs from a national survey</a> on defence expenditures across Canada.
 		</li>
 
 		<li>
-			<a href="./company-insights">Read about the companies that make up our defence industry</a>.	
+			See <a href="./company-insights">a map of defence firms in Canada</a>.
 		</li>
+
+		<li>
+			<a href="./dnd-procurements">Read about the nature and geography of defence procurement</a>.	
+		</li>
+		
+		<li> 
+			<a href="./production">Explore where international defence spending happens</a>.
+		</li>
+
+		<li> 
+			Find out <a href="./production">what defence-related firms produce</a>.
+		</li>
+
+		<li> 
+			Read our <a href="./methodology">data methodology</a> for our findings.
+		</li>
+		
 
 		</ul>
 

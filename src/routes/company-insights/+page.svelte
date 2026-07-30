@@ -270,8 +270,8 @@
 					<span class="filter-label">Show</span>
 					<select class="year-select" bind:value={selectedMode}>
 						<option value="ALL">All defence</option>
-						<option value="PRIMARY">Primary only</option>
-						<option value="SECONDARY">Secondary only</option>
+						<option value="PRIMARY">Core defence only</option>
+						<option value="SECONDARY">Defence related only</option>
 						<optgroup label="Core Defence Companies">
 							{#each naicsOptions.filter((n) => n.type === 'primary') as n}
 								<option value={n.code}>{n.code} — {n.desc}</option>
