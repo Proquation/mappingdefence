@@ -14,12 +14,11 @@
 		
 		{ name: "Homepage", url: "./" },
 		{ name: "Defence definition", url: "./definition"},
-		{ name: "National survey breakdown", url: "./national-survey-comparison" },
-		{ name: "Company insights", url: "./company-insights"},
-		{ name: "Procurements", url: "./dnd-procurements"},
-		{ name: "National/international trade", url: "./contracts"},
-		{ name: "Production", url: "./production"},
-		{ name: "Data and methods", url: "./methodology"}
+		{ name: "Defence production", url: "./production"},
+		{ name: "Location of defence firms", url: "./company-insights"},
+		{ name: "Nature of procurements", url: "./dnd-procurements"},
+		{ name: "National contracts", url: "./contracts"},
+		{ name: "Data sources and methods", url: "./methodology"}
 	];
 </script>
 
