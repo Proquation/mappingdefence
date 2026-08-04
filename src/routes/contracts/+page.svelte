@@ -404,7 +404,8 @@
 <Logo logoType="White" backgroundColor="var(--brandGray90)" />
 
 <main class="page">
-	<TitleStandard title="Where does the Department of National Defence spend its contract dollars?" />
+	<!-- ALTERNATIVE TITLE Contract based procurement efforts by the Department of National Defence -->
+	<TitleStandard title="Explore where Canadian defence firms are benefitting from national contracts and selling their products." /> 
 	<div class="text">
 		<AuthorDate
 			authors="<a href='https://schoolofcities.utoronto.ca/people/karen-chapple/' target='_blank'>Karen Chapple</a>, <a href='https://discover.research.utoronto.ca/8035-tara-vinodrai' target='_blank'>Tara Vinodrai</a>, <a href='https://www.linkedin.com/in/yihoi-jung-0b95351b5/' target='_blank'>Yihoi Jung</a>, <a href='https://www.linkedin.com/in/sarahbridgetgibbons/'>Sarah Gibbons</a>, Andrew Feng"
@@ -415,7 +416,6 @@
 			goods and services, and where those vendors are located. Contracts are classified into tiers based on whether they come from core defence sectors, 
 			provide general government support, or industrial and technical support. 
 			The map also displays the location of defense-related industrial sectors across the country, as well as Canadian Forces bases. 
-			Below the map, a table describes the destinations of goods and services sold by Canadian firms (from the CDACCMS dataset).
 
 		</p>
 	</div>
@@ -531,90 +531,6 @@
 		</section>
 
 
-		<div class="text">
-			<div class="filter-group inline-filters">
-				<span class="filter-label">Compare years</span>
-				<div class="year-pair">
-					<select class="year-select" bind:value={yearA}>
-						{#each years as y}<option value={y}>{y}</option>{/each}
-					</select>
-					<span class="year-vs">vs</span>
-					<select class="year-select" bind:value={yearB}>
-						{#each years.filter(y => y !== yearA) as y}<option value={y}>{y}</option>{/each}
-					</select>
-				</div>
-			</div>
-		</div>
-
-        <!-- TABULAR LIST: LOCATIONS -->
-        <div class="text">
-            <h3>Sales by location</h3>
-            <p>Sales breakdown across all survey years, ordered by most recent year value.</p>
-            <div class="filter-group inline-filters">
-                <span class="filter-label">Sales metric</span>
-                <div class="button-group">
-                    <button class="filter-toggle-button {locViewMode === 'raw' ? 'selected' : ''}" on:click={() => (locViewMode = 'raw')}>
-                        Show Raw
-                    </button>
-                    <button class="filter-toggle-button {locViewMode === 'percent' ? 'selected' : ''}" on:click={() => (locViewMode = 'percent')}>
-                        Show Percent
-                    </button>
-                </div>
-            </div>
-            <div class="filter-group inline-filters">
-                <span class="filter-label">Region</span>
-                <div class="button-group">
-                    {#each regionGroups as r}
-                        <button
-                            class="filter-toggle-button {selectedRegions.has(r.id) ? 'selected' : ''}"
-                            on:click={() => toggleRegion(r.id)}>
-                            {r.label}
-                        </button>
-                    {/each}
-                </div>
-            </div>
-            <div class="table-wrap">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th class="align-left">Location Breakdown</th>
-                            {#each selectedYears as y}
-                                <th>{y}</th>
-                            {/each}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {#each allCategories.filter(cat => {
-                            const r = resolveRegion(cat);
-                            return selectedRegions.has(r) || (selectedRegions.has('world') && r === 'unknown');
-                        }) as cat}
-                            {@const region = resolveRegion(cat)}
-                            <tr>
-                                <td class="align-left cell-category">
-                                    <span class="region-bar" style="background:{regionColors[region]}"></span>{cat}
-                                </td>
-                                {#each locAllYears as { items, total }}
-                                    {@const val = items.find(d => d.category === cat)?.amount ?? 0}
-                                    <td>{val > 0 ? formatSalesValue(val, total, locViewMode) : '—'}</td>
-                                {/each}
-                            </tr>
-                        {/each}
-                        <tr class="total-row">
-                            <td class="align-left cell-category">Total</td>
-                            {#each locAllYears as { total, items }}
-                                {@const filteredTotal = items
-                                    .filter(d => {
-                                        const r = resolveRegion(d.category);
-                                        return selectedRegions.has(r) || (selectedRegions.has('world') && r === 'unknown');
-                                    })
-                                    .reduce((sum, d) => sum + d.amount, 0)}
-                                <td>{formatSalesValue(filteredTotal, filteredTotal, locViewMode)}</td>
-                            {/each}
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
 	{/if}
 
 	

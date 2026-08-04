@@ -99,7 +99,7 @@
 
 	<ImageSingle
 		imageURL="./img/mappingdefence.png"
-		pageURL="./company-insights"
+		pageURL="./firms"
 		caption=''
 		source=''
 		maxWidth='680px'
@@ -163,11 +163,11 @@
 		</li>
 
 		<li>
-			See <a href="./company-insights">a map of defence firms in Canada</a>.
+			See <a href="./firms">a map of defence firms in Canada</a>.
 		</li>
 
 		<li>
-			<a href="./dnd-procurements">Read about the nature and geography of defence procurement</a>.	
+			<a href="./exports">Read about the export of defence products and services</a> from the Department of National Defence.	
 		</li>
 		
 		<li> 
@@ -186,11 +186,11 @@
 		</h2>
 
 		<p>
-			<a href="https://discover.research.utoronto.ca/8035-tara-vinodrai">Tara Vinodrai, PhD</a> is Professor in the Institute for Management and Innovation at the University of Toronto, where she directs the Master of Urban Innovation program.
+			<a href="https://schoolofcities.utoronto.ca/people/karen-chapple/" target="_blank">Karen Chapple, PhD</a> is the Director of the School of Cities and Professor in the Department of Geography & Planning at the University of Toronto.
 		</p>
 
 		<p>
-			<a href="https://schoolofcities.utoronto.ca/people/karen-chapple/" target="_blank">Karen Chapple, PhD</a> is the Director of the School of Cities and Professor in the Department of Geography & Planning at the University of Toronto.
+			<a href="https://discover.research.utoronto.ca/8035-tara-vinodrai">Tara Vinodrai, PhD</a> is Professor in the Institute for Management and Innovation at the University of Toronto, where she directs the Master of Urban Innovation program.
 		</p>
 
 		<p>
@@ -206,10 +206,8 @@
 		</p>
 
 		<p>
-			<a href="https://www.linkedin.com/in/eli-easton-77bb60273/" target="_blank">Andrew Feng</a> is lorem ipsum.
+			<a href="https://www.linkedin.com/in/andrewwfeng/" target="_blank">Andrew Feng</a> is lorem ipsum.
 		</p>
-
-		<!-- https://armstransfers.sipri.org/ArmsTransfer/ -->
 
 	</div>
 

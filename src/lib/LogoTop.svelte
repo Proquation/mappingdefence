@@ -15,8 +15,8 @@
 		{ name: "Homepage", url: "./" },
 		{ name: "Defence definition", url: "./definition"},
 		{ name: "Defence production", url: "./production"},
-		{ name: "Location of defence firms", url: "./company-insights"},
-		{ name: "Nature of procurements", url: "./dnd-procurements"},
+		{ name: "Location of defence firms", url: "./firms"},
+		{ name: "Defence exports", url: "./exports"},
 		{ name: "National contracts", url: "./contracts"},
 		{ name: "Data sources and methods", url: "./methodology"}
 	];
