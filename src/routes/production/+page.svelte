@@ -666,7 +666,7 @@
     <div class="text">
         <AuthorDate
 			authors="<a href='https://schoolofcities.utoronto.ca/people/karen-chapple/' target='_blank'>Karen Chapple</a>, <a href='https://discover.research.utoronto.ca/8035-tara-vinodrai' target='_blank'>Tara Vinodrai</a>, <a href='https://www.linkedin.com/in/yihoi-jung-0b95351b5/' target='_blank'>Yihoi Jung</a>, Sarah Gibbons, Andrew Feng"
-            date="Last updated July 23, 2026."
+            date="Last updated August 4th, 2026."
         />
         <p>
             Data comes from the Canadian Defence, Aerospace and Commercial and Civil Marine Sectors Survey (CDACCMS).
@@ -823,12 +823,7 @@
                 </div>
                 <div class="sankey-chart" bind:this={sankeyEl}></div>
 
-                <h3>Data methods and source</h3>
-                <p>
-                    Data comes from the <a href="https://www.statcan.gc.ca/en/survey/business/2933">Canadian Defence, Aerospace and Commercial and Civil Marine Sectors Survey</a> (CDACCMS). 
-                    The survey creates a general summary of the businesses engaged in the defence, aerospace, marine and cybersecurity sectors in Canada to match with the Statistics Canada Business Register.
-                    A more detailed finding of the most recent survey can be found here INSERT LINK, whereas this serves to compare across all years to see recent trends.
-                </p>
+                
         </div>
 
         

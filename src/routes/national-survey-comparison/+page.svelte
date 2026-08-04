@@ -666,11 +666,12 @@
     <div class="text">
         <AuthorDate
 			authors="<a href='https://schoolofcities.utoronto.ca/people/karen-chapple/' target='_blank'>Karen Chapple</a>, <a href='https://discover.research.utoronto.ca/8035-tara-vinodrai' target='_blank'>Tara Vinodrai</a>, <a href='https://www.linkedin.com/in/yihoi-jung-0b95351b5/' target='_blank'>Yihoi Jung</a>, Sarah Gibbons, Andrew Feng"
-            date="Last updated July 23, 2026."
+            date="Last updated August 4th, 2026."
         />
         <p>
-            Data comes from the Canadian Defence, Aerospace and Commercial and Civil Marine Sectors Survey (CDACCMS).
-            This page visualizes the composition of goods and services alongside the geographical breakdown of defence buyers over time.
+            The <a href="https://www23.statcan.gc.ca/imdb/p2SV.pl?Function=getSurvey&SDDS=2933">Canadian Defence, Aerospace and Commercial and Civil Marine Sectors Survey</a> (CDACCMS) provides the most reliable data available on Canada’s military-industrial complex. 
+            The survey creates a general summary of the businesses engaged in the defence, aerospace, marine and cybersecurity sectors in Canada to match with the Statistics Canada Business Register. 
+            This page uses this data to visualize the sectoral composition of goods and services as well as the change in firm size over time.
         </p>
     </div>
 

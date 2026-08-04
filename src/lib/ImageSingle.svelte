@@ -2,6 +2,7 @@
 	import "$lib/assets/global-styles.css"
 
 	export let imageURL = '';
+	export let pageURL = '';
 	export let caption = '';
 	export let source = '';
 	export let altText = '';
@@ -21,7 +22,7 @@
 	bind:offsetWidth={containerWidth}
 	>
 	{#if link === 'Yes'}
-		<a href={imageURL} target="_blank">
+		<a href={pageURL} target="_blank">
 			<img src={imageURL} alt={altText} loading="lazy" />
 		</a>
 	{:else}
@@ -46,6 +47,11 @@
 		margin-bottom: 30px;
 	}
 
+	.img-container a {
+		display: block;
+		width: 100%;
+	}
+
 	img {
 		width: 100%;
 		height: auto;
@@ -54,6 +60,8 @@
 		display: block;
 		object-fit: cover;
 		object-position: center;
+		border: 1px solid var(--brandGray70); /* or any color you like */
+		box-sizing: border-box; /* <-- add this */
 	}
 
 	a img {

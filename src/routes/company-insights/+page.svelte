@@ -226,7 +226,7 @@
 	<div class="text">
 		<AuthorDate
 			authors="<a href='https://schoolofcities.utoronto.ca/people/karen-chapple/' target='_blank'>Karen Chapple</a>, <a href='https://discover.research.utoronto.ca/8035-tara-vinodrai' target='_blank'>Tara Vinodrai</a>, <a href='https://www.linkedin.com/in/yihoi-jung-0b95351b5/' target='_blank'>Yihoi Jung</a>, <a href='https://www.linkedin.com/in/sarahbridgetgibbons/'>Sarah Gibbons</a>, Andrew Feng</AuthorDate>"
-			date="Last updated July 23, 2026."
+			date="Last updated August 4th, 2026."
 		/>
 		<p>
 			Defence spending in Canada has historically been difficult to gather. Canada has historically kept
@@ -237,11 +237,11 @@
 			Industry Classification System (NAICS).
 		</p>
 		<p>
-			This tool aggregates defence-related firms' sales and employees into different Canadian geographies.
+			Using proprietary data on Canadian firms from <a href="https://borealisdata.ca/dataset.xhtml?persistentId=doi:10.5683/SP3/IPKREG">Data Axle</a> (available via the <a href="https://mdl.library.utoronto.ca/technology/tutorials/working-data-axle-historical-business-location-data">University of Toronto Library</a>), this tool aggregates defence-related firms' sales and employees into different Canadian geographies.
 			Switch the geography to view provinces, census metropolitan areas and their rural counterparts as cartograms (size = sales, colour = location quotient), and census subdivisions as choropleths.
 		</p>
 		<p>
-			Note: Any geometry with only 1 firm has been excluded for privacy. The total values reflect those that have been included only.
+			Note: Confidentiality concerns require the exclusion of any geometry with only 1 firm (noted as "no data" on the map).
 		</p>
 	</div>
 
@@ -352,39 +352,6 @@
 		{lqBasis} {colourType} {selectedYear} {selectedMode} {selectedGeometry} {formatSales} />
 	{/if}
 
-
-	<div class="text" style="margin-bottom: 0px;">
-		<h3>Data sources and methods</h3>
-		<p>
-			The company sales volume data is from the <a
-				href="https://mdl.library.utoronto.ca/technology/tutorials/working-data-axle-historical-business-location-data"
-				>University of Toronto Library Data Axle</a
-			>. In order to identify the companies we wanted to observe from the historical business dataset, we
-			gathered a list of NAICS codes deemed to be at least partially defence related.
-		</p>
-		<p>
-			Jobs in this context refers to employees within headquarter firms, which is a metric given in the Data Axle.
-		</p>
-		<p>
-			"Primary defence" is deemed as NAICS codes where the companies' sales are their primarily
-			defence-related. "Secondary defence" is when defence is not the primary product that these companies
-			produce. For example, engineering services fall under many different sectors, but companies like <a
-				href="https://www.wsp.com/en-me/sectors/defense">Williams Sale Partnership (WSP)</a
-			> span dozens of different sectors, one of them being defence.
-		</p>
-		<p>
-			To protect firm-level confidentiality, regions with fewer than three firms in a given category and
-			year have their exact sales suppressed and appear as "no data" on the map.
-		</p>
-
-		<p>
-			Download data:
-			<a href="{base}/data/csd_agg.csv" download>Census Subdivisions</a> ·
-			<a href="{base}/data/cma_rural_agg.csv" download>Census Metropolitan Areas</a> ·
-			<a href="{base}/data/prov_agg.csv" download>Provinces</a> ·
-			<a href="{base}/data/Master NAICS Codes List - Full list.csv" download>NAICS codes used to filter the data axle</a>
-		</p>
-	</div>
 </main>
 
 <Footer />

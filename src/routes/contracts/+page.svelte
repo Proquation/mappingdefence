@@ -408,12 +408,15 @@
 	<div class="text">
 		<AuthorDate
 			authors="<a href='https://schoolofcities.utoronto.ca/people/karen-chapple/' target='_blank'>Karen Chapple</a>, <a href='https://discover.research.utoronto.ca/8035-tara-vinodrai' target='_blank'>Tara Vinodrai</a>, <a href='https://www.linkedin.com/in/yihoi-jung-0b95351b5/' target='_blank'>Yihoi Jung</a>, <a href='https://www.linkedin.com/in/sarahbridgetgibbons/'>Sarah Gibbons</a>, Andrew Feng"
-			date="Last updated July 28, 2026."
+			date="Last updated August 4th, 2026."
 		/>
 		<p>
 			Department of National Defence (DND) contract disclosures show who the federal government pays for
-			goods and services, and where those vendors are located. Contracts are classified into a defence-relevance
-			tier and an industry cluster to help identify where defence-adjacent economic activity concentrates.
+			goods and services, and where those vendors are located. Contracts are classified into tiers based on whether they come from core defence sectors, 
+			provide general government support, or industrial and technical support. 
+			The map also displays the location of defense-related industrial sectors across the country, as well as Canadian Forces bases. 
+			Below the map, a table describes the destinations of goods and services sold by Canadian firms (from the CDACCMS dataset).
+
 		</p>
 	</div>
 
@@ -447,9 +450,9 @@
 				</div>
 
 				<div class="filter-group">
-					<span class="filter-label">Industry cluster</span>
+					<span class="filter-label">Industry sector</span>
 					<select class="year-select" bind:value={selectedCluster}>
-						<option value={NO_FILTER}>All clusters</option>
+						<option value={NO_FILTER}>All sectors</option>
 						{#each clusterOptions as c}<option value={c}>{c}</option>{/each}
 					</select>
 				</div>
@@ -614,28 +617,7 @@
         </div>
 	{/if}
 
-	<div class="text" style="margin-bottom: 0px;">
-		<h3>Data sources and methods</h3>
-		<p>
-			Contract data comes from the <a href="https://search.open.canada.ca/contracts/?owner_org=dnd-mdn&page=1&sort=contract_date+desc">Government of Canada's disclosure of contracts over $10,000</a>,
-			filtered to contracts issued by National Defence.
-		</p>
-		<p>
-			Each contract is classified into a defence-relevance <b>tier</b> (Core Defence Industrial Complex,
-			Industrial and Technical Support, or General Government Support) and an industry <b>cluster</b> based
-			on its economic object code.
-		</p>
-		<p>
-			Vendor locations are geocoded from postal codes. Any rows with no Canadian province or CMA are
-			excluded from the map view.
-		</p>
-
-		<p>
-			Download data:
-			<a href="{base}/data/contracts_cma_agg.csv" download>Census Metropolitan Areas</a> ·
-			<a href="{base}/data/contracts_prov_agg.csv" download>Provinces</a>
-		</p>
-	</div>
+	
 </main>
 
 <Footer />

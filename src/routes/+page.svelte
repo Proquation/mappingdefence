@@ -99,10 +99,11 @@
 
 	<ImageSingle
 		imageURL="./img/mappingdefence.png"
+		pageURL="./company-insights"
 		caption=''
 		source=''
 		maxWidth='680px'
-		link='No'
+		link='Yes'
 	/>
 
 	<TitleStandard
@@ -158,7 +159,7 @@
 		</li>
 
 		<li>
-			<a href="./production">Examine graphs from a national survey</a> on defence goods production across Canada.
+			<a href="./production">Examine visualizations from a national survey</a> on defence goods production across Canada.
 		</li>
 
 		<li>
@@ -170,11 +171,11 @@
 		</li>
 		
 		<li> 
-			<a href="./contracts">Explore where national and international defence spending happens</a> with contract data.
+			<a href="./contracts">Explore where Canadian defence firms are benefitting from national contracts</a> and selling their products.
 		</li>
 
 		<li> 
-			Read our <a href="./methodology">data methodology</a> for our findings.
+			Read about <a href="./methodology">our data sources and methods</a>.
 		</li>
 		
 
