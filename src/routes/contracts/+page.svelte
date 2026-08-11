@@ -29,55 +29,87 @@
 	// // object_cluster: "ALL" | one of the 14 clusters
 	// let selectedCluster = 'ALL';
 
-	let yearOptions = [];
-	let clusterOptions = [];
-	let tierOptions = [];
+	// let yearOptions = [];
+	// let clusterOptions = [];
+	// let tierOptions = [];
 
 	let metric = 'value'; // 'value' | 'count' | 'vendors'
 
 	// Per-geometry data + geojson caches
-	const aggData = {}; // { cma: [...rows], prov: [...] }
+	
 	const geojsonCache = {};
 
+	let aggDataCma = [];
+	let aggDataProv = [];
+	let aggDataWorld = [];
+
+
 	let yearIndex = 0;
-	let selectedYear = null; 
+	let selectedYear = 'ALL'; 
 
 	const NO_FILTER = '__ANY__';
 
 	let selectedTier = NO_FILTER;
 	let selectedCluster = NO_FILTER;
 
-	$: {
-		if (aggData[selectedGeometry] && aggData[selectedGeometry].length > 0) {
-			const data = aggData[selectedGeometry];
-			const years = [...new Set(data.map(r => r.year))].sort();
-			const tiers = [...new Set(data.map(r => r.tier))]
-				.filter(t => Boolean(t) && t !== 'ALL')  // exclude the rollup pseudo-tier
-				.sort();
+	// $: {
+	// 	if (aggData[selectedGeometry] && aggData[selectedGeometry].length > 0) {
+	// 		const data = aggData[selectedGeometry];
+	// 		const years = [...new Set(data.map(r => r.year))].sort();
+	// 		const tiers = [...new Set(data.map(r => r.tier))]
+	// 			.filter(t => Boolean(t) && t !== 'ALL')  // exclude the rollup pseudo-tier
+	// 			.sort();
 
-			const clusters = [...new Set(data.map(r => r.object_cluster))]
-				.filter(c => Boolean(c) && c !== 'ALL')
-				.sort();
+	// 		const clusters = [...new Set(data.map(r => r.object_cluster))]
+	// 			.filter(c => Boolean(c) && c !== 'ALL')
+	// 			.sort();
 
-			yearOptions = years;
-			tierOptions = tiers;
-			clusterOptions = clusters;
+	// 		yearOptions = years;
+	// 		tierOptions = tiers;
+	// 		clusterOptions = clusters;
 			
-			// Reset year if needed
-			if (yearIndex >= years.length) {
-				yearIndex = 0;
-			}
-			if (years.length > 0) {
-				selectedYear = years[yearIndex];
-			}
-		}
-	}
+	// 		// Reset year if needed
+	// 		if (yearIndex >= years.length) {
+	// 			yearIndex = 0;
+	// 		}
+	// 		if (years.length > 0) {
+	// 			selectedYear = years[yearIndex];
+	// 		}
+	// 	}
+	// }
+	$: currentAggData = selectedGeometry === 'cma' ? aggDataCma
+		: selectedGeometry === 'prov' ? aggDataProv
+		: aggDataWorld;
+
+	$: yearOptions = currentAggData?.length
+		? ['ALL', ...[...new Set(currentAggData.map(r => r.year))].sort()]
+		: ['ALL'];
+
+	$: tierOptions = currentAggData?.length
+		? [...new Set(currentAggData.map(r => r.tier))].filter(t => t && t !== 'ALL').sort()
+		: [];
+
+	$: clusterOptions = currentAggData?.length
+		? [...new Set(currentAggData.map(r => r.object_cluster))].filter(c => c && c !== 'ALL').sort()
+		: [];
+
 
 	$: if (selectedGeometry === 'world' && selectedYear === 2021) {
-		const rawRows = (aggData.world || []).filter(r => r.region_name === 'Sri Lanka' && r.year === 2021);
+		const rawRows = aggDataWorld.filter(r => r.region_name === 'Sri Lanka' && r.year === 2021);
 		console.log('SRI LANKA 2021 RAW ROWS:', rawRows);
 	}
 
+	$: sizeBins =
+		metric === 'count' ? computeSizeBins(filteredAllYears, 'n_contracts')
+		: metric === 'vendors' ? computeSizeBins(filteredAllYears, 'n_vendors')
+		: computeSizeBins(filteredAllYears, 'total_value');
+
+	$: sizeBinsAllYearsView =
+		metric === 'count' ? computeSizeBins(activeRows, 'n_contracts')
+		: metric === 'vendors' ? computeSizeBins(activeRows, 'n_vendors')
+		: computeSizeBins(activeRows, 'total_value');
+
+	$: effectiveSizeBins = selectedYear === 'ALL' ? sizeBinsAllYearsView : sizeBins;
 
 
 	let usGeojson = null;
@@ -113,7 +145,7 @@
 		return csvParse(csvText).map((r) => ({
 			region_uid: normalizeRegionUid(r.region_uid),
 			region_name: r.region_name,
-			year: Number(r.year),
+			year: r.year === 'ALL' ? 'ALL' : Number(r.year),  // ← preserve ALL
 			tier: r.tier,
 			object_cluster: r.object_cluster,
 			total_value: r.total_value === '' ? null : Number(r.total_value),
@@ -129,7 +161,7 @@
 	}
 
 	
-	$: filteredAllYears = (aggData[selectedGeometry] || []).filter((r) => {
+	$: filteredAllYears = (currentAggData || []).filter((r) => {
 		const tierMatch = selectedTier === NO_FILTER ? r.tier === 'ALL' : r.tier === selectedTier;
 		const clusterMatch = selectedCluster === NO_FILTER ? r.object_cluster === 'ALL' : r.object_cluster === selectedCluster;
 		return tierMatch && clusterMatch;
@@ -137,8 +169,8 @@
 
 
 	$: {
-		if (aggData.cma && aggData.cma.length > 0 && cmaGeojson) {
-			const dataIds = new Set(aggData.cma.map(r => r.region_uid));
+		if (aggDataCma.length > 0 && cmaGeojson) {
+			const dataIds = new Set(aggDataCma.map(r => r.region_uid));
 			const geoIds = new Set(cmaGeojson.features.map(f => normalizeRegionUid(f.properties.region_uid)));
 			console.log('DATA region_uid sample:', Array.from(dataIds).slice(0, 10));
 			console.log('GEO region_uid sample:', Array.from(geoIds).slice(0, 10));
@@ -180,10 +212,10 @@
 	}
 
 	// direct reference to filteredAllYears so Svelte tracks the dependency correctly
-	$: sizeBins =
-		metric === 'count' ? computeSizeBins(filteredAllYears, 'n_contracts')
-		: metric === 'vendors' ? computeSizeBins(filteredAllYears, 'n_vendors')
-		: computeSizeBins(filteredAllYears, 'total_value');
+	// $: sizeBins =
+	// 	metric === 'count' ? computeSizeBins(filteredAllYears, 'n_contracts')
+	// 	: metric === 'vendors' ? computeSizeBins(filteredAllYears, 'n_vendors')
+	// 	: computeSizeBins(filteredAllYears, 'total_value');
 
 	async function ensureGeojson(file) {
 		if (geojsonCache[file]) return geojsonCache[file];
@@ -208,7 +240,7 @@
 			ensureGeojson('us_nation').then((g) => (usGeojson = g));
 		}
 		if (selectedGeometry === 'world') {
-			ensureGeojson('world_countries').then((g) => (worldGeojson = g));   // new
+			ensureGeojson('world_countries').then((g) => (worldGeojson = g));
 		}
 	}
 
@@ -235,20 +267,29 @@
 	}
 
 	$: activeRows = aggregateByRegion(
-		(aggData[selectedGeometry] || []).filter((r) => {
+		(currentAggData || []).filter((r) => {
 			const tierMatch = selectedTier === NO_FILTER ? r.tier === 'ALL' : r.tier === selectedTier;
 			const clusterMatch = selectedCluster === NO_FILTER ? r.object_cluster === 'ALL' : r.object_cluster === selectedCluster;
-			return r.year === selectedYear && tierMatch && clusterMatch;
+			const yearMatch = selectedYear === 'ALL' ? r.year === 'ALL' : r.year === selectedYear;
+			return yearMatch && tierMatch && clusterMatch;
 		})
 	);
 
 	$: console.log('FILTER DEBUG:', {
 		geometry: selectedGeometry,
 		selectedYear, selectedTier, selectedCluster,
-		totalRowsForGeometry: (aggData[selectedGeometry] || []).length,
+		totalRowsForGeometry: (currentAggData || []).length,
 		activeRowsCount: activeRows.length,
-		sampleRow: (aggData[selectedGeometry] || [])[0]
+		sampleRow: (currentAggData || [])[0]
 	});
+
+	$: {
+		const numericYears = yearOptions.filter(y => y !== 'ALL');
+		yearIndex; // reference to establish dependency
+		if (selectedYear !== 'ALL') {
+			selectedYear = numericYears[yearIndex] ?? 'ALL';
+		}
+	}	
 
 	$: console.log('YEAR DEBUG:', { yearIndex, yearOptionsLength: yearOptions.length, yearOptions, selectedYear });
 
@@ -377,9 +418,9 @@
 				fetch(`${base}/data/B1B2B3.csv`).then((r) => r.text())
 			]);
 
-			aggData.cma = parseAgg(cma);
-			aggData.prov = parseAgg(prov);
-			aggData.world = parseAgg(world);
+			aggDataCma = parseAgg(cma);
+			aggDataProv = parseAgg(prov);
+			aggDataWorld = parseAgg(world);
 
 			b1Data = csvParse(locRes).map((row) => ({
 				category: normalizeCategory(row['Type of Sale'].trim()),
@@ -436,7 +477,7 @@
 
 				<div class="filter-group">
 					<span class="filter-label">Map style</span>
-					<button class="toggle-btn" on:click={() => (darkMode = !darkMode)}>
+					<button class="toggle-btn" class:selected={!darkMode} on:click={() => (darkMode = !darkMode)}>
 						{darkMode ? 'Light' : 'Dark'}
 					</button>
 				</div>
@@ -460,6 +501,30 @@
 				<div class="filter-group">
 					<span class="filter-label">Year</span>
 					<div class="slider-row">
+						<button class="toggle-btn" class:selected={selectedYear === 'ALL'}
+							on:click={() => selectedYear = 'ALL'}>
+							All years
+						</button>
+						<input
+							type="range"
+							min="0"
+							max={yearOptions.filter(y => y !== 'ALL').length - 1}
+							step="1"
+							bind:value={yearIndex}
+							class="year-slider"
+							on:input={() => selectedYear = yearOptions.filter(y => y !== 'ALL')[yearIndex]}
+						/>
+						<span class="year-slider-value"
+							on:click={() => selectedYear = yearOptions.filter(y => y !== 'ALL')[yearIndex]}
+							style="cursor:pointer; opacity:{selectedYear === 'ALL' ? 0.4 : 1}">
+							{yearOptions.filter(y => y !== 'ALL')[yearIndex] ?? ''}
+						</span>
+					</div>
+				</div>
+
+				<!-- <div class="filter-group">
+					<span class="filter-label">Year</span>
+					<div class="slider-row">
 						<input
 							type="range"
 							min="0"
@@ -470,7 +535,7 @@
 						/>
 						<span class="year-slider-value">{selectedYear ?? ''}</span>
 					</div>
-				</div>
+				</div> -->
 
 				<div class="filter-group">
 					<span class="filter-label">Metric</span>
@@ -483,7 +548,7 @@
 
 				<div class="filter-group">
 					<span class="filter-label">Military bases</span>
-					<button class="toggle-btn" on:click={toggleMilitaryBases}>
+					<button class="toggle-btn" class:selected={showMilitaryBases} on:click={toggleMilitaryBases}>
 						{showMilitaryBases ? 'Hide' : 'Show'}
 					</button>
 				</div>
@@ -502,7 +567,7 @@
 					{darkMode}
 					{militaryGeojson}
 					{showMilitaryBases}
-					{sizeBins}
+					sizeBins = {effectiveSizeBins}
 				/>
 			{:else if selectedGeometry === 'prov'}
 				<ContractsProvinceCartogram
@@ -514,7 +579,7 @@
 					{darkMode}
 					{militaryGeojson}
 					{showMilitaryBases}
-					{sizeBins}
+					sizeBins = {effectiveSizeBins}
 				/>
 			{:else if selectedGeometry === 'world'}
 				<ContractsWorldCartogram
@@ -525,7 +590,7 @@
 					{darkMode}
 					{militaryGeojson}
 					{showMilitaryBases}
-					{sizeBins}
+					sizeBins = {effectiveSizeBins}
 				/>
 			{/if}
 		</section>
@@ -620,6 +685,11 @@
 		font-family: OpenSans;
 		font-size: 13px;
 		cursor: pointer;
+	}
+	.toggle-btn.selected {
+		background: #ffffff;
+		color: #000000;
+		border-color: #ffffff;
 	}
 	.toggle-btn:hover { background: rgba(255,255,255,0.1); }
 	.year-select {

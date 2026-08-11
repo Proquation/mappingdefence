@@ -4390,3 +4390,525 @@ region_uid,region_name,year,tier,object_cluster,total_value,n_contracts,n_vendor
 62,Nunavut,2026,General Government Support,Professional Services,190337.7,4,4
 62,Nunavut,2026,General Government Support,Utilities & Environmental,589099.9,2,2
 62,Nunavut,2026,Industrial and Technical Support,Civil Engineering & Infrastructure,112439.25,1,1
+10,Newfoundland and Labrador,ALL,ALL,ALL,385425009.55,2374,461
+11,Prince Edward Island,ALL,ALL,ALL,21045287.22,180,75
+12,Nova Scotia,ALL,ALL,ALL,19266817065.92,12462,1403
+13,New Brunswick,ALL,ALL,ALL,1095128004.03,6789,772
+24,Quebec,ALL,ALL,ALL,20717788166.24,23130,4160
+35,Ontario,ALL,ALL,ALL,32789131490.04,52239,7756
+46,Manitoba,ALL,ALL,ALL,617141239.21,4421,724
+47,Saskatchewan,ALL,ALL,ALL,4680570795.08,1629,374
+48,Alberta,ALL,ALL,ALL,3106085055.74,17906,2465
+59,British Columbia,ALL,ALL,ALL,9278291453.31,13993,2238
+60,Yukon,ALL,ALL,ALL,12415469.62,163,46
+61,Northwest Territories,ALL,ALL,ALL,55522434.44,363,125
+62,Nunavut,ALL,ALL,ALL,633817688.14,488,70
+10,Newfoundland and Labrador,ALL,Core Defence Industrial Complex,ALL,187173700.03,499,127
+10,Newfoundland and Labrador,ALL,General Government Support,ALL,100281852.92,871,278
+10,Newfoundland and Labrador,ALL,Industrial and Technical Support,ALL,97969456.6,1004,149
+11,Prince Edward Island,ALL,Core Defence Industrial Complex,ALL,1746392.48,8,3
+11,Prince Edward Island,ALL,General Government Support,ALL,15023129.24,133,56
+11,Prince Edward Island,ALL,Industrial and Technical Support,ALL,4275765.5,39,26
+12,Nova Scotia,ALL,Core Defence Industrial Complex,ALL,15965056438.88,1035,220
+12,Nova Scotia,ALL,General Government Support,ALL,847881939.16,8261,1050
+12,Nova Scotia,ALL,Industrial and Technical Support,ALL,2453878687.88,3166,543
+13,New Brunswick,ALL,Core Defence Industrial Complex,ALL,6657616.75,94,51
+13,New Brunswick,ALL,General Government Support,ALL,551935230.96,4518,580
+13,New Brunswick,ALL,Industrial and Technical Support,ALL,536535156.32,2177,335
+24,Quebec,ALL,Core Defence Industrial Complex,ALL,9622081364.31,2055,385
+24,Quebec,ALL,General Government Support,ALL,2925267923.65,11291,2830
+24,Quebec,ALL,Industrial and Technical Support,ALL,8170438878.28,9784,1726
+35,Ontario,ALL,Core Defence Industrial Complex,ALL,2603217092.33,1512,539
+35,Ontario,ALL,General Government Support,ALL,19215537216.670002,27615,5352
+35,Ontario,ALL,Industrial and Technical Support,ALL,10970377181.04,23112,3506
+46,Manitoba,ALL,Core Defence Industrial Complex,ALL,125000326.68,145,37
+46,Manitoba,ALL,General Government Support,ALL,294463797.87,2773,534
+46,Manitoba,ALL,Industrial and Technical Support,ALL,197677114.66,1503,288
+47,Saskatchewan,ALL,Core Defence Industrial Complex,ALL,1582418.23,23,18
+47,Saskatchewan,ALL,General Government Support,ALL,78634872.64,874,228
+47,Saskatchewan,ALL,Industrial and Technical Support,ALL,4600353504.21,732,186
+48,Alberta,ALL,Core Defence Industrial Complex,ALL,120731223.42,350,151
+48,Alberta,ALL,General Government Support,ALL,1725977479.02,9276,1688
+48,Alberta,ALL,Industrial and Technical Support,ALL,1259376353.3,8280,1102
+59,British Columbia,ALL,Core Defence Industrial Complex,ALL,7077384617.77,586,189
+59,British Columbia,ALL,General Government Support,ALL,1051826298.64,7829,1537
+59,British Columbia,ALL,Industrial and Technical Support,ALL,1149080536.9,5578,957
+60,Yukon,ALL,Core Defence Industrial Complex,ALL,21357,1,1
+60,Yukon,ALL,General Government Support,ALL,1234281.26,44,27
+60,Yukon,ALL,Industrial and Technical Support,ALL,11159831.36,118,24
+61,Northwest Territories,ALL,Core Defence Industrial Complex,ALL,3638471.16,8,3
+61,Northwest Territories,ALL,General Government Support,ALL,29247566.68,179,84
+61,Northwest Territories,ALL,Industrial and Technical Support,ALL,22636396.6,176,49
+62,Nunavut,ALL,Core Defence Industrial Complex,ALL,13934.2,1,1
+62,Nunavut,ALL,General Government Support,ALL,599064277.8,93,46
+62,Nunavut,ALL,Industrial and Technical Support,ALL,34739476.14,394,29
+10,Newfoundland and Labrador,ALL,ALL,Aerospace & Space,6888236.41,53,12
+10,Newfoundland and Labrador,ALL,ALL,Automotive & Heavy Vehicles,950900.09,19,16
+10,Newfoundland and Labrador,ALL,ALL,Civil Engineering & Infrastructure,98077891.68,304,86
+10,Newfoundland and Labrador,ALL,ALL,Heavy Industry & Machinery,16065357.35,92,62
+10,Newfoundland and Labrador,ALL,ALL,High-Tech Hardware & Telecom,938025.27,14,12
+10,Newfoundland and Labrador,ALL,ALL,Life Sciences & Medical,289993.48,5,5
+10,Newfoundland and Labrador,ALL,ALL,"Logistics, Training & Workforce",18370774.25,230,109
+10,Newfoundland and Labrador,ALL,ALL,Marine & Shipbuilding,181406996.06,490,119
+10,Newfoundland and Labrador,ALL,ALL,Other,3353295.71,97,28
+10,Newfoundland and Labrador,ALL,ALL,Professional Services,6351633.88,66,43
+10,Newfoundland and Labrador,ALL,ALL,"Resources, Fuels & Materials",34177870.24,827,55
+10,Newfoundland and Labrador,ALL,ALL,Software & IT Services,3894737.0100000002,52,34
+10,Newfoundland and Labrador,ALL,ALL,Utilities & Environmental,11170521.13,108,22
+10,Newfoundland and Labrador,ALL,ALL,Weapons & Tactical Security,3488776.9899999998,17,8
+11,Prince Edward Island,ALL,ALL,Aerospace & Space,1220671.52,3,2
+11,Prince Edward Island,ALL,ALL,Automotive & Heavy Vehicles,1002635.71,3,3
+11,Prince Edward Island,ALL,ALL,Civil Engineering & Infrastructure,12633611.83,63,18
+11,Prince Edward Island,ALL,ALL,Heavy Industry & Machinery,160695.58,7,6
+11,Prince Edward Island,ALL,ALL,Life Sciences & Medical,191379.53,5,1
+11,Prince Edward Island,ALL,ALL,"Logistics, Training & Workforce",347307.07,14,11
+11,Prince Edward Island,ALL,ALL,Marine & Shipbuilding,538804.73,6,2
+11,Prince Edward Island,ALL,ALL,Other,670084.34,23,5
+11,Prince Edward Island,ALL,ALL,Professional Services,1444809.51,24,17
+11,Prince Edward Island,ALL,ALL,"Resources, Fuels & Materials",53247.04,4,4
+11,Prince Edward Island,ALL,ALL,Software & IT Services,1316702.32,14,11
+11,Prince Edward Island,ALL,ALL,Utilities & Environmental,1217769.83,9,7
+11,Prince Edward Island,ALL,ALL,Weapons & Tactical Security,247568.21,5,2
+12,Nova Scotia,ALL,ALL,Aerospace & Space,3516663224.52,18,10
+12,Nova Scotia,ALL,ALL,Automotive & Heavy Vehicles,33446452.19,180,74
+12,Nova Scotia,ALL,ALL,Civil Engineering & Infrastructure,1698797855.57,3980,357
+12,Nova Scotia,ALL,ALL,Heavy Industry & Machinery,123005925.4,1239,319
+12,Nova Scotia,ALL,ALL,High-Tech Hardware & Telecom,153338197.58,134,62
+12,Nova Scotia,ALL,ALL,Life Sciences & Medical,19595158.29,50,33
+12,Nova Scotia,ALL,ALL,"Logistics, Training & Workforce",131215800.89,2039,396
+12,Nova Scotia,ALL,ALL,Marine & Shipbuilding,12308711608.88,929,175
+12,Nova Scotia,ALL,ALL,Other,14348683.8,475,105
+12,Nova Scotia,ALL,ALL,Professional Services,105375351.14,329,126
+12,Nova Scotia,ALL,ALL,"Resources, Fuels & Materials",48846224.49,1418,188
+12,Nova Scotia,ALL,ALL,Software & IT Services,762085437.38,504,181
+12,Nova Scotia,ALL,ALL,Utilities & Environmental,114505216.02,695,89
+12,Nova Scotia,ALL,ALL,Weapons & Tactical Security,236881929.77,472,50
+13,New Brunswick,ALL,ALL,Automotive & Heavy Vehicles,10166856.57,139,57
+13,New Brunswick,ALL,ALL,Civil Engineering & Infrastructure,394808137.22,1684,215
+13,New Brunswick,ALL,ALL,Heavy Industry & Machinery,15254052.12,409,147
+13,New Brunswick,ALL,ALL,High-Tech Hardware & Telecom,10878957.49,142,28
+13,New Brunswick,ALL,ALL,Life Sciences & Medical,6897604.16,470,19
+13,New Brunswick,ALL,ALL,"Logistics, Training & Workforce",137656697.92,989,176
+13,New Brunswick,ALL,ALL,Marine & Shipbuilding,113532014.45,53,30
+13,New Brunswick,ALL,ALL,Other,12894350.47,245,81
+13,New Brunswick,ALL,ALL,Professional Services,29545620.06,141,89
+13,New Brunswick,ALL,ALL,"Resources, Fuels & Materials",323070696.68,2204,153
+13,New Brunswick,ALL,ALL,Software & IT Services,19996242.87,167,91
+13,New Brunswick,ALL,ALL,Utilities & Environmental,18787437.89,133,40
+13,New Brunswick,ALL,ALL,Weapons & Tactical Security,1639336.1300000001,13,9
+24,Quebec,ALL,ALL,Aerospace & Space,4643620338.17,1064,108
+24,Quebec,ALL,ALL,Automotive & Heavy Vehicles,2616480344.72,1262,350
+24,Quebec,ALL,ALL,Civil Engineering & Infrastructure,4211341721.71,2106,736
+24,Quebec,ALL,ALL,Heavy Industry & Machinery,491772165.53,3301,936
+24,Quebec,ALL,ALL,High-Tech Hardware & Telecom,313195870.14,1325,254
+24,Quebec,ALL,ALL,Life Sciences & Medical,127018517.2,479,207
+24,Quebec,ALL,ALL,"Logistics, Training & Workforce",1434464319.25,5238,1143
+24,Quebec,ALL,ALL,Marine & Shipbuilding,3614228015.47,826,149
+24,Quebec,ALL,ALL,Other,34404662.58,585,250
+24,Quebec,ALL,ALL,Professional Services,414772191.67,742,418
+24,Quebec,ALL,ALL,"Resources, Fuels & Materials",329054885.54,4485,526
+24,Quebec,ALL,ALL,Software & IT Services,159428211.73,1017,392
+24,Quebec,ALL,ALL,Utilities & Environmental,90010056.43,215,104
+24,Quebec,ALL,ALL,Weapons & Tactical Security,2237996866.1,485,88
+35,Ontario,ALL,ALL,Aerospace & Space,293320037.59,1034,145
+35,Ontario,ALL,ALL,Automotive & Heavy Vehicles,576827935.33,2825,487
+35,Ontario,ALL,ALL,Civil Engineering & Infrastructure,6676630453.08,5030,1402
+35,Ontario,ALL,ALL,Heavy Industry & Machinery,603723820.01,5865,1472
+35,Ontario,ALL,ALL,High-Tech Hardware & Telecom,2201520513.12,7403,876
+35,Ontario,ALL,ALL,Life Sciences & Medical,2000460235.09,977,431
+35,Ontario,ALL,ALL,"Logistics, Training & Workforce",709315334.05,9817,2143
+35,Ontario,ALL,ALL,Marine & Shipbuilding,1372529503.77,663,249
+35,Ontario,ALL,ALL,Other,149660305.56,2122,543
+35,Ontario,ALL,ALL,Professional Services,13644489820.8,4872,1214
+35,Ontario,ALL,ALL,"Resources, Fuels & Materials",336824590.9,5261,864
+35,Ontario,ALL,ALL,Software & IT Services,2758118463.3,4337,1025
+35,Ontario,ALL,ALL,Utilities & Environmental,344892053.48,1174,215
+35,Ontario,ALL,ALL,Weapons & Tactical Security,1120818423.96,859,168
+46,Manitoba,ALL,ALL,Aerospace & Space,1211756.11,34,21
+46,Manitoba,ALL,ALL,Automotive & Heavy Vehicles,27161210.91,230,61
+46,Manitoba,ALL,ALL,Civil Engineering & Infrastructure,190723690.53,1530,248
+46,Manitoba,ALL,ALL,Heavy Industry & Machinery,19714742.44,632,138
+46,Manitoba,ALL,ALL,High-Tech Hardware & Telecom,7419787.64,122,27
+46,Manitoba,ALL,ALL,Life Sciences & Medical,104754850.06,45,19
+46,Manitoba,ALL,ALL,"Logistics, Training & Workforce",78432193.22,703,146
+46,Manitoba,ALL,ALL,Marine & Shipbuilding,3208216.2399999998,73,16
+46,Manitoba,ALL,ALL,Other,6146365.43,112,50
+46,Manitoba,ALL,ALL,Professional Services,8623228.38,126,44
+46,Manitoba,ALL,ALL,"Resources, Fuels & Materials",12405370.17,457,82
+46,Manitoba,ALL,ALL,Software & IT Services,12783658.34,143,60
+46,Manitoba,ALL,ALL,Utilities & Environmental,12082451.03,117,32
+46,Manitoba,ALL,ALL,Weapons & Tactical Security,132473718.71,97,14
+47,Saskatchewan,ALL,ALL,Aerospace & Space,47796.36,2,2
+47,Saskatchewan,ALL,ALL,Automotive & Heavy Vehicles,12143784.17,37,27
+47,Saskatchewan,ALL,ALL,Civil Engineering & Infrastructure,4573485766.44,593,109
+47,Saskatchewan,ALL,ALL,Heavy Industry & Machinery,2226378.85,48,37
+47,Saskatchewan,ALL,ALL,High-Tech Hardware & Telecom,2651857.06,17,14
+47,Saskatchewan,ALL,ALL,Life Sciences & Medical,446098.57,10,9
+47,Saskatchewan,ALL,ALL,"Logistics, Training & Workforce",23314586.58,324,70
+47,Saskatchewan,ALL,ALL,Marine & Shipbuilding,182633.3,3,3
+47,Saskatchewan,ALL,ALL,Other,2709794.28,96,31
+47,Saskatchewan,ALL,ALL,Professional Services,9765836.21,56,32
+47,Saskatchewan,ALL,ALL,"Resources, Fuels & Materials",11404245.76,204,31
+47,Saskatchewan,ALL,ALL,Software & IT Services,26580799.77,198,64
+47,Saskatchewan,ALL,ALL,Utilities & Environmental,2395425.63,14,10
+47,Saskatchewan,ALL,ALL,Weapons & Tactical Security,13215792.1,27,20
+48,Alberta,ALL,ALL,Aerospace & Space,88604410.61,67,26
+48,Alberta,ALL,ALL,Automotive & Heavy Vehicles,39799639.59,377,184
+48,Alberta,ALL,ALL,Civil Engineering & Infrastructure,644724738.49,5564,610
+48,Alberta,ALL,ALL,Heavy Industry & Machinery,835319986.61,1125,471
+48,Alberta,ALL,ALL,High-Tech Hardware & Telecom,48961351.57,225,123
+48,Alberta,ALL,ALL,Life Sciences & Medical,21036881.25,132,72
+48,Alberta,ALL,ALL,"Logistics, Training & Workforce",143787914.96,1511,476
+48,Alberta,ALL,ALL,Marine & Shipbuilding,11975501.81,117,45
+48,Alberta,ALL,ALL,Other,29860366.58,937,232
+48,Alberta,ALL,ALL,Professional Services,115534288.74,642,239
+48,Alberta,ALL,ALL,"Resources, Fuels & Materials",458769411.62,5209,359
+48,Alberta,ALL,ALL,Software & IT Services,379092802.61,1158,304
+48,Alberta,ALL,ALL,Utilities & Environmental,211135891.17,562,121
+48,Alberta,ALL,ALL,Weapons & Tactical Security,77481870.13,280,50
+59,British Columbia,ALL,ALL,Aerospace & Space,76619196.87,99,33
+59,British Columbia,ALL,ALL,Automotive & Heavy Vehicles,92904975.63,240,106
+59,British Columbia,ALL,ALL,Civil Engineering & Infrastructure,976476829.37,3960,580
+59,British Columbia,ALL,ALL,Heavy Industry & Machinery,121192850.65,1463,440
+59,British Columbia,ALL,ALL,High-Tech Hardware & Telecom,38006832.35,166,77
+59,British Columbia,ALL,ALL,Life Sciences & Medical,51792534.9,162,64
+59,British Columbia,ALL,ALL,"Logistics, Training & Workforce",285379590.83,1902,534
+59,British Columbia,ALL,ALL,Marine & Shipbuilding,6919046161.25,392,128
+59,British Columbia,ALL,ALL,Other,16818233.74,445,131
+59,British Columbia,ALL,ALL,Professional Services,161808112.03,584,213
+59,British Columbia,ALL,ALL,"Resources, Fuels & Materials",318067730.55,2909,291
+59,British Columbia,ALL,ALL,Software & IT Services,115359197.82,1206,254
+59,British Columbia,ALL,ALL,Utilities & Environmental,48033920.07,284,87
+59,British Columbia,ALL,ALL,Weapons & Tactical Security,56785287.25,181,51
+60,Yukon,ALL,ALL,Aerospace & Space,1900743.37,21,11
+60,Yukon,ALL,ALL,Automotive & Heavy Vehicles,106220.1,1,1
+60,Yukon,ALL,ALL,Civil Engineering & Infrastructure,3245796,3,3
+60,Yukon,ALL,ALL,Heavy Industry & Machinery,22563.45,1,1
+60,Yukon,ALL,ALL,"Logistics, Training & Workforce",718273.72,24,14
+60,Yukon,ALL,ALL,Marine & Shipbuilding,21357,1,1
+60,Yukon,ALL,ALL,Other,74578.47,4,4
+60,Yukon,ALL,ALL,Professional Services,148517.67,8,7
+60,Yukon,ALL,ALL,"Resources, Fuels & Materials",2891111.1,89,4
+60,Yukon,ALL,ALL,Software & IT Services,3236013.74,8,7
+60,Yukon,ALL,ALL,Utilities & Environmental,50295,3,3
+61,Northwest Territories,ALL,ALL,Aerospace & Space,18616808.64,69,8
+61,Northwest Territories,ALL,ALL,Automotive & Heavy Vehicles,413680.04,13,9
+61,Northwest Territories,ALL,ALL,Civil Engineering & Infrastructure,1367550.45,17,14
+61,Northwest Territories,ALL,ALL,Heavy Industry & Machinery,322168.98,11,8
+61,Northwest Territories,ALL,ALL,High-Tech Hardware & Telecom,128011.45999999999,5,5
+61,Northwest Territories,ALL,ALL,Life Sciences & Medical,26465.25,1,1
+61,Northwest Territories,ALL,ALL,"Logistics, Training & Workforce",1422687.48,36,29
+61,Northwest Territories,ALL,ALL,Marine & Shipbuilding,3022583.66,3,2
+61,Northwest Territories,ALL,ALL,Other,2858637.3,82,26
+61,Northwest Territories,ALL,ALL,Professional Services,1186111.8,14,12
+61,Northwest Territories,ALL,ALL,"Resources, Fuels & Materials",3348843.32,90,13
+61,Northwest Territories,ALL,ALL,Software & IT Services,265684.05,9,8
+61,Northwest Territories,ALL,ALL,Utilities & Environmental,22157815.51,12,11
+61,Northwest Territories,ALL,ALL,Weapons & Tactical Security,385386.5,1,1
+62,Nunavut,ALL,ALL,Aerospace & Space,1136135.52,4,4
+62,Nunavut,ALL,ALL,Civil Engineering & Infrastructure,3813637.0100000002,11,9
+62,Nunavut,ALL,ALL,Heavy Industry & Machinery,591675451.52,5,5
+62,Nunavut,ALL,ALL,High-Tech Hardware & Telecom,32102.07,2,2
+62,Nunavut,ALL,ALL,Life Sciences & Medical,16038.91,1,1
+62,Nunavut,ALL,ALL,"Logistics, Training & Workforce",331076.66000000003,10,6
+62,Nunavut,ALL,ALL,Marine & Shipbuilding,13934.2,1,1
+62,Nunavut,ALL,ALL,Other,1014489.17,34,19
+62,Nunavut,ALL,ALL,Professional Services,319572.85,8,8
+62,Nunavut,ALL,ALL,"Resources, Fuels & Materials",30094739.04,395,17
+62,Nunavut,ALL,ALL,Software & IT Services,63517.22,3,3
+62,Nunavut,ALL,ALL,Utilities & Environmental,5267515.97,13,7
+62,Nunavut,ALL,ALL,Weapons & Tactical Security,39478,1,1
+10,Newfoundland and Labrador,ALL,Core Defence Industrial Complex,Aerospace & Space,4906461.84,2,2
+10,Newfoundland and Labrador,ALL,Core Defence Industrial Complex,Automotive & Heavy Vehicles,69133.18,5,5
+10,Newfoundland and Labrador,ALL,Core Defence Industrial Complex,Marine & Shipbuilding,181406996.06,490,119
+10,Newfoundland and Labrador,ALL,Core Defence Industrial Complex,Weapons & Tactical Security,791108.95,2,2
+10,Newfoundland and Labrador,ALL,General Government Support,Civil Engineering & Infrastructure,40991233.22,240,60
+10,Newfoundland and Labrador,ALL,General Government Support,Heavy Industry & Machinery,15928150.93,84,57
+10,Newfoundland and Labrador,ALL,General Government Support,High-Tech Hardware & Telecom,10456.95,1,1
+10,Newfoundland and Labrador,ALL,General Government Support,Life Sciences & Medical,34482.75,1,1
+10,Newfoundland and Labrador,ALL,General Government Support,"Logistics, Training & Workforce",18132427.46,222,105
+10,Newfoundland and Labrador,ALL,General Government Support,Other,3353295.71,97,28
+10,Newfoundland and Labrador,ALL,General Government Support,Professional Services,3547935.59,54,38
+10,Newfoundland and Labrador,ALL,General Government Support,"Resources, Fuels & Materials",7113349.18,64,26
+10,Newfoundland and Labrador,ALL,General Government Support,Utilities & Environmental,11170521.13,108,22
+10,Newfoundland and Labrador,ALL,Industrial and Technical Support,Aerospace & Space,1981774.57,51,10
+10,Newfoundland and Labrador,ALL,Industrial and Technical Support,Automotive & Heavy Vehicles,881766.91,14,12
+10,Newfoundland and Labrador,ALL,Industrial and Technical Support,Civil Engineering & Infrastructure,57086658.46,64,32
+10,Newfoundland and Labrador,ALL,Industrial and Technical Support,Heavy Industry & Machinery,137206.41999999998,8,8
+10,Newfoundland and Labrador,ALL,Industrial and Technical Support,High-Tech Hardware & Telecom,927568.3200000001,13,11
+10,Newfoundland and Labrador,ALL,Industrial and Technical Support,Life Sciences & Medical,255510.73,4,4
+10,Newfoundland and Labrador,ALL,Industrial and Technical Support,"Logistics, Training & Workforce",238346.79,8,8
+10,Newfoundland and Labrador,ALL,Industrial and Technical Support,Professional Services,2803698.29,12,6
+10,Newfoundland and Labrador,ALL,Industrial and Technical Support,"Resources, Fuels & Materials",27064521.06,763,36
+10,Newfoundland and Labrador,ALL,Industrial and Technical Support,Software & IT Services,3894737.0100000002,52,34
+10,Newfoundland and Labrador,ALL,Industrial and Technical Support,Weapons & Tactical Security,2697668.04,15,6
+11,Prince Edward Island,ALL,Core Defence Industrial Complex,Aerospace & Space,1220671.52,3,2
+11,Prince Edward Island,ALL,Core Defence Industrial Complex,Marine & Shipbuilding,525720.96,5,1
+11,Prince Edward Island,ALL,General Government Support,Civil Engineering & Infrastructure,11239950.53,57,15
+11,Prince Edward Island,ALL,General Government Support,Heavy Industry & Machinery,108313.08,6,6
+11,Prince Edward Island,ALL,General Government Support,"Logistics, Training & Workforce",336500.45,13,10
+11,Prince Edward Island,ALL,General Government Support,Other,670084.34,23,5
+11,Prince Edward Island,ALL,General Government Support,Professional Services,1428707.01,23,16
+11,Prince Edward Island,ALL,General Government Support,"Resources, Fuels & Materials",21804,2,2
+11,Prince Edward Island,ALL,General Government Support,Utilities & Environmental,1217769.83,9,7
+11,Prince Edward Island,ALL,Industrial and Technical Support,Automotive & Heavy Vehicles,1002635.71,3,3
+11,Prince Edward Island,ALL,Industrial and Technical Support,Civil Engineering & Infrastructure,1393661.3,6,5
+11,Prince Edward Island,ALL,Industrial and Technical Support,Heavy Industry & Machinery,52382.5,1,1
+11,Prince Edward Island,ALL,Industrial and Technical Support,Life Sciences & Medical,191379.53,5,1
+11,Prince Edward Island,ALL,Industrial and Technical Support,"Logistics, Training & Workforce",10806.62,1,1
+11,Prince Edward Island,ALL,Industrial and Technical Support,Marine & Shipbuilding,13083.77,1,1
+11,Prince Edward Island,ALL,Industrial and Technical Support,Professional Services,16102.5,1,1
+11,Prince Edward Island,ALL,Industrial and Technical Support,"Resources, Fuels & Materials",31443.04,2,2
+11,Prince Edward Island,ALL,Industrial and Technical Support,Software & IT Services,1316702.32,14,11
+11,Prince Edward Island,ALL,Industrial and Technical Support,Weapons & Tactical Security,247568.21,5,2
+12,Nova Scotia,ALL,Core Defence Industrial Complex,Aerospace & Space,3516464912.7,14,8
+12,Nova Scotia,ALL,Core Defence Industrial Complex,Automotive & Heavy Vehicles,611229.55,30,21
+12,Nova Scotia,ALL,Core Defence Industrial Complex,Civil Engineering & Infrastructure,10028084.76,22,12
+12,Nova Scotia,ALL,Core Defence Industrial Complex,Marine & Shipbuilding,12306648708.78,922,173
+12,Nova Scotia,ALL,Core Defence Industrial Complex,Weapons & Tactical Security,131303503.09,47,23
+12,Nova Scotia,ALL,General Government Support,Civil Engineering & Infrastructure,349198816.72,3171,270
+12,Nova Scotia,ALL,General Government Support,Heavy Industry & Machinery,117971366.94,1134,299
+12,Nova Scotia,ALL,General Government Support,High-Tech Hardware & Telecom,359642.21,13,4
+12,Nova Scotia,ALL,General Government Support,Life Sciences & Medical,698162.75,22,13
+12,Nova Scotia,ALL,General Government Support,"Logistics, Training & Workforce",129328692.36,2004,387
+12,Nova Scotia,ALL,General Government Support,Other,14348683.8,475,105
+12,Nova Scotia,ALL,General Government Support,Professional Services,103208137.79,323,122
+12,Nova Scotia,ALL,General Government Support,"Resources, Fuels & Materials",18263220.57,424,94
+12,Nova Scotia,ALL,General Government Support,Utilities & Environmental,114505216.02,695,89
+12,Nova Scotia,ALL,Industrial and Technical Support,Aerospace & Space,198311.82,4,2
+12,Nova Scotia,ALL,Industrial and Technical Support,Automotive & Heavy Vehicles,32835222.64,150,61
+12,Nova Scotia,ALL,Industrial and Technical Support,Civil Engineering & Infrastructure,1339570954.09,787,149
+12,Nova Scotia,ALL,Industrial and Technical Support,Heavy Industry & Machinery,5034558.46,105,52
+12,Nova Scotia,ALL,Industrial and Technical Support,High-Tech Hardware & Telecom,152978555.37,121,59
+12,Nova Scotia,ALL,Industrial and Technical Support,Life Sciences & Medical,18896995.54,28,20
+12,Nova Scotia,ALL,Industrial and Technical Support,"Logistics, Training & Workforce",1887108.53,35,20
+12,Nova Scotia,ALL,Industrial and Technical Support,Marine & Shipbuilding,2062900.0999999999,7,5
+12,Nova Scotia,ALL,Industrial and Technical Support,Professional Services,2167213.35,6,5
+12,Nova Scotia,ALL,Industrial and Technical Support,"Resources, Fuels & Materials",30583003.92,994,120
+12,Nova Scotia,ALL,Industrial and Technical Support,Software & IT Services,762085437.38,504,181
+12,Nova Scotia,ALL,Industrial and Technical Support,Weapons & Tactical Security,105578426.68,425,27
+13,New Brunswick,ALL,Core Defence Industrial Complex,Automotive & Heavy Vehicles,367435.38,21,15
+13,New Brunswick,ALL,Core Defence Industrial Complex,Civil Engineering & Infrastructure,685573.78,14,3
+13,New Brunswick,ALL,Core Defence Industrial Complex,Marine & Shipbuilding,4199294.45,52,30
+13,New Brunswick,ALL,Core Defence Industrial Complex,Weapons & Tactical Security,1405313.1400000001,7,4
+13,New Brunswick,ALL,General Government Support,Civil Engineering & Infrastructure,188377436.87,1474,172
+13,New Brunswick,ALL,General Government Support,Heavy Industry & Machinery,14070581.34,383,137
+13,New Brunswick,ALL,General Government Support,Life Sciences & Medical,6437804.36,455,6
+13,New Brunswick,ALL,General Government Support,"Logistics, Training & Workforce",136211072.49,931,170
+13,New Brunswick,ALL,General Government Support,Other,12894350.47,245,81
+13,New Brunswick,ALL,General Government Support,Professional Services,28363123.03,139,87
+13,New Brunswick,ALL,General Government Support,"Resources, Fuels & Materials",146793424.51,758,62
+13,New Brunswick,ALL,General Government Support,Utilities & Environmental,18787437.89,133,40
+13,New Brunswick,ALL,Industrial and Technical Support,Automotive & Heavy Vehicles,9799421.19,118,48
+13,New Brunswick,ALL,Industrial and Technical Support,Civil Engineering & Infrastructure,205745126.57,196,79
+13,New Brunswick,ALL,Industrial and Technical Support,Heavy Industry & Machinery,1183470.78,26,17
+13,New Brunswick,ALL,Industrial and Technical Support,High-Tech Hardware & Telecom,10878957.49,142,28
+13,New Brunswick,ALL,Industrial and Technical Support,Life Sciences & Medical,459799.8,15,13
+13,New Brunswick,ALL,Industrial and Technical Support,"Logistics, Training & Workforce",1445625.43,58,8
+13,New Brunswick,ALL,Industrial and Technical Support,Marine & Shipbuilding,109332720,1,1
+13,New Brunswick,ALL,Industrial and Technical Support,Professional Services,1182497.03,2,2
+13,New Brunswick,ALL,Industrial and Technical Support,"Resources, Fuels & Materials",176277272.17,1446,115
+13,New Brunswick,ALL,Industrial and Technical Support,Software & IT Services,19996242.87,167,91
+13,New Brunswick,ALL,Industrial and Technical Support,Weapons & Tactical Security,234022.99,6,5
+24,Quebec,ALL,Core Defence Industrial Complex,Aerospace & Space,3676408411.39,501,73
+24,Quebec,ALL,Core Defence Industrial Complex,Automotive & Heavy Vehicles,112573474.48,339,144
+24,Quebec,ALL,Core Defence Industrial Complex,Civil Engineering & Infrastructure,1066068,2,2
+24,Quebec,ALL,Core Defence Industrial Complex,Marine & Shipbuilding,3613705786.21,824,147
+24,Quebec,ALL,Core Defence Industrial Complex,Weapons & Tactical Security,2218327624.23,389,66
+24,Quebec,ALL,General Government Support,Civil Engineering & Infrastructure,468508877.03,1417,467
+24,Quebec,ALL,General Government Support,Heavy Industry & Machinery,470019565.02,3067,853
+24,Quebec,ALL,General Government Support,High-Tech Hardware & Telecom,5430693.5,30,16
+24,Quebec,ALL,General Government Support,Life Sciences & Medical,50771946.24,88,60
+24,Quebec,ALL,General Government Support,"Logistics, Training & Workforce",1365493663.71,4399,1028
+24,Quebec,ALL,General Government Support,Other,34404662.58,585,250
+24,Quebec,ALL,General Government Support,Professional Services,406502629.2,720,403
+24,Quebec,ALL,General Government Support,"Resources, Fuels & Materials",34125829.94,770,253
+24,Quebec,ALL,General Government Support,Utilities & Environmental,90010056.43,215,104
+24,Quebec,ALL,Industrial and Technical Support,Aerospace & Space,967211926.78,563,36
+24,Quebec,ALL,Industrial and Technical Support,Automotive & Heavy Vehicles,2503906870.24,923,244
+24,Quebec,ALL,Industrial and Technical Support,Civil Engineering & Infrastructure,3741766776.68,687,319
+24,Quebec,ALL,Industrial and Technical Support,Heavy Industry & Machinery,21752600.51,234,150
+24,Quebec,ALL,Industrial and Technical Support,High-Tech Hardware & Telecom,307765176.64,1295,246
+24,Quebec,ALL,Industrial and Technical Support,Life Sciences & Medical,76246570.96,391,159
+24,Quebec,ALL,Industrial and Technical Support,"Logistics, Training & Workforce",68970655.54,839,146
+24,Quebec,ALL,Industrial and Technical Support,Marine & Shipbuilding,522229.26,2,2
+24,Quebec,ALL,Industrial and Technical Support,Professional Services,8269562.47,22,19
+24,Quebec,ALL,Industrial and Technical Support,"Resources, Fuels & Materials",294929055.6,3715,331
+24,Quebec,ALL,Industrial and Technical Support,Software & IT Services,159428211.73,1017,392
+24,Quebec,ALL,Industrial and Technical Support,Weapons & Tactical Security,19669241.87,96,22
+35,Ontario,ALL,Core Defence Industrial Complex,Aerospace & Space,84185273.97,218,92
+35,Ontario,ALL,Core Defence Industrial Complex,Automotive & Heavy Vehicles,104240982.47,326,164
+35,Ontario,ALL,Core Defence Industrial Complex,Civil Engineering & Infrastructure,2827175.9,18,13
+35,Ontario,ALL,Core Defence Industrial Complex,Marine & Shipbuilding,1370706710.38,658,246
+35,Ontario,ALL,Core Defence Industrial Complex,Weapons & Tactical Security,1041256949.61,292,96
+35,Ontario,ALL,General Government Support,Civil Engineering & Infrastructure,1999145354.51,3056,798
+35,Ontario,ALL,General Government Support,Heavy Industry & Machinery,561731016.19,5459,1361
+35,Ontario,ALL,General Government Support,High-Tech Hardware & Telecom,11484124.32,49,35
+35,Ontario,ALL,General Government Support,Life Sciences & Medical,1830081596.34,230,135
+35,Ontario,ALL,General Government Support,"Logistics, Training & Workforce",647702122.32,9351,2039
+35,Ontario,ALL,General Government Support,Other,149660305.56,2122,543
+35,Ontario,ALL,General Government Support,Professional Services,13567680034.55,4342,1165
+35,Ontario,ALL,General Government Support,"Resources, Fuels & Materials",103160609.4,1832,457
+35,Ontario,ALL,General Government Support,Utilities & Environmental,344892053.48,1174,215
+35,Ontario,ALL,Industrial and Technical Support,Aerospace & Space,209134763.62,816,54
+35,Ontario,ALL,Industrial and Technical Support,Automotive & Heavy Vehicles,472586952.86,2499,370
+35,Ontario,ALL,Industrial and Technical Support,Civil Engineering & Infrastructure,4674657922.67,1956,767
+35,Ontario,ALL,Industrial and Technical Support,Heavy Industry & Machinery,41992803.82,406,234
+35,Ontario,ALL,Industrial and Technical Support,High-Tech Hardware & Telecom,2190036388.8,7354,857
+35,Ontario,ALL,Industrial and Technical Support,Life Sciences & Medical,170378638.75,747,326
+35,Ontario,ALL,Industrial and Technical Support,"Logistics, Training & Workforce",61613211.73,466,132
+35,Ontario,ALL,Industrial and Technical Support,Marine & Shipbuilding,1822793.39,5,4
+35,Ontario,ALL,Industrial and Technical Support,Professional Services,76809786.25,530,76
+35,Ontario,ALL,Industrial and Technical Support,"Resources, Fuels & Materials",233663981.5,3429,507
+35,Ontario,ALL,Industrial and Technical Support,Software & IT Services,2758118463.3,4337,1025
+35,Ontario,ALL,Industrial and Technical Support,Weapons & Tactical Security,79561474.35,567,73
+46,Manitoba,ALL,Core Defence Industrial Complex,Aerospace & Space,203929.2,6,5
+46,Manitoba,ALL,Core Defence Industrial Complex,Automotive & Heavy Vehicles,1424376.27,52,13
+46,Manitoba,ALL,Core Defence Industrial Complex,Civil Engineering & Infrastructure,112510.65,2,2
+46,Manitoba,ALL,Core Defence Industrial Complex,Marine & Shipbuilding,3208216.2399999998,73,16
+46,Manitoba,ALL,Core Defence Industrial Complex,Weapons & Tactical Security,120051294.32,12,6
+46,Manitoba,ALL,General Government Support,Civil Engineering & Infrastructure,116200820.93,1126,196
+46,Manitoba,ALL,General Government Support,Heavy Industry & Machinery,18049051.23,591,130
+46,Manitoba,ALL,General Government Support,High-Tech Hardware & Telecom,134017.26,3,3
+46,Manitoba,ALL,General Government Support,Life Sciences & Medical,79580301.12,23,10
+46,Manitoba,ALL,General Government Support,"Logistics, Training & Workforce",48975027.42,508,136
+46,Manitoba,ALL,General Government Support,Other,6146365.43,112,50
+46,Manitoba,ALL,General Government Support,Professional Services,8606278.38,125,43
+46,Manitoba,ALL,General Government Support,"Resources, Fuels & Materials",4689485.07,168,56
+46,Manitoba,ALL,General Government Support,Utilities & Environmental,12082451.03,117,32
+46,Manitoba,ALL,Industrial and Technical Support,Aerospace & Space,1007826.91,28,16
+46,Manitoba,ALL,Industrial and Technical Support,Automotive & Heavy Vehicles,25736834.64,178,52
+46,Manitoba,ALL,Industrial and Technical Support,Civil Engineering & Infrastructure,74410358.95,402,92
+46,Manitoba,ALL,Industrial and Technical Support,Heavy Industry & Machinery,1665691.21,41,17
+46,Manitoba,ALL,Industrial and Technical Support,High-Tech Hardware & Telecom,7285770.38,119,26
+46,Manitoba,ALL,Industrial and Technical Support,Life Sciences & Medical,25174548.94,22,13
+46,Manitoba,ALL,Industrial and Technical Support,"Logistics, Training & Workforce",29457165.8,195,16
+46,Manitoba,ALL,Industrial and Technical Support,Professional Services,16950,1,1
+46,Manitoba,ALL,Industrial and Technical Support,"Resources, Fuels & Materials",7715885.1,289,35
+46,Manitoba,ALL,Industrial and Technical Support,Software & IT Services,12783658.34,143,60
+46,Manitoba,ALL,Industrial and Technical Support,Weapons & Tactical Security,12422424.39,85,8
+47,Saskatchewan,ALL,Core Defence Industrial Complex,Automotive & Heavy Vehicles,594958.38,14,10
+47,Saskatchewan,ALL,Core Defence Industrial Complex,Civil Engineering & Infrastructure,12462.33,1,1
+47,Saskatchewan,ALL,Core Defence Industrial Complex,Marine & Shipbuilding,153883.3,2,2
+47,Saskatchewan,ALL,Core Defence Industrial Complex,Weapons & Tactical Security,821114.22,6,5
+47,Saskatchewan,ALL,General Government Support,Civil Engineering & Infrastructure,52909928,461,81
+47,Saskatchewan,ALL,General Government Support,Heavy Industry & Machinery,2179863.85,45,35
+47,Saskatchewan,ALL,General Government Support,High-Tech Hardware & Telecom,10586.26,1,1
+47,Saskatchewan,ALL,General Government Support,Life Sciences & Medical,261540.09,5,4
+47,Saskatchewan,ALL,General Government Support,"Logistics, Training & Workforce",3630143.45,104,49
+47,Saskatchewan,ALL,General Government Support,Other,2709794.28,96,31
+47,Saskatchewan,ALL,General Government Support,Professional Services,9232010.4,54,30
+47,Saskatchewan,ALL,General Government Support,"Resources, Fuels & Materials",5305580.68,94,15
+47,Saskatchewan,ALL,General Government Support,Utilities & Environmental,2395425.63,14,10
+47,Saskatchewan,ALL,Industrial and Technical Support,Aerospace & Space,47796.36,2,2
+47,Saskatchewan,ALL,Industrial and Technical Support,Automotive & Heavy Vehicles,11548825.79,23,18
+47,Saskatchewan,ALL,Industrial and Technical Support,Civil Engineering & Infrastructure,4520563376.11,131,48
+47,Saskatchewan,ALL,Industrial and Technical Support,Heavy Industry & Machinery,46515,3,2
+47,Saskatchewan,ALL,Industrial and Technical Support,High-Tech Hardware & Telecom,2641270.8,16,13
+47,Saskatchewan,ALL,Industrial and Technical Support,Life Sciences & Medical,184558.47999999998,5,5
+47,Saskatchewan,ALL,Industrial and Technical Support,"Logistics, Training & Workforce",19684443.13,220,22
+47,Saskatchewan,ALL,Industrial and Technical Support,Marine & Shipbuilding,28750,1,1
+47,Saskatchewan,ALL,Industrial and Technical Support,Professional Services,533825.81,2,2
+47,Saskatchewan,ALL,Industrial and Technical Support,"Resources, Fuels & Materials",6098665.08,110,21
+47,Saskatchewan,ALL,Industrial and Technical Support,Software & IT Services,26580799.77,198,64
+47,Saskatchewan,ALL,Industrial and Technical Support,Weapons & Tactical Security,12394677.88,21,15
+48,Alberta,ALL,Core Defence Industrial Complex,Aerospace & Space,86587689.08,41,15
+48,Alberta,ALL,Core Defence Industrial Complex,Automotive & Heavy Vehicles,5412184.5,129,70
+48,Alberta,ALL,Core Defence Industrial Complex,Civil Engineering & Infrastructure,1680062.17,24,11
+48,Alberta,ALL,Core Defence Industrial Complex,Marine & Shipbuilding,11955083.43,116,45
+48,Alberta,ALL,Core Defence Industrial Complex,Weapons & Tactical Security,15096204.24,40,19
+48,Alberta,ALL,General Government Support,Civil Engineering & Infrastructure,378083797.13,4206,438
+48,Alberta,ALL,General Government Support,Heavy Industry & Machinery,833283493.66,1074,444
+48,Alberta,ALL,General Government Support,High-Tech Hardware & Telecom,685427.3200000001,16,12
+48,Alberta,ALL,General Government Support,Life Sciences & Medical,13368894.63,66,33
+48,Alberta,ALL,General Government Support,"Logistics, Training & Workforce",129767647.98,1394,431
+48,Alberta,ALL,General Government Support,Other,29860366.58,937,232
+48,Alberta,ALL,General Government Support,Professional Services,111635323.5,630,232
+48,Alberta,ALL,General Government Support,"Resources, Fuels & Materials",18156637.05,391,138
+48,Alberta,ALL,General Government Support,Utilities & Environmental,211135891.17,562,121
+48,Alberta,ALL,Industrial and Technical Support,Aerospace & Space,2016721.53,26,12
+48,Alberta,ALL,Industrial and Technical Support,Automotive & Heavy Vehicles,34387455.09,248,134
+48,Alberta,ALL,Industrial and Technical Support,Civil Engineering & Infrastructure,264960879.19,1334,283
+48,Alberta,ALL,Industrial and Technical Support,Heavy Industry & Machinery,2036492.95,51,46
+48,Alberta,ALL,Industrial and Technical Support,High-Tech Hardware & Telecom,48275924.25,209,112
+48,Alberta,ALL,Industrial and Technical Support,Life Sciences & Medical,7667986.62,66,45
+48,Alberta,ALL,Industrial and Technical Support,"Logistics, Training & Workforce",14020266.98,117,52
+48,Alberta,ALL,Industrial and Technical Support,Marine & Shipbuilding,20418.38,1,1
+48,Alberta,ALL,Industrial and Technical Support,Professional Services,3898965.24,12,11
+48,Alberta,ALL,Industrial and Technical Support,"Resources, Fuels & Materials",440612774.57,4818,254
+48,Alberta,ALL,Industrial and Technical Support,Software & IT Services,379092802.61,1158,304
+48,Alberta,ALL,Industrial and Technical Support,Weapons & Tactical Security,62385665.89,240,32
+59,British Columbia,ALL,Core Defence Industrial Complex,Aerospace & Space,69239370.53,54,15
+59,British Columbia,ALL,Core Defence Industrial Complex,Automotive & Heavy Vehicles,74658963.99,67,34
+59,British Columbia,ALL,Core Defence Industrial Complex,Civil Engineering & Infrastructure,2849879.77,12,7
+59,British Columbia,ALL,Core Defence Industrial Complex,Marine & Shipbuilding,6912206086.5,389,125
+59,British Columbia,ALL,Core Defence Industrial Complex,Weapons & Tactical Security,18430316.98,64,26
+59,British Columbia,ALL,General Government Support,Civil Engineering & Infrastructure,366100289.61,3276,402
+59,British Columbia,ALL,General Government Support,Heavy Industry & Machinery,110955626.31,1392,413
+59,British Columbia,ALL,General Government Support,High-Tech Hardware & Telecom,82674.35,4,4
+59,British Columbia,ALL,General Government Support,Life Sciences & Medical,3030533.5,91,22
+59,British Columbia,ALL,General Government Support,"Logistics, Training & Workforce",259257994.62,1417,479
+59,British Columbia,ALL,General Government Support,Other,16818233.74,445,131
+59,British Columbia,ALL,General Government Support,Professional Services,150012817.81,555,198
+59,British Columbia,ALL,General Government Support,"Resources, Fuels & Materials",97534208.63,365,118
+59,British Columbia,ALL,General Government Support,Utilities & Environmental,48033920.07,284,87
+59,British Columbia,ALL,Industrial and Technical Support,Aerospace & Space,7379826.34,45,19
+59,British Columbia,ALL,Industrial and Technical Support,Automotive & Heavy Vehicles,18246011.64,173,76
+59,British Columbia,ALL,Industrial and Technical Support,Civil Engineering & Infrastructure,607526659.99,672,257
+59,British Columbia,ALL,Industrial and Technical Support,Heavy Industry & Machinery,10237224.34,71,56
+59,British Columbia,ALL,Industrial and Technical Support,High-Tech Hardware & Telecom,37924158,162,73
+59,British Columbia,ALL,Industrial and Technical Support,Life Sciences & Medical,48762001.4,71,43
+59,British Columbia,ALL,Industrial and Technical Support,"Logistics, Training & Workforce",26121596.21,485,70
+59,British Columbia,ALL,Industrial and Technical Support,Marine & Shipbuilding,6840074.75,3,3
+59,British Columbia,ALL,Industrial and Technical Support,Professional Services,11795294.22,29,20
+59,British Columbia,ALL,Industrial and Technical Support,"Resources, Fuels & Materials",220533521.92,2544,209
+59,British Columbia,ALL,Industrial and Technical Support,Software & IT Services,115359197.82,1206,254
+59,British Columbia,ALL,Industrial and Technical Support,Weapons & Tactical Security,38354970.27,117,25
+60,Yukon,ALL,Core Defence Industrial Complex,Marine & Shipbuilding,21357,1,1
+60,Yukon,ALL,General Government Support,Heavy Industry & Machinery,22563.45,1,1
+60,Yukon,ALL,General Government Support,"Logistics, Training & Workforce",718273.72,24,14
+60,Yukon,ALL,General Government Support,Other,74578.47,4,4
+60,Yukon,ALL,General Government Support,Professional Services,148517.67,8,7
+60,Yukon,ALL,General Government Support,"Resources, Fuels & Materials",220052.95,4,2
+60,Yukon,ALL,General Government Support,Utilities & Environmental,50295,3,3
+60,Yukon,ALL,Industrial and Technical Support,Aerospace & Space,1900743.37,21,11
+60,Yukon,ALL,Industrial and Technical Support,Automotive & Heavy Vehicles,106220.1,1,1
+60,Yukon,ALL,Industrial and Technical Support,Civil Engineering & Infrastructure,3245796,3,3
+60,Yukon,ALL,Industrial and Technical Support,"Resources, Fuels & Materials",2671058.15,85,3
+60,Yukon,ALL,Industrial and Technical Support,Software & IT Services,3236013.74,8,7
+61,Northwest Territories,ALL,Core Defence Industrial Complex,Aerospace & Space,243311,5,1
+61,Northwest Territories,ALL,Core Defence Industrial Complex,Marine & Shipbuilding,3009773.66,2,1
+61,Northwest Territories,ALL,Core Defence Industrial Complex,Weapons & Tactical Security,385386.5,1,1
+61,Northwest Territories,ALL,General Government Support,Civil Engineering & Infrastructure,896566.11,9,8
+61,Northwest Territories,ALL,General Government Support,Heavy Industry & Machinery,322168.98,11,8
+61,Northwest Territories,ALL,General Government Support,High-Tech Hardware & Telecom,43260,3,3
+61,Northwest Territories,ALL,General Government Support,Life Sciences & Medical,26465.25,1,1
+61,Northwest Territories,ALL,General Government Support,"Logistics, Training & Workforce",868822.48,31,24
+61,Northwest Territories,ALL,General Government Support,Other,2858637.3,82,26
+61,Northwest Territories,ALL,General Government Support,Professional Services,1186111.8,14,12
+61,Northwest Territories,ALL,General Government Support,"Resources, Fuels & Materials",887719.25,16,1
+61,Northwest Territories,ALL,General Government Support,Utilities & Environmental,22157815.51,12,11
+61,Northwest Territories,ALL,Industrial and Technical Support,Aerospace & Space,18373497.64,64,8
+61,Northwest Territories,ALL,Industrial and Technical Support,Automotive & Heavy Vehicles,413680.04,13,9
+61,Northwest Territories,ALL,Industrial and Technical Support,Civil Engineering & Infrastructure,470984.34,8,7
+61,Northwest Territories,ALL,Industrial and Technical Support,High-Tech Hardware & Telecom,84751.45999999999,2,2
+61,Northwest Territories,ALL,Industrial and Technical Support,"Logistics, Training & Workforce",553865,5,5
+61,Northwest Territories,ALL,Industrial and Technical Support,Marine & Shipbuilding,12810,1,1
+61,Northwest Territories,ALL,Industrial and Technical Support,"Resources, Fuels & Materials",2461124.07,74,13
+61,Northwest Territories,ALL,Industrial and Technical Support,Software & IT Services,265684.05,9,8
+62,Nunavut,ALL,Core Defence Industrial Complex,Marine & Shipbuilding,13934.2,1,1
+62,Nunavut,ALL,General Government Support,Civil Engineering & Infrastructure,37343.92,3,3
+62,Nunavut,ALL,General Government Support,Heavy Industry & Machinery,591675451.52,5,5
+62,Nunavut,ALL,General Government Support,"Logistics, Training & Workforce",294210.57,8,4
+62,Nunavut,ALL,General Government Support,Other,1014489.17,34,19
+62,Nunavut,ALL,General Government Support,Professional Services,319572.85,8,8
+62,Nunavut,ALL,General Government Support,"Resources, Fuels & Materials",455693.8,22,4
+62,Nunavut,ALL,General Government Support,Utilities & Environmental,5267515.97,13,7
+62,Nunavut,ALL,Industrial and Technical Support,Aerospace & Space,1136135.52,4,4
+62,Nunavut,ALL,Industrial and Technical Support,Civil Engineering & Infrastructure,3776293.0900000003,8,7
+62,Nunavut,ALL,Industrial and Technical Support,High-Tech Hardware & Telecom,32102.07,2,2
+62,Nunavut,ALL,Industrial and Technical Support,Life Sciences & Medical,16038.91,1,1
+62,Nunavut,ALL,Industrial and Technical Support,"Logistics, Training & Workforce",36866.09,2,2
+62,Nunavut,ALL,Industrial and Technical Support,"Resources, Fuels & Materials",29639045.24,373,13
+62,Nunavut,ALL,Industrial and Technical Support,Software & IT Services,63517.22,3,3
+62,Nunavut,ALL,Industrial and Technical Support,Weapons & Tactical Security,39478,1,1

@@ -42,6 +42,18 @@
 	$: labelColor  = darkMode ? '#ffffff' : '#111111';
 	$: labelShadow = darkMode ? '0 1px 3px rgba(0,0,0,0.8)' : '0 1px 2px rgba(255,255,255,0.8)';
 
+	$: foreignTotal = (() => {
+		const nonCanada = bubbles.filter(b => b.name !== 'Canada');
+		if (metric === 'count')   return nonCanada.reduce((s, b) => s + b.count, 0);
+		if (metric === 'vendors') return nonCanada.reduce((s, b) => s + b.vendors, 0);
+		return nonCanada.reduce((s, b) => s + b.value, 0);
+	})();
+
+	$: foreignTotalDisplay = metric === 'value' ? formatValue(foreignTotal) : foreignTotal.toLocaleString();
+	$: foreignTotalLabel = metric === 'count' ? 'Total contracts (foreign)'
+		: metric === 'vendors' ? 'Total vendors (foreign)'
+		: 'Total contract value (foreign)';
+
 	// Update map background when dark mode toggles
 	$: if (mapLoaded) {
 		map.setPaintProperty('background', 'background-color', mapBg);
@@ -438,11 +450,17 @@
 
 <div class="map-row">
 	<div class="map-wrapper" class:light={!darkMode}>
-		<div class="map" bind:this={mapContainer}></div>
+    <div class="map" bind:this={mapContainer}></div>
 		<div class="total-overlay"
 			style="background:{darkMode ? '#1e2433' : '#ffffff'}; border-color:{darkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'};">
 			<div class="total-label" style="color:{darkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)'};">{totalLabel}</div>
 			<div class="total-value" style="color:{darkMode ? '#ffffff' : '#111111'};">{totalDisplay}</div>
+		</div>
+
+		<div class="total-overlay foreign-overlay"
+			style="background:{darkMode ? '#1e2433' : '#ffffff'}; border-color:{darkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'};">
+			<div class="total-label" style="color:{darkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)'};">{foreignTotalLabel}</div>
+			<div class="total-value" style="color:{darkMode ? '#ffffff' : '#111111'};">{foreignTotalDisplay}</div>
 		</div>
 	</div>
 
@@ -526,6 +544,9 @@
 		position: absolute; top: 12px; left: 12px;
 		border-radius: 6px; padding: 8px 12px; font-family: OpenSans;
 		border: 1px solid;
+	}
+	.foreign-overlay {
+		top: 78px; /* adjust based on the height of the first overlay + gap */
 	}
 	.total-label { font-size: 11px; font-family: OpenSansBold; margin-bottom: 2px; }
 	.total-value { font-size: 20px; font-family: TradeGothicBold; }
