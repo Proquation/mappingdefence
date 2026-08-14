@@ -598,6 +598,101 @@
 
 	{/if}
 
+	<div class="text">
+
+		<p>
+			Contract data comes from the Public Services and Procurement Canada’s (PSPC) <a href=" https://search.open.canada.ca/contracts/">disclosure of contracts over $10,000</a>, filtered to contracts issued by the Department of National Defence. 
+		</p>
+
+		<p>
+			Because contracts are frequently amended, a single procurement can appear multiple times in the raw disclosure records. We retain only the most recent amendment for each unique Procurement Identification Number before analysis.
+		</p>
+		<p>
+			Total Contract Value figures for multi-year contracts reflect the full contracted value rather than annual spending. As such, the year-over-year figures represent the value of the contracts issued in that year, rather than annual defence expenditures or the pace at which funds were disbursed. 
+		</p>
+
+		<h3>
+			Classifying contracts by their relationship to defence capability 
+		</h3>
+
+		<p>
+			We sort every contract into one of three tiers, based on its economic object code, to capture how closely a contract's purpose is tied to military capability rather than simply to defence-department spending.
+		</p>
+
+		<p>
+			Core Defence contracts carry an object code tied to the provision and production of defence goods and services, and directly generate, sustain, or enhance military operational capability. This can look like weapons systems, military platforms (aircraft, ships, vehicles), and specialized defence infrastructure.
+		</p>
+
+		<p>
+			Technical Support contracts enable defence production, maintenance, and logistics, but don't themselves constitute military capability: engineering services, fuel, and IT support are typical examples. These are goods and services that could exist outside a defence context, but here are supporting defence activities specifically.
+		</p>
+
+		<p>
+			General Government Support contracts are the least tied to defence capability. These are the costs of operating the Department of National Defence as a government organization, rather than producing military capability. 
+		</p>
+
+		<h3>
+			What the data tells us about the landscape of DND Procurement 
+		</h3>
+
+		<p>
+			Although Canadian defence procurement touches a wide range of places, spending within each tier is heavily concentrated in a small number of urban centres. Looking at contracts with Canadian vendors between 2017 and 2026, the top five CMAs account for the large majority of each tier's total value, even though many more CMAs and CAs receive at least some contracting activity.
+		</p>
+		<p>
+			The Core Defence Industrial Complex shows the sharpest concentration: the top five CMAs capture 88.6% of the tier's total value, even though 95 different CMAs and CAs appear somewhere in the data. General Government Support is somewhat less concentrated, with the top five CMAs accounting for 83.0% of value spread across 144 places, while Industrial and Technical Support falls in between, with the top five capturing 85.0% of value across 139 places.
+
+		</p>
+		<p>
+			Halifax dominates the Core Defence tier, accounting for 44% of the national contract value from 2017-2026. It is followed by Montréal (20%), Vancouver (16%), Québec City (5%), and Ottawa–Gatineau (4%). 
+		</p>
+
+		<p>
+			For the industrial and technical support tier, the most dominant city is Ottawa-Gatineau with 26% of the national share of contract value, followed closely by Montreal (24%), then Halifax (8%), Toronto (7%), and Calgary (2%).
+		</p>
+		
+		<p>
+			Finally, for administrative-focused contracts, the leader is Ottawa-Gatineau with 60% of the national share, followed by Montreal (7%), Toronto (6%), Calgary (4%), and Halifax (2%).
+
+		</p>
+
+		<h3>
+			What Sectors Are Being Contracted, and Where?
+		</h3>
+
+		<p>
+			The federal government has signalled a major expansion in defence spending: $180 billion in defence procurement opportunities and $290 billion in defence-related capital investment. This increase will touch every tier of the defence industrial base, but not evenly. Some tiers are positioned to see larger impacts than others, and the same is true across sectors [no source for this– does it need one?]. The government has already flagged certain sectors as priority growth areas, including nitrocellulose production and the promotion of AI and quantum technologies. Understanding which regions dominate specific sectors may provide insight into where future sector-specific investments are likely to flow. 
+
+		</p>
+
+		<p>
+			PLACEHOLDER FOR CHART -- see the doc: https://docs.google.com/document/d/1jQz2MjrjpoqQVzX3HbreUsS1DIRVKdTg9IU2fLX-JzE/edit?tab=t.0
+		</p>
+
+		<p>
+			Halifax's dominance can be largely attributed to its shipbuilding industry, receiving exactly half of the value of all marine-related contracts from DND over the analysis period. In 2026, Irving Shipbuilding Inc. received multibillion-dollar contracts to construct a fleet of River-class destroyers to replace Canada's aging naval fleet. These investments are already having significant impacts on the local community. As the company seeks to hire skilled workers to support production, it is facing labour shortages, while training programs for key trades such as welding are already operating at capacity. 
+		</p>
+
+		<p>
+			PLACEHOLDER FOR CHART -- see the doc: https://docs.google.com/document/d/1jQz2MjrjpoqQVzX3HbreUsS1DIRVKdTg9IU2fLX-JzE/edit?tab=t.0
+		</p>
+
+		<p>
+			Montreal features strongly across many sectors, and makes up the largest single CMA share of the aerospace and space industry (46.5%). This reflects Montreal's broader position in the industry: the city is the third-largest centre of aerospace manufacturing in the world, and aerospace remains Quebec's largest export sector. Despite this clustering, more DND money in aerospace flowed to foreign vendors than to Montreal itself. Montreal's largest DND contract shares are actually in Land Systems & Vehicles (71.0%) and Weapons (62.5%).
+		</p>
+
+		<p>
+			Administrative services (70.0%), Communications & Electronics (65.1%), and Digital Systems & Software (60.7%) are the sectors with contracts overwhelmingly awarded to vendors in the Ottawa region. This is consistent with a few plausible explanations. Proximity to the federal government, and the familiarity with government procurement processes that comes with it, likely makes Ottawa-based vendors an attractive choice for DND. Ottawa's established technology cluster, built up over decades of public-sector contracting, reinforces this advantage further. However, Ottawa’s advantage does not occur in all defence-related sectors, making up a minority of sectors like Aerospace & Space or Automotive & Heavy Vehicles.
+		</p>
+
+		<h3>
+			Takeaways
+		</h3>
+
+		<p>
+			Taken together, these patterns suggest that new defence spending is unlikely to be distributed evenly across the country if future investment follows the same channels as the contracts already awarded. Whether this pattern reflects genuine advantages in relevant industrial capacity, the advantages of being an established and familiar vendor to DND, or a market with very few qualified domestic suppliers to begin with is a more difficult question. 
+		</p>
+	</div>
+
 	
 </main>
 

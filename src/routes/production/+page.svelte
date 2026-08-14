@@ -662,11 +662,11 @@
 <Logo logoType="White" backgroundColor="var(--brandGray90)"/>
 
 <main class="page">
-    <TitleStandard title="Where are defence sales going?" />
+    <TitleStandard title="A national survey’s insights on defence goods production" />
     <div class="text">
         <AuthorDate
 			authors="<a href='https://schoolofcities.utoronto.ca/people/karen-chapple/' target='_blank'>Karen Chapple</a>, <a href='https://discover.research.utoronto.ca/8035-tara-vinodrai' target='_blank'>Tara Vinodrai</a>, <a href='https://www.linkedin.com/in/yihoi-jung-0b95351b5/' target='_blank'>Yihoi Jung</a>, Sarah Gibbons, Andrew Feng"
-            date="Last updated August 4th, 2026."
+            date="Last updated August 11th, 2026."
         />
         <p>
             Data comes from the Canadian Defence, Aerospace and Commercial and Civil Marine Sectors Survey (CDACCMS).

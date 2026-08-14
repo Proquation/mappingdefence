@@ -34,9 +34,9 @@
 			</li>
 		</ul>
 
-		<h3>National survey</h3>
+		<h2>National survey</h2>
 
-		<h3>Data axle</h3>
+		<h2>Data axle</h2>
 
 		<p>Jobs in this context refers to employees within headquarter firms, which is a metric given in the Data Axle.</p>
 
@@ -60,7 +60,7 @@
 			<a href="{base}/data/Master NAICS Codes List - Full list.csv" download>NAICS codes used to filter the data axle</a>
 		</p>
 
-		<h3>Contracts</h3>
+		<h2>Contracts</h2>
 		<p>
 			Each contract is classified into a defence-relevance tier (Core Defence, Technical Support, or General Government Support) and an industry sector based on its economic object code. The tiers capture a contract’s relationship to defence capability. Core Defence expenditures capture investments that directly are contracts with an object code related to the provision and production of defence goods and services and directly generate, sustain, or enhance military operational capability. This includes things like weapons systems, military platforms (aircraft, ships and vehicles) and specialized defence infrastructure. Industrial and technical support contracts are expenditures that enable defence production, maintenance and logistics but do not themselves constitute military capability such as engineering services, fuel, and IT support. These object codes are items that could exist outside of defence, but are still supporting defence activities. Contracts falling under the General Government Support tier are the least related to defence. 
 			Instead, they are associated with operating the Department of National Defence as a government organization rather than producing military capability. 
@@ -77,6 +77,28 @@
 			Total Contract Value figures for multi-year contracts reflect the full contracted value rather than annual spending. As such, the year-over-year figures represent the value of the contracts issued in that year, rather than annual defence expenditures or the pace at which funds were disbursed. 
 
 		</p>
+
+		<h3>
+			Locating where value flows
+
+		</h3>
+
+		<p>
+We geocoded vendor location using the Forward Sortation Area (the first three characters of the postal code) reported in each disclosure record. This is typically a company's registered address, so we are measuring where contract value formally accumulates, generally a firm's headquarters, rather than necessarily where the associated production, employment, or economic activity takes place.
+		</p>
+
+		<p>
+			Postal code reporting is incomplete in the earlier years of the data, so we apply two rounds of correction to reduce this gap. First, we backfill using the most common historical FSA reported elsewhere for the same vendor. Where that fails, we match vendor names against Data Axle historical business location data using fuzzy string matching. Both approaches assume a vendor's location is stable across the panel; a firm that relocated or opened new facilities during this period could be misattributed to an earlier address. Even with these corrections, 2023–2026 contains the most complete postal code reporting and is the most reliable window for place-based analysis.
+		</p>
+
+		<p>
+			The contract data also reports contracts given to non-domestic vendors, which are reported with no postal code and instead with a foreign ‘country of vendor’. Any rows with no Canadian province or Census Metropolitan Area (CMA) are excluded from the map view. Some vendors reported as Canadian in the disclosure data are headquartered abroad with a Canadian contracting or subsidiary address. Conversely, for vendors reported with a foreign address, the disclosure data cannot capture whether production or investment associated with the contract occurs in Canada. This distinction matters for assessing Industrial and Technological Benefits (ITB) commitments, this dataset cannot resolve these types of investments. This dataset covers only National Defence's own procurement and does not capture contracts issued by other governments that may also shape the Canadian defence industrial base. 
+		</p>
+
+		<p>
+			Notably, the contracts represented here are with prime contractors: the vendors who hold the direct relationship with the Department of National Defence and are the first point of contact for a given procurement. However, prime contractors routinely subcontract work down through a broader supply chain, and it's through this subcontracting that the complete picture of a contract's regional economic impact is ultimately felt. We don't have visibility into this subcontracting layer. Publicly available procurement data captures only the prime relationship, not what happens beneath it.
+		</p>
+
 
 
 	</div>

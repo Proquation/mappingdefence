@@ -107,7 +107,7 @@
 	/>
 
 	<TitleStandard
-		title="Mapping Defence"
+		title="Mapping Defence in Canada"
 		subtitle=""
 	/>
 
@@ -133,6 +133,29 @@
 	<div class="text">	
 
 		<p>
+			In the face of global geopolitical realignment, the Carney Administration has recommitted Canada to defence. In March, 2026, Canada officially reached NATO's target of spending 2% of its gross domestic product (GDP) on defence. With a target of 5% of GDP spent on defence by 2035, and a new <a href="https://www.canada.ca/en/department-national-defence/corporate/reports-publications/industrial-strategy/security-sovereignty-prosperity.html">Defence Industrial Strategy</a> in place, Canadian cities and regions are likely to see considerable investment and growth in the next decade. But where? 
+
+		</p>
+
+		<p>
+			This website examines the current location of the defence industry (firms, jobs, and sales) and Canadian Forces (bases and stations) across Canada’s cities and metropolitan areas. We also look at the geography of recent defence spending (in the form of contracts) in order to determine which places are likely to benefit in the near future. This then points to the local and regional economic development policies that should be in place to ensure prosperity for all.
+		</p>
+
+		<p>
+			Overall, we find that:
+		</p>
+		<ul>
+			<li>
+				Defence spending continues to concentrate in Canada’s historic industrial centres, in Quebec and Ontario
+			</li>
+
+			<li>
+				Something on Halifax
+			</li>
+		</ul>
+		
+
+		<!-- <p>
 			Recent commitments in the Defence sector under the Carney administration brings about a question of where are these funds allocated, and how are they distributed?
 		</p>
 
@@ -150,6 +173,10 @@
 		<p>	
 			Although the Defence Industrial Strategy outlines broad programs for investment, the question remains as to what this entails for different regions across Canada and the employees that work in this sector.
 			The articles in this page cover the current and historial landscape of defence spending across metropolitan regions in Canada to discover what areas could see increased investment and growth.
+		</p> -->
+
+		<p>
+			Explore the pages below to learn more about defence in Canada:
 		</p>
 
 		<ul>
