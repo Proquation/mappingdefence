@@ -1,3 +1,5 @@
+<Dev/>
+
 <script>
 
 	import '$lib/assets/global-styles.css';
@@ -12,6 +14,7 @@
 	import GraphicsMultiples from '$lib/GraphicMultiples.svelte';
 	import Footer from '$lib/Footer.svelte';
 	import Password from '$lib/Password.svelte';
+	import Dev from '$lib/Dev.svelte';
 	import Footnote from '$lib/Footnote.svelte';
 	import Footnotes from '$lib/Footnotes.svelte';
 	import { createFootnoteStore } from '$lib/footnoteUtils';
@@ -233,7 +236,7 @@
 		</p>
 
 		<p>
-			<a href="https://www.linkedin.com/in/andrewwfeng/" target="_blank">Andrew Feng</a> is lorem ipsum.
+			<a href="https://www.linkedin.com/in/andrewwfeng/" target="_blank">Andrew Feng</a> is a JD candidate at the University of Toronto's Henry N.R. Jackman Faculty of Law.
 		</p>
 
 	</div>

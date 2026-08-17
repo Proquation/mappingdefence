@@ -9,7 +9,7 @@
 <Logo logoType="White" backgroundColor="var(--brandGray90)" />
 
 <main class="page">
-	<TitleStandard title="What is defence?" />
+	<TitleStandard title="Defining the defence industry" />
 	<div class="text">
 		<AuthorDate
 			authors="<a href='https://schoolofcities.utoronto.ca/people/karen-chapple/' target='_blank'>Karen Chapple</a>, <a href='https://discover.research.utoronto.ca/8035-tara-vinodrai' target='_blank'>Tara Vinodrai</a>, 

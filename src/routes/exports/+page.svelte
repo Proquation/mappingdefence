@@ -159,7 +159,7 @@
 <Logo logoType="White" backgroundColor="var(--brandGray90)" />
 
 <main class="page">
-	<TitleStandard title="Defence sales and exports from the Department of National Defence" />
+	<TitleStandard title="Where are Canadian companies exporting their defence-related products?" />
 	<div class="text">
 		<AuthorDate
 			authors="<a href='https://schoolofcities.utoronto.ca/people/karen-chapple/' target='_blank'>Karen Chapple</a>, <a href='https://discover.research.utoronto.ca/8035-tara-vinodrai' target='_blank'>Tara Vinodrai</a>, <a href='https://www.linkedin.com/in/yihoi-jung-0b95351b5/' target='_blank'>Yihoi Jung</a>, <a href='https://www.linkedin.com/in/sarahbridgetgibbons/'>Sarah Gibbons</a>, Andrew Feng"

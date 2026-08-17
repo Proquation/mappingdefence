@@ -222,7 +222,7 @@
 <Logo logoType="White" backgroundColor="var(--brandGray90)"/>
 
 <main class="page">
-	<TitleStandard title="See a map of defence firms in Canada" />
+	<TitleStandard title="Where are Canada’s defence-related firms and jobs located?" />
 	<div class="text">
 		<AuthorDate
 			authors="<a href='https://schoolofcities.utoronto.ca/people/karen-chapple/' target='_blank'>Karen Chapple</a>, <a href='https://discover.research.utoronto.ca/8035-tara-vinodrai' target='_blank'>Tara Vinodrai</a>, <a href='https://www.linkedin.com/in/yihoi-jung-0b95351b5/' target='_blank'>Yihoi Jung</a>, <a href='https://www.linkedin.com/in/sarahbridgetgibbons/'>Sarah Gibbons</a>, Andrew Feng</AuthorDate>"
