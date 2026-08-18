@@ -31,10 +31,7 @@
         us: 'United States',
         notcanada: 'Outside Canada'
     };
-    let locYear = 2024;
-    let selectedRegion = 'all';
-    let locViewMode = 'raw'; // 'raw' or 'percent'
-    let spiderViewMode = 'percent'; // 'raw' or 'percent'
+    let spiderViewMode = 'raw'; // 'raw' or 'percent'
     let waffleYear = 2024;
     let waffleMetric = 'amount';
 
@@ -117,13 +114,6 @@
         'Breakdown not specified for any category',
     ];
 
-    const regionColors = {
-        canada: 'var(--brandLightBlue)',
-        us: 'var(--brandMedBlue)',
-        world: 'rgba(255,255,255,0.5)',
-        unknown: 'rgba(255,255,255,0.2)',
-    };
-
     $: allCategories = (() => {
         const cats = [...new Set(b1Data.map(d => d.category))];
         return cats.sort((a, b) => {
@@ -142,21 +132,7 @@
         return key ? b4ShortLabels[key] : full.slice(0, 18);
     }
 
-    function formatCurrency(val) {
-		if (val >= 1e9) return `$${(val / 1e9).toFixed(2)}B`;
-		if (val >= 1e6) return `$${(val / 1e6).toFixed(1)}M`;
-		return `$${val.toLocaleString()}`;
-	}
 
-	// Helper to format values (either $ Millions/Billions or Percentages)
-	function formatValue(val, total, currentMode) {
-		if (currentMode === 'percent') {
-			if (!total) return '0.0%';
-			return ((val / total) * 100).toFixed(1) + '%';
-		} else {
-			return formatCurrency(val);
-		}
-	}
 
 	function resolveCssColor(token) {
 		if (typeof document === 'undefined') return token;
@@ -492,7 +468,7 @@
                 const activeValues = spiderViewMode === 'percent' ? percentValues : rawValues;
                 const color = i === 0
                     ? resolveCssColor('--brandLightBlue') || '#6FC7EA'
-                    : resolveCssColor('--brandMedGreen') || '#8DBF2E';
+                    : resolveCssColor('--brandRed') || '#8DBF2E';
                 return {
                     type: 'scatterpolar',
                     r: activeValues,
@@ -834,20 +810,7 @@
 
 <style>
     .hidden { display: none; }
-    .region-bar {
-        display: inline-block;
-        width: 3px;
-        height: 1em;
-        border-radius: 2px;
-        margin-right: 8px;
-        vertical-align: middle;
-        flex-shrink: 0;
-    }
-
-    .cell-category {
-        display: flex;
-        align-items: center;
-    }
+    
     .sankey-chart {
         width: 100%;
         height: 420px;
@@ -942,44 +905,6 @@
         border-radius: 3px;
     }
 
-    /* Simple Shared Table */
-    .table-wrap {
-        width: 100%;
-        margin: 0 auto;
-        overflow-x: auto;
-        border: 1px solid var(--brandGray);
-        border-radius: 3px;
-        background: var(--brandGray90);
-    }
-
-    .data-table {
-        width: 100%;
-        margin: 0 auto;
-        border-collapse: collapse;
-        font-family: OpenSans;
-        font-size: 14px;
-    }
-
-    .data-table th, .data-table td {
-        color: var(--brandWhite);
-        padding: 6px 8px;
-        border-bottom: 1px solid var(--brandGray);
-        text-align: right;
-    }
-
-    .data-table th:first-child,
-    .data-table td:first-child {
-        border-right: 1px solid var(--brandGray);
-    }
-
-    .data-table th { background:var(--brandGray90); font-family: OpenSansBold}
-    .align-left { text-align: left !important; }
-    .cell-category { min-width: 300px;  font-family: OpenSans; }
-    .data-table tbody tr:last-child td { border-bottom: none; }
-
-    .total-row {
-        font-family: OpenSansBold;
-    }
 
     .inline-filters {
         margin-top: 12px;

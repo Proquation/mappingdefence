@@ -23,7 +23,7 @@
 <div class="overlay">
     <div class="popup-box">
         <h3>The page is under development – last updated <span class="datetime">{dateTimeStr}</span></h3>
-        <p>Notable updates: titles fixed</p>
+        <p>Notable updates: added creds for sarah & andrew, fixed bug with percentage not changing in sales by location, CPI will come in soon</p>
         <button on:click={dismissPopup}>OK</button>
     </div>
 </div>

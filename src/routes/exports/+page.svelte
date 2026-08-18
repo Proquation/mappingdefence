@@ -162,8 +162,8 @@
 	<TitleStandard title="Where are Canadian companies exporting their defence-related products?" />
 	<div class="text">
 		<AuthorDate
-			authors="<a href='https://schoolofcities.utoronto.ca/people/karen-chapple/' target='_blank'>Karen Chapple</a>, <a href='https://discover.research.utoronto.ca/8035-tara-vinodrai' target='_blank'>Tara Vinodrai</a>, <a href='https://www.linkedin.com/in/yihoi-jung-0b95351b5/' target='_blank'>Yihoi Jung</a>, <a href='https://www.linkedin.com/in/sarahbridgetgibbons/'>Sarah Gibbons</a>, Andrew Feng"
-			date="Last updated August 4th, 2026."
+			authors="<a href='https://schoolofcities.utoronto.ca/people/karen-chapple/' target='_blank'>Karen Chapple</a>, <a href='https://discover.research.utoronto.ca/8035-tara-vinodrai' target='_blank'>Tara Vinodrai</a>, <a href='https://www.linkedin.com/in/sarahbridgetgibbons/'>Sarah Gibbons</a>, <a href='https://www.linkedin.com/in/yihoi-jung-0b95351b5/' target='_blank'>Yihoi Jung</a>, <a href='https://www.linkedin.com/in/andrewwfeng/' target='_blank'>Andrew Feng</a>"
+			date="Last updated August 18th, 2026."
 		/>
 		<p>
 			This table describes the destinations of goods and services sold by Canadian firms (from the CDACCMS dataset).
@@ -232,32 +232,32 @@
                     </thead>
                     <tbody>
                         {#each allCategories.filter(cat => {
-                            const r = resolveRegion(cat);
-                            return selectedRegions.has(r) || (selectedRegions.has('world') && r === 'unknown');
-                        }) as cat}
+							const r = resolveRegion(cat);
+							return selectedRegions.has(r) || (selectedRegions.has('world') && r === 'unknown');
+						}) as cat}
+							
                             {@const region = resolveRegion(cat)}
                             <tr>
                                 <td class="align-left cell-category">
                                     <span class="region-bar" style="background:{regionColors[region]}"></span>{cat}
                                 </td>
-                                {#each locAllYears as { items, total }}
-                                    {@const val = items.find(d => d.category === cat)?.amount ?? 0}
-                                    <td>{val > 0 ? formatSalesValue(val, total, locViewMode) : '—'}</td>
-                                {/each}
+                                {#each locAllYears as { year, items, total }}
+									{@const val = items.find(d => d.category === cat)?.amount ?? 0}
+									<td>{formatSalesValue(val, total, locViewMode)}</td>
+								{/each}
                             </tr>
                         {/each}
                         <tr class="total-row">
-                            <td class="align-left cell-category">Total</td>
-                            {#each locAllYears as { total, items }}
-                                {@const filteredTotal = items
-                                    .filter(d => {
-                                        const r = resolveRegion(d.category);
-                                        return selectedRegions.has(r) || (selectedRegions.has('world') && r === 'unknown');
-                                    })
-                                    .reduce((sum, d) => sum + d.amount, 0)}
-                                <td>{formatSalesValue(filteredTotal, filteredTotal, locViewMode)}</td>
-                            {/each}
-                        </tr>
+							<td class="align-left">Total</td>
+							{#each locAllYears as { items, total }}
+								{@const visibleItems = items.filter(d => {
+									const r = resolveRegion(d.category);
+									return selectedRegions.has(r) || (selectedRegions.has('world') && r === 'unknown');
+								})}
+								{@const filteredTotal = visibleItems.reduce((sum, d) => sum + d.amount, 0)}
+								<td>{formatSalesValue(filteredTotal, total, locViewMode)}</td>
+							{/each}
+						</tr>
                     </tbody>
                 </table>
             </div>

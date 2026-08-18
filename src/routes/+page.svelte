@@ -149,11 +149,15 @@
 		</p>
 		<ul>
 			<li>
-				Defence spending continues to concentrate in Canada’s historic industrial centres, in Quebec and Ontario
+				Defence spending continues to concentrate in Canada’s historic industrial centres, in Quebec and Ontario.
 			</li>
 
 			<li>
-				Something on Halifax
+				Halifax dominated the marine related defence contracts, accounting for 44% of the total national contract value in the past 10 years.
+			</li>
+
+			<li>
+				Canada’s biggest defence exports in recent years went to the United States reporting 28.4% of total Canadian defence sales in 2024.
 			</li>
 		</ul>
 		
@@ -228,11 +232,11 @@
 		</p>
 
 		<p>
-			<a href="https://www.linkedin.com/in/yihoi-jung-0b95351b5/" target="_blank">Yihoi Jung</a> is a Data Analyst Research Assistant at the School of Cities and has completed his undergraduate degree at the University of Toronto Scarborough in Statistics and City Studies.
+			<a href='https://www.linkedin.com/in/sarahbridgetgibbons/' target="_blank">Sarah Gibbons</a> is a Research Assistant at the School of Cities and a graduate student at the University of Toronto, where she is pursuing a Master of Science in Planning and a Master of Arts in Economics..
 		</p>
 
 		<p>
-			<a href='https://www.linkedin.com/in/sarahbridgetgibbons/' target="_blank">Sarah Gibbons</a> is lorem ipsum.
+			<a href="https://www.linkedin.com/in/yihoi-jung-0b95351b5/" target="_blank">Yihoi Jung</a> is a Data Analyst Research Assistant at the School of Cities and has completed his undergraduate degree at the University of Toronto Scarborough in Statistics and City Studies.
 		</p>
 
 		<p>
