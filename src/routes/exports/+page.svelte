@@ -137,8 +137,8 @@
 
 
 			b1Data = csvParse(locRes).map((row) => ({
-				category: normalizeCategory(row['Type of Sale'].trim()),
-				amount: parseNum(row['Amount']),
+				category: normalizeCategory(row['Type.of.Sale'].trim()),
+				amount: parseNum(row['Amount_real']),
 				year: Number(row['Year'])
 			})).filter((d) => d.year && d.amount > 0);
 

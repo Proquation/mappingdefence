@@ -34,6 +34,10 @@
 			</li>
 		</ul>
 
+		<p>
+			Nominal or raw dollar figures have been converted into real dollar figures using Statistics Canada’s Consumer Price Index adjusted for 2025, the last full year.
+		</p>
+
 		<h2>National survey</h2>
 
 		<h2>Data axle</h2>

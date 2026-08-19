@@ -102,7 +102,7 @@
 			NAICS: String(r.NAICS).trim(),   // ← add
 			NAICSD: r.NAICSD,
 			defence_type: r.defence_type,
-			total_sales_M: r.total_sales_M === '' ? null : Number(r.total_sales_M),
+			total_sales_M: r.total_sales_M_real === '' ? null : Number(r.total_sales_M_real),
 			sales_bucket: r.sales_bucket,
 			n_firms: r.n_firms,
 			avg_employees: r.avg_employees === '' ? null : Number(r.avg_employees),

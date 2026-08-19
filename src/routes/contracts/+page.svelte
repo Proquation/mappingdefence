@@ -26,11 +26,11 @@
 
 	// tier: "ALL" | "General Government Support" | "Industrial and Technical Support" | "Core Defence Industrial Complex"
 	// let selectedTier = 'ALL';
-	// // object_cluster: "ALL" | one of the 14 clusters
+	// // object_sector: "ALL" | one of the 14 sectors
 	// let selectedCluster = 'ALL';
 
 	// let yearOptions = [];
-	// let clusterOptions = [];
+	// let sectorOptions = [];
 	// let tierOptions = [];
 
 	let metric = 'value'; // 'value' | 'count' | 'vendors'
@@ -60,13 +60,13 @@
 	// 			.filter(t => Boolean(t) && t !== 'ALL')  // exclude the rollup pseudo-tier
 	// 			.sort();
 
-	// 		const clusters = [...new Set(data.map(r => r.object_cluster))]
+	// 		const sectors = [...new Set(data.map(r => r.object_sector))]
 	// 			.filter(c => Boolean(c) && c !== 'ALL')
 	// 			.sort();
 
 	// 		yearOptions = years;
 	// 		tierOptions = tiers;
-	// 		clusterOptions = clusters;
+	// 		sectorOptions = sectors;
 			
 	// 		// Reset year if needed
 	// 		if (yearIndex >= years.length) {
@@ -89,8 +89,8 @@
 		? [...new Set(currentAggData.map(r => r.tier))].filter(t => t && t !== 'ALL').sort()
 		: [];
 
-	$: clusterOptions = currentAggData?.length
-		? [...new Set(currentAggData.map(r => r.object_cluster))].filter(c => c && c !== 'ALL').sort()
+	$: sectorOptions = currentAggData?.length
+		? [...new Set(currentAggData.map(r => r.object_sector))].filter(c => c && c !== 'ALL').sort()
 		: [];
 
 
@@ -147,8 +147,8 @@
 			region_name: r.region_name,
 			year: r.year === 'ALL' ? 'ALL' : Number(r.year),  // ← preserve ALL
 			tier: r.tier,
-			object_cluster: r.object_cluster,
-			total_value: r.total_value === '' ? null : Number(r.total_value),
+			object_sector: r.object_sector,
+			total_value: r.total_value_real === '' ? null : Number(r.total_value_real),
 			n_contracts: r.n_contracts === '' ? null : Number(r.n_contracts),
 			n_vendors: r.n_vendors === '' ? null : Number(r.n_vendors)
 		}));
@@ -163,8 +163,8 @@
 	
 	$: filteredAllYears = (currentAggData || []).filter((r) => {
 		const tierMatch = selectedTier === NO_FILTER ? r.tier === 'ALL' : r.tier === selectedTier;
-		const clusterMatch = selectedCluster === NO_FILTER ? r.object_cluster === 'ALL' : r.object_cluster === selectedCluster;
-		return tierMatch && clusterMatch;
+		const sectorMatch = selectedCluster === NO_FILTER ? r.object_sector === 'ALL' : r.object_sector === selectedCluster;
+		return tierMatch && sectorMatch;
 	});
 
 
@@ -181,9 +181,9 @@
 		}
 	}
 
-	// Same tier/cluster filter as activeRows, but across ALL years
+	// Same tier/sector filter as activeRows, but across ALL years
 	// $: filteredAllYears = (aggData[selectedGeometry] || []).filter(
-	// 	(r) => r.tier === selectedTier && r.object_cluster === selectedCluster
+	// 	(r) => r.tier === selectedTier && r.object_sector === selectedCluster
 	// );
 
 	function computeSizeBins(rows, field) {
@@ -215,7 +215,7 @@
 	// $: sizeBins =
 	// 	metric === 'count' ? computeSizeBins(filteredAllYears, 'n_contracts')
 	// 	: metric === 'vendors' ? computeSizeBins(filteredAllYears, 'n_vendors')
-	// 	: computeSizeBins(filteredAllYears, 'total_value');
+	// 	: computeSizeBins(filteredAllYears, 'total_value_real_real');
 
 	async function ensureGeojson(file) {
 		if (geojsonCache[file]) return geojsonCache[file];
@@ -269,9 +269,9 @@
 	$: activeRows = aggregateByRegion(
 		(currentAggData || []).filter((r) => {
 			const tierMatch = selectedTier === NO_FILTER ? r.tier === 'ALL' : r.tier === selectedTier;
-			const clusterMatch = selectedCluster === NO_FILTER ? r.object_cluster === 'ALL' : r.object_cluster === selectedCluster;
+			const sectorMatch = selectedCluster === NO_FILTER ? r.object_sector === 'ALL' : r.object_sector === selectedCluster;
 			const yearMatch = selectedYear === 'ALL' ? r.year === 'ALL' : r.year === selectedYear;
-			return yearMatch && tierMatch && clusterMatch;
+			return yearMatch && tierMatch && sectorMatch;
 		})
 	);
 
@@ -423,8 +423,8 @@
 			aggDataWorld = parseAgg(world);
 
 			b1Data = csvParse(locRes).map((row) => ({
-				category: normalizeCategory(row['Type of Sale'].trim()),
-				amount: parseNum(row['Amount']),
+				category: normalizeCategory(row['Type.of.Sale'].trim()),
+				amount: parseNum(row['Amount_real']),
 				year: Number(row['Year'])
 			})).filter((d) => d.year && d.amount > 0);
 
@@ -494,7 +494,7 @@
 					<span class="filter-label">Industry sector</span>
 					<select class="year-select" bind:value={selectedCluster}>
 						<option value={NO_FILTER}>All sectors</option>
-						{#each clusterOptions as c}<option value={c}>{c}</option>{/each}
+						{#each sectorOptions as c}<option value={c}>{c}</option>{/each}
 					</select>
 				</div>
 
@@ -540,7 +540,7 @@
 				<div class="filter-group">
 					<span class="filter-label">Metric</span>
 					<select class="year-select" bind:value={metric}>
-						<option value="value">Contract value</option>
+						<option value="value">Contract value (adjusted to CAD 2025)</option>
 						<option value="count">Number of contracts</option>
 						<option value="vendors">Number of vendors</option>
 					</select>
@@ -677,11 +677,11 @@
 		</p>
 
 		<p>
-			Montreal features strongly across many sectors, and makes up the largest single CMA share of the aerospace and space industry (46.5%). This reflects Montreal's broader position in the industry: the city is the third-largest centre of aerospace manufacturing in the world, and aerospace remains Quebec's largest export sector. Despite this clustering, more DND money in aerospace flowed to foreign vendors than to Montreal itself. Montreal's largest DND contract shares are actually in Land Systems & Vehicles (71.0%) and Weapons (62.5%).
+			Montreal features strongly across many sectors, and makes up the largest single CMA share of the aerospace and space industry (46.5%). This reflects Montreal's broader position in the industry: the city is the third-largest centre of aerospace manufacturing in the world, and aerospace remains Quebec's largest export sector. Despite this sectoring, more DND money in aerospace flowed to foreign vendors than to Montreal itself. Montreal's largest DND contract shares are actually in Land Systems & Vehicles (71.0%) and Weapons (62.5%).
 		</p>
 
 		<p>
-			Administrative services (70.0%), Communications & Electronics (65.1%), and Digital Systems & Software (60.7%) are the sectors with contracts overwhelmingly awarded to vendors in the Ottawa region. This is consistent with a few plausible explanations. Proximity to the federal government, and the familiarity with government procurement processes that comes with it, likely makes Ottawa-based vendors an attractive choice for DND. Ottawa's established technology cluster, built up over decades of public-sector contracting, reinforces this advantage further. However, Ottawa’s advantage does not occur in all defence-related sectors, making up a minority of sectors like Aerospace & Space or Automotive & Heavy Vehicles.
+			Administrative services (70.0%), Communications & Electronics (65.1%), and Digital Systems & Software (60.7%) are the sectors with contracts overwhelmingly awarded to vendors in the Ottawa region. This is consistent with a few plausible explanations. Proximity to the federal government, and the familiarity with government procurement processes that comes with it, likely makes Ottawa-based vendors an attractive choice for DND. Ottawa's established technology sector, built up over decades of public-sector contracting, reinforces this advantage further. However, Ottawa’s advantage does not occur in all defence-related sectors, making up a minority of sectors like Aerospace & Space or Automotive & Heavy Vehicles.
 		</p>
 
 		<h3>

@@ -347,14 +347,14 @@
             const csvSize = await resSize.text();
 
             b1Data = csvParse(csvLoc).map((row) => ({
-                category: normalizeCategory(row['Type of Sale'].trim()),
-                amount: parseNum(row['Amount']),
+                category: normalizeCategory(row['Type.of.Sale'].trim()),
+                amount: parseNum(row['Amount_real']),
                 year: Number(row['Year'])
             })).filter((d) => d.year && d.amount > 0);
 
             b4Data = csvParse(csvGoods).map((row) => ({
-                category: row['Goods and Services'].trim(),
-                amount: parseNum(row['Sales of Goods and Services']),
+                category: row['Goods.and.Services'].trim(),
+                amount: parseNum(row['Sales_real']),
                 year: Number(row['Year'])
             })).filter((d) => d.year && d.amount > 0);
 
@@ -449,7 +449,6 @@
 
     async function renderCharts() {
         await ensurePlotly();
-
 
         if (overlayMode) {
             // Single combined chart — use first el
