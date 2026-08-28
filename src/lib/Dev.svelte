@@ -22,8 +22,8 @@
 {#if showPopup}
 <div class="overlay">
     <div class="popup-box">
-        <h3>The page is under development – last updated <span class="datetime">August 19, 2026</span></h3>
-        <p>Notable updates: CPI index adjusted real dollar values, new object sectors for contracts (sarah sent on 8/11), added creds for sarah & andrew, fixed bug with percentage not changing in sales by location</p>
+        <h3>The page is under development – last updated <span class="datetime">August 28, 2026</span></h3>
+        <p>Notable updates: August 28: Fixes & suggestions by Tara, mostly with the firms & contracts pages; August 19: CPI index adjusted real dollar values, new object sectors for contracts (sarah sent on 8/11), added creds for sarah & andrew, fixed bug with percentage not changing in sales by location</p>
         <button on:click={dismissPopup}>OK</button>
     </div>
 </div>

@@ -21,15 +21,30 @@
 	let map, mapContainer, mapLoaded = false, popup, markerLayer;
 
 	// Colour ramp
-	const SEQ_LO = '#a8d4f5', SEQ_HI = '#4db8ff';
+	const PIN_ICON = `${base}/img/pin_icon.svg`;
 
 	// Military icons (reuse)
-	const MIL_ICONS = {
-		'Canadian Army': `${base}/img/Badge_of_the_Canadian_Army.svg`,
-		'Royal Canadian Airforce': `${base}/img/Badge_of_the_RCAF.svg`,
-		'Royal Canadian Navy': `${base}/img/Badge_of_the_Royal_Canadian_Navy.svg`,
-		'All Services': `${base}/img/Badge_of_the_Canadian_Armed_Forces.png`
-	};
+	// const MIL_ICONS = {
+	// 	'Canadian Army': `${base}/img/Badge_of_the_Canadian_Army.svg`,
+	// 	'Royal Canadian Airforce': `${base}/img/Badge_of_the_RCAF.svg`,
+	// 	'Royal Canadian Navy': `${base}/img/Badge_of_the_Royal_Canadian_Navy.svg`,
+	// 	'All Services': `${base}/img/Badge_of_the_Canadian_Armed_Forces.png`
+	// };
+
+	// Add near the top, alongside your other helper functions
+	function starPath(outerR, points = 5, innerRatio = 0.5) {
+		const innerR = outerR * innerRatio;
+		const step = Math.PI / points;
+		let path = '';
+		for (let i = 0; i < points * 2; i++) {
+			const r = i % 2 === 0 ? outerR : innerR;
+			const angle = i * step - Math.PI / 2; // start pointing up
+			const x = r * Math.cos(angle);
+			const y = r * Math.sin(angle);
+			path += (i === 0 ? 'M' : 'L') + x.toFixed(2) + ',' + y.toFixed(2);
+		}
+		return path + 'Z';
+	}
 
 	// ----- Centroids by country name -----
 	let centroidByName = {};
@@ -220,9 +235,7 @@
 
 	// ----- Colour and size helpers -----
 	function colorFor(b) {
-		if (!(b.colorVal > 0)) return noDataColor;
-		const t = Math.min(1, b.colorVal / Math.max(1, absClamp));
-		return d3.interpolateRgb(SEQ_LO, SEQ_HI)(t);
+		return darkMode ? '#ffffff' : '#000000';
 	}
 
 	// Total metric (for overlay)
@@ -237,29 +250,27 @@
 		: 'Total contract value (shown)';
 	$: totalDisplay = metric === 'value' ? formatValue(totalMetric) : totalMetric.toLocaleString();
 
-	export let sizeBins = null;
 
-	const DEFAULT_BINS = { thresholds: [1], radii: [3, 25] };
-	$: effectiveBins = sizeBins && sizeBins.thresholds?.length ? sizeBins : DEFAULT_BINS;
-	$: absClamp = effectiveBins.thresholds[effectiveBins.thresholds.length - 1];
+	const CANADA_STAR_R = 30; // fixed, independent of value — add near MAX_LEGEND_R
+
+	// Exclude Canada from the scale that sizes every other bubble
+	$: maxSize = Math.max(1, ...bubbles.filter((b) => b.name !== 'Canada').map((b) => b.sizeVal));
 
 	function radiusForValue(v) {
-		const { thresholds, radii } = effectiveBins;
-		for (let i = 0; i < thresholds.length; i++) {
-			if (v < thresholds[i]) return radii[i];
-		}
-		return radii[radii.length - 1];
+		return 3 + Math.sqrt(Math.min(Math.max(v, 0), maxSize) / maxSize) * 25;
 	}
 
+	// Exclude Canada from the legend entirely
 	$: sizeLegendSteps = (() => {
-		const { thresholds, radii } = effectiveBins;
-		return radii.map((rBase, i) => {
-			const r = Math.min(Math.max(3, rBase * currentZoomScale), MAX_LEGEND_R);
-			let label;
-			if (i === 0) label = `< ${formatSizeVal(thresholds[0])}`;
-			else if (i === radii.length - 1) label = `${formatSizeVal(thresholds[i - 1])}+`;
-			else label = `${formatSizeVal(thresholds[i - 1])}–${formatSizeVal(thresholds[i])}`;
-			return { r, label };
+		const values = bubbles
+			.filter((b) => b.name !== 'Canada')
+			.map((b) => b.sizeVal)
+			.filter((v) => v > 0)
+			.sort((a, b) => a - b);
+		const steps = [0.01, 0.15, 0.4, 1]; // fractions of maxSize — tune spacing here
+		return steps.map((t) => {
+			const value = maxSize * t;
+			return { r: Math.min(radiusForValue(value), MAX_LEGEND_R), label: formatSizeVal(value) };
 		});
 	})();
 
@@ -277,7 +288,7 @@
 	// ----- Drawing military points (same as CMA, but may be off-world; it's fine) -----
 	function drawMilitaryPoints(g) {
 		if (!showMilitaryBases || !militaryGeojson) return;
-		const ICON_SIZE = 20;
+		const ICON_SIZE = 16;
 		const milNodes = militaryGeojson.features.map(f => {
 			const p = map.project(f.geometry.coordinates);
 			return { x: p.x, y: p.y, name: f.properties.Name, type: f.properties.Type };
@@ -287,9 +298,9 @@
 			.data(milNodes)
 			.join('image')
 			.attr('class', 'mil-marker')
-			.attr('href', d => MIL_ICONS[d.type] || MIL_ICONS['All Services'])
+			.attr('href', d => PIN_ICON)
 			.attr('x', d => d.x - ICON_SIZE / 2)
-			.attr('y', d => d.y - ICON_SIZE / 2)
+			.attr('y', d => d.y - ICON_SIZE)
 			.attr('width', ICON_SIZE)
 			.attr('height', ICON_SIZE)
 			.style('cursor', 'pointer')
@@ -307,6 +318,7 @@
 
 	// ----- Draw bubbles with d3 -----
 	let currentZoomScale = 1;
+	let currentZoom = 2.1;
 
 	function drawBubbles() {
 		console.log('>>> drawBubbles (world): START, mapLoaded=', mapLoaded, 'markerLayer=', !!markerLayer, 'bubbles=', bubbles.length);
@@ -316,22 +328,22 @@
 		}
 		console.time('drawBubblesWorld');
 		const zoom = map.getZoom();
+		currentZoom = zoom;
 		const zoomScale = Math.max(0.6, Math.min(2.5, (zoom - 0.5) / 1.5));
 		const labelMinR = zoom < 2 ? 999 : zoom < 4 ? 18 : zoom < 5.5 ? 12 : 8;
 		const svg = d3.select(markerLayer);
 		currentZoomScale = zoomScale;
 		svg.selectAll('*').remove()
+
 		const allNodes = bubbles
 			.filter((b) => isVisibleOnGlobe(b.lngLat))
 			.map((b) => {
 				const p = project(b.lngLat);
-				const baseR = radiusForValue(b.sizeVal);
-				return { ...b, x: p.x, y: p.y, r: Math.max(3, baseR * zoomScale) };
-		});;
+				const isCanada = b.name === 'Canada';
+				const baseR = isCanada ? CANADA_STAR_R : radiusForValue(b.sizeVal);
+				return { ...b, x: p.x, y: p.y, r: Math.max(3, baseR * zoomScale), isCanada };
+			});
 
-		console.log('nodes built:', allNodes.length);
-
-		console.time('drawBubblesWorld: d3 render');
 		const g = svg.append('g');
 		const node = g.selectAll('g.bubble')
 			.data(allNodes)
@@ -341,12 +353,29 @@
 			.on('mouseenter', (event, d) => showPopup(d))
 			.on('mouseleave', () => { if (popup) { popup.remove(); popup = null; } });
 
-		node.append('circle')
+		const canadaNode = node.filter((d) => d.isCanada);
+		const otherNodes = node.filter((d) => !d.isCanada);
+
+		// Every country EXCEPT Canada gets a circle
+		otherNodes.append('circle')
 			.attr('r', (d) => d.r)
 			.attr('fill', (d) => colorFor(d))
 			.attr('stroke', darkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)')
 			.attr('stroke-width', 0.6)
 			.attr('fill-opacity', 0.85);
+
+		// Canada — and ONLY Canada — gets the star, nothing else
+		canadaNode.append('path')
+			.attr('d', (d) => starPath(d.r))
+			.attr('fill', (d) => colorFor(d))
+			.attr('stroke', darkMode ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.25)')
+			.attr('stroke-width', 0.8)
+			.attr('fill-opacity', 0.95);
+
+		canadaNode.insert('circle', ':first-child')
+			.attr('r', (d) => d.r * 1.1)
+			.attr('fill', 'transparent');
+
 
 		node.filter((d) => d.r >= labelMinR)
 			.append('text')
@@ -449,6 +478,7 @@
 </script>
 
 <div class="map-row">
+	
 	<div class="map-wrapper" class:light={!darkMode}>
     <div class="map" bind:this={mapContainer}></div>
 		<div class="total-overlay"
@@ -456,6 +486,13 @@
 			<div class="total-label" style="color:{darkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)'};">{totalLabel}</div>
 			<div class="total-value" style="color:{darkMode ? '#ffffff' : '#111111'};">{totalDisplay}</div>
 		</div>
+
+		<!-- {#if mapLoaded}
+			<div style="position:absolute; top:12px; right:12px; background:#000; color:#0f0; padding:4px 8px; font-family:monospace; font-size:11px; z-index:10;">
+				
+				<div>zoom: {currentZoom.toFixed(2)} | scale: {currentZoomScale.toFixed(2)}</div>
+			</div>
+		{/if} -->
 
 		<div class="total-overlay foreign-overlay"
 			style="background:{darkMode ? '#1e2433' : '#ffffff'}; border-color:{darkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'};">
@@ -487,31 +524,19 @@
 	</div>
 </div>
 
-<div class="legend-bar">
-	<div class="legend-inner">
-		<div class="legend-title">
-			{metric === 'value' ? 'Total contract value' : metric === 'count' ? 'Number of contracts' : 'Number of vendors'}
-		</div>
-		<div class="ramp-wrap">
-			<div class="ramp" style="background: linear-gradient(to right, {SEQ_LO} 0%, {SEQ_HI} 100%)"></div>
-			<div class="ticks">
-				<span style="left:0%">0</span>
-				<span style="left:100%">{metric === 'value' ? formatValue(absClamp) : Math.round(absClamp).toLocaleString()}+</span>
-			</div>
-		</div>
-	</div>
+
+<div class="under-map">
+	Note: All dollar amounts are displayed in constant dollars (2025)
 </div>
 
 {#if showMilitaryBases}
 <div class="legend-bar" style="margin-top: 4px;">
 	<div class="legend-inner">
 		<div class="legend-title">Canadian Forces Base (CFB)</div>
-		<div class="mil-legend-row">
-			{#each Object.entries(MIL_ICONS) as [type, icon]}
-				<div class="mil-legend-item">
-					<img src={icon} alt={type} class="mil-icon" />{type}
-				</div>
-			{/each}
+        <div class="mil-legend-row">
+			<div class="mil-legend-item">
+				<img src={PIN_ICON} alt="DND Facility" class="mil-icon" />
+			</div>
 		</div>
 	</div>
 </div>
@@ -525,6 +550,7 @@
 	.mil-legend-row { display: flex; gap: 16px; flex-wrap: wrap; }
 	.mil-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
 	.mil-icon { width: 16px; height: 16px; object-fit: contain; }
+	.under-map { display: flex; font-family: OpenSans; font-size: 12px; color: var(--brandWhite); padding-top: 3px; }
 
 	.map-row {
 		display: flex;
@@ -591,16 +617,6 @@
 	}
 	.legend-title { font-family: OpenSansBold; margin-bottom: 6px; align-self: flex-start; }
 	.legend-inner { width: 680px; }
-	.ramp-wrap { position: relative; width: 100%; margin: 0 auto; }
-	.ramp { width: 100%; height: 12px; border-radius: 2px; }
-	.ticks { position: relative; height: 18px; margin-top: 2px; }
-	.ticks span {
-		position: absolute; transform: translateX(-50%);
-		font-size: 11px; color: var(--brandWhite); white-space: nowrap;
-	}
-	.ticks span:first-child { transform: none; }
-	.ticks span:last-child  { transform: translateX(-100%); }
-
 	.map-wrapper :global(.maplibregl-ctrl-bottom-left .maplibregl-ctrl) {
 		filter: invert(1) brightness(0.7);
 	}

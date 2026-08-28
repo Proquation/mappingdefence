@@ -1,4 +1,7 @@
 <script>
+
+    import { slide } from 'svelte/transition';
+
     export let csdRows = [];
     export let cmaRows = [];
     export let provRows = [];
@@ -10,6 +13,8 @@
     export let formatSales = (v) => `${v}`;
 
     const lqKey = { sales: 'lq_sales', firms: 'lq_firms', jobs: 'lq_jobs' };
+
+    let expanded = false;
 
     function absVal(r) {
         if (lqBasis === 'sales') return Number.isFinite(r.total_sales_M) ? r.total_sales_M : null;
@@ -41,18 +46,28 @@
             .slice(0, n);
     }
 
-    $: deps = [colourType, lqBasis, selectedYear, selectedMode];
+    $: deps = [colourType, lqBasis, selectedYear, selectedMode, selectedGeometry];
+
+    $: { deps; expanded = false; }
 
     // pick the active geography's rows + title + how many to show
     $: active = (() => {
         deps;  // dependency
         if (selectedGeometry === 'csd')
-            return { title: 'Top 10 census subdivisions', list: rank(csdRows, 10) };
+            return { title: 'Census Subdivisions', list: rank(csdRows, 25), expandable: true };
         if (selectedGeometry === 'cma')
-            return { title: 'Top 10 census metropolitan areas',
-                     list: rank(cmaRows.filter(r => !String(r.region_uid).startsWith('RURAL_')), 10) };
-        return { title: 'Provinces & territories', list: rank(provRows, 99) };
+            return { title: 'Census Metropolitan Areas',
+                     list: rank(cmaRows.filter(r => !String(r.region_uid).startsWith('RURAL_')), 25),
+                     expandable: true };
+        return { title: 'Provinces & territories', list: rank(provRows, 99), expandable: false };
     })();
+
+    $: tenList = active.list.slice(0, 10);
+    $: twentyfiveList = active.list.slice(10, 25);
+
+    $: displayTitle = active.expandable
+        ? `Top ${expanded ? Math.min(25, active.list.length) : Math.min(10, active.list.length)} ${active.title}`
+        : active.title;
 
     $: console.log("selectedGeometry:", selectedGeometry);
 
@@ -65,34 +80,51 @@
 
 <div class="rankings">
     <div class="rank-col">
-        <h4>{active.title}</h4>
-                <!-- <div style="color:red">DEBUG geom={selectedGeometry}</div> -->
+        <h4>{displayTitle}</h4>
         <table>
             <thead>
-            <tr>
-                <th class="rk">#</th>
-                <th>Region</th>
-                {#if colourType !== 'totals'}<th class="num">LQ ({lqBasis})</th>{/if}
-                <th class="num">{metricLabel}</th>
-                <th class="num">Firms</th>
-            </tr>
-        </thead>
-        <tbody>
-            {#each active.list as r, i}
                 <tr>
-                    <td class="rk">{i + 1}</td>
-                    <td class="name">{r.region_name}</td>
-                    {#if colourType !== 'totals'}
-                        <td class="num">{Number.isFinite(lqVal(r)) ? lqVal(r).toFixed(2) + '×' : '—'}</td>
-                    {/if}
-                    <td class="num">{fmtAbs(r)}</td>
-                    <td class="num">{firmsVal(r)}</td>
+                    <th class = "rk">#</th>
+                    <th>Region</th>
+                    {#if colourType !== 'totals'}<th class = "num">LQ ({lqBasis})</th>{/if}
+                    <th class = "num">{metricLabel}</th>
                 </tr>
-            {:else}
-                <tr><td colspan={colourType === 'totals' ? 4 : 5} class="empty">No data for this selection</td></tr>
-            {/each}
-        </tbody>
+            </thead>
+
+            <tbody>
+                {#each tenList as r, i}
+                    <tr>
+                        <td class="rk">{i + 1}</td>
+                        <td class="name">{r.region_name}</td>
+                        {#if colourType !== 'totals'}
+                            <td class="num">{Number.isFinite(lqVal(r)) ? lqVal(r).toFixed(2) : '—'}</td>
+                        {/if}
+                        <td class="num">{fmtAbs(r)}</td>
+                    </tr>
+                {:else}
+                    <tr><td colspan={colourType === 'totals' ? 4 : 5} class="empty">No data for this selection</td></tr>
+                {/each}
+
+                {#if expanded}
+                    {#each twentyfiveList as r, i (r.region_uid)}
+                        <tr transition:slide={{ duration: 200 }}>
+                            <td class="rk">{i + 11}</td>
+                            <td class="name">{r.region_name}</td>
+                            {#if colourType !== 'totals'}
+                                <td class="num">{Number.isFinite(lqVal(r)) ? lqVal(r).toFixed(2) : '—'}</td>
+                            {/if}
+                            <td class="num">{fmtAbs(r)}</td>
+                        </tr>
+                    {/each}
+                {/if}
+            </tbody>
         </table>
+
+        {#if active.expandable && twentyfiveList.length > 0}
+            <button class="expand-btn" on:click={() => (expanded = !expanded)}>
+                {expanded ? 'Show top 10' : `Show up to Top 25`}
+            </button>
+        {/if}
     </div>
 </div>
 
@@ -108,4 +140,17 @@
     .name { max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .empty { color: rgba(255,255,255,0.4); font-style: italic; }
     tr:hover td { background: rgba(255,255,255,0.04); }
+    .expand-btn {
+        display: block;
+        margin: 10px auto 0;
+        padding: 4px 12px;
+        border: 1px solid var(--brandWhite);
+        border-radius: 3px;
+        background: transparent;
+        color: var(--brandWhite);
+        font-family: OpenSans;
+        font-size: 12px;
+        cursor: pointer;
+    }
+    .expand-btn:hover { background: rgba(255,255,255,0.08); }
 </style>

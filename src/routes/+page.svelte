@@ -114,34 +114,16 @@
 		subtitle=""
 	/>
 
-	<!-- <div class="text">
-
-		<AuthorDate
-			authors="<a href='' target='_blank'>Tara Vinodrai</a>, <a href='' target='_blank'>Karen Chapple</a>, <a href='' target='_blank'>Jeff Allen</a>, Muhammad Khalis Bin Samion, Eli Easton, Rick DiFrancesco"
-			date="October 2025"
-		/>
-	
-	</div> -->
-
-	<!-- <ImageSingle
-		imageURL="./images/border-rainbow-bridge.jpg"
-		caption="Rainbow Bridge, Niagara River."
-		source='Photo by Lennon Kong on Unsplash.'
-		altText=""
-		maxWidth="680px"
-		link="no"
-	/> -->
-
 
 	<div class="text">	
 
 		<p>
-			In the face of global geopolitical realignment, the Carney Administration has recommitted Canada to defence. In March, 2026, Canada officially reached NATO's target of spending 2% of its gross domestic product (GDP) on defence. With a target of 5% of GDP spent on defence by 2035, and a new <a href="https://www.canada.ca/en/department-national-defence/corporate/reports-publications/industrial-strategy/security-sovereignty-prosperity.html">Defence Industrial Strategy</a> in place, Canadian cities and regions are likely to see considerable investment and growth in the next decade. But where? 
+			In the face of global geopolitical realignment, the Carney Government has recommitted Canada to defence. In March, 2026, Canada officially reached NATO's target of spending 2% of its gross domestic product (GDP) on defence. With a target of 5% of GDP spent on defence by 2035, and a new <a href="https://www.canada.ca/en/department-national-defence/corporate/reports-publications/industrial-strategy/security-sovereignty-prosperity.html">Defence Industrial Strategy</a> in place, Canadian cities and regions are likely to see considerable investment and growth in the next decade. But where? 
 
 		</p>
 
 		<p>
-			This website examines the current location of the defence industry (firms, jobs, and sales) and Canadian Forces (bases and stations) across Canada’s cities and metropolitan areas. We also look at the geography of recent defence spending (in the form of contracts) in order to determine which places are likely to benefit in the near future. This then points to the local and regional economic development policies that should be in place to ensure prosperity for all.
+			This website examines the current location of the defence industry (firms, jobs, and sales) and Canadian Forces (e.g., bases, stations, and research facilities) across Canada’s cities and metropolitan areas. We also look at the geography of recent defence spending (in the form of contracts) in order to determine which places are likely to benefit in the near future. This then points to the local and regional economic development policies that should be in place to ensure prosperity for all.
 		</p>
 
 		<p>
@@ -189,7 +171,7 @@
 		<ul>
 		
 		<li> 
-			Learn about <a href="./definition">what defence means</a> in this context.
+			Read about <a href="./definition">how we have defined the defence industry</a>.
 		</li>
 
 		<li>
@@ -232,7 +214,7 @@
 		</p>
 
 		<p>
-			<a href='https://www.linkedin.com/in/sarahbridgetgibbons/' target="_blank">Sarah Gibbons</a> is a Research Assistant at the School of Cities and a graduate student at the University of Toronto, where she is pursuing a Master of Science in Planning and a Master of Arts in Economics..
+			<a href='https://www.linkedin.com/in/sarahbridgetgibbons/' target="_blank">Sarah Gibbons</a> is a Research Assistant at the School of Cities and a graduate student at the University of Toronto, where she is pursuing a Master of Science in Planning and a Master of Arts in Economics.
 		</p>
 
 		<p>

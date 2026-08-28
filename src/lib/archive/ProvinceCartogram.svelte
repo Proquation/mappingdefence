@@ -183,7 +183,7 @@
 	function showPopup(d) {
 		if (popup) popup.remove();
 		const salesTxt = d.suppressed ? 'Suppressed' : formatSales(d.sales);
-		const lqTxt = d.lq == null ? 'N/A' : d.lq.toFixed(2) + '×';
+		const lqTxt = d.lq == null ? 'N/A' : d.lq.toFixed(2) ;
 		const empTxt = (d.avg_employees == null || d.avg_employees === '') ? 'N/A'
 			: Number(d.avg_employees).toFixed(0);
 		const jobsTxt = (d.total_jobs == null || d.total_jobs === '') ? 'N/A'

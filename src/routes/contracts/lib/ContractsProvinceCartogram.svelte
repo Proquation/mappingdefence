@@ -16,14 +16,14 @@
 
 	let map, mapContainer, mapLoaded = false, popup, markerLayer;
 
-	const SEQ_LO = '#a8d4f5', SEQ_HI = '#4db8ff';
+	const PIN_ICON = `${base}/img/pin_icon.svg`;
 
-	const MIL_ICONS = {
-		'Canadian Army': `${base}/img/Badge_of_the_Canadian_Army.svg`,
-		'Royal Canadian Airforce': `${base}/img/Badge_of_the_RCAF.svg`,
-		'Royal Canadian Navy': `${base}/img/Badge_of_the_Royal_Canadian_Navy.svg`,
-		'All Services': `${base}/img/Badge_of_the_Canadian_Armed_Forces.png`
-	};
+	// const MIL_ICONS = {
+	// 	'Canadian Army': `${base}/img/Badge_of_the_Canadian_Army.svg`,
+	// 	'Royal Canadian Airforce': `${base}/img/Badge_of_the_RCAF.svg`,
+	// 	'Royal Canadian Navy': `${base}/img/Badge_of_the_Royal_Canadian_Navy.svg`,
+	// 	'All Services': `${base}/img/Badge_of_the_Canadian_Armed_Forces.png`
+	// };
 
 	let centroidByUid = {};
 
@@ -132,9 +132,7 @@
 	})();
 
 	function colorFor(b) {
-		if (!(b.colorVal > 0)) return noDataColor;
-		const t = Math.min(1, b.colorVal / Math.max(1, absClamp));
-		return d3.interpolateRgb(SEQ_LO, SEQ_HI)(t);
+		return darkMode ? '#ffffff' : '#000000';
 	}
 
 	$: totalMetric = (() => {
@@ -148,28 +146,18 @@
 		: 'Total contract value (shown)';
 	$: totalDisplay = metric === 'value' ? formatValue(totalMetric) : totalMetric.toLocaleString();
 
-	export let sizeBins = null; // { thresholds, radii } from parent, fixed across years for current filter
-
-	const DEFAULT_BINS = { thresholds: [1], radii: [10, 42] };
-	$: effectiveBins = sizeBins && sizeBins.thresholds?.length ? sizeBins : DEFAULT_BINS;
-	$: absClamp = effectiveBins.thresholds[effectiveBins.thresholds.length - 1]; // for color gradient only
+	$: maxSize = Math.max(1, ...bubbles.map(b => b.sizeVal));
 
 	function radiusForValue(v) {
-		const { thresholds, radii } = effectiveBins;
-		for (let i = 0; i < thresholds.length; i++) {
-			if (v < thresholds[i]) return radii[i];
-		}
-		return radii[radii.length - 1];
+		return 3 + Math.sqrt(Math.min(Math.max(v, 0), maxSize) / maxSize) * 25;
 	}
 
 	$: sizeLegendSteps = (() => {
-		const { thresholds, radii } = effectiveBins;
-		return radii.map((r, i) => {
-			let label;
-			if (i === 0) label = `< ${formatSizeVal(thresholds[0])}`;
-			else if (i === radii.length - 1) label = `${formatSizeVal(thresholds[i - 1])}+`;
-			else label = `${formatSizeVal(thresholds[i - 1])}–${formatSizeVal(thresholds[i])}`;
-			return { r, label };
+		if (!maxSize) return [];
+		const steps = [0.05, 0.15, 0.4, 1]; // fractions of maxSize — tune spacing here
+		return steps.map((t) => {
+			const value = maxSize * t;
+			return { r: Math.min(radiusForValue(value), MAX_LEGEND_R), label: formatSizeVal(value) };
 		});
 	})();
 
@@ -181,7 +169,7 @@
 
 	function drawMilitaryPoints(g) {
 		if (!showMilitaryBases || !militaryGeojson) return;
-		const ICON_SIZE = 20;
+		const ICON_SIZE = 16;
 		const milNodes = militaryGeojson.features.map(f => {
 			const p = map.project(f.geometry.coordinates);
 			return { x: p.x, y: p.y, name: f.properties.Name, type: f.properties.Type };
@@ -191,9 +179,9 @@
 			.data(milNodes)
 			.join('image')
 			.attr('class', 'mil-marker')
-			.attr('href', d => MIL_ICONS[d.type] || MIL_ICONS['All Services'])
+			.attr('href', d => PIN_ICON)
 			.attr('x', d => d.x - ICON_SIZE / 2)
-			.attr('y', d => d.y - ICON_SIZE / 2)
+			.attr('y', d => d.y - ICON_SIZE)
 			.attr('width', ICON_SIZE)
 			.attr('height', ICON_SIZE)
 			.style('cursor', 'pointer')
@@ -359,31 +347,18 @@
 	</div>
 </div>
 
-<div class="legend-bar">
-	<div class="legend-inner">
-		<div class="legend-title">
-			{metric === 'value' ? 'Total contract value' : metric === 'count' ? 'Number of contracts' : 'Number of vendors'}
-		</div>
-		<div class="ramp-wrap">
-			<div class="ramp" style="background: linear-gradient(to right, {SEQ_LO} 0%, {SEQ_HI} 100%)"></div>
-			<div class="ticks">
-				<span style="left:0%">0</span>
-				<span style="left:100%">{metric === 'value' ? formatValue(absClamp) : Math.round(absClamp).toLocaleString()}+</span>
-			</div>
-		</div>
-	</div>
+<div class="under-map">
+	Note: All dollar amounts are displayed in constant dollars (2025)
 </div>
 
 {#if showMilitaryBases}
 <div class="legend-bar" style="margin-top: 4px;">
 	<div class="legend-inner">
 		<div class="legend-title">Canadian Forces Base (CFB)</div>
-		<div class="mil-legend-row">
-			{#each Object.entries(MIL_ICONS) as [type, icon]}
-				<div class="mil-legend-item">
-					<img src={icon} alt={type} class="mil-icon" />{type}
-				</div>
-			{/each}
+        <div class="mil-legend-row">
+			<div class="mil-legend-item">
+				<img src={PIN_ICON} alt="DND Facility" class="mil-icon" />
+			</div>
 		</div>
 	</div>
 </div>
@@ -397,6 +372,7 @@
 	.mil-legend-row { display: flex; gap: 16px; flex-wrap: wrap; }
 	.mil-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
 	.mil-icon { width: 16px; height: 16px; object-fit: contain; }
+	.under-map { display: flex; font-family: OpenSans; font-size: 12px; color: var(--brandWhite); padding-top: 3px; }
 
 	.map-row {
 		display: flex;
@@ -458,16 +434,6 @@
 	}
 	.legend-title { font-family: OpenSansBold; margin-bottom: 6px; align-self: flex-start; }
 	.legend-inner { width: 680px; }
-	.ramp-wrap { position: relative; width: 100%; margin: 0 auto; }
-	.ramp { width: 100%; height: 12px; border-radius: 2px; }
-	.ticks { position: relative; height: 18px; margin-top: 2px; }
-	.ticks span {
-		position: absolute; transform: translateX(-50%);
-		font-size: 11px; color: var(--brandWhite); white-space: nowrap;
-	}
-	.ticks span:first-child { transform: none; }
-	.ticks span:last-child  { transform: translateX(-100%); }
-
 	.map-wrapper :global(.maplibregl-ctrl-bottom-left .maplibregl-ctrl) {
 		filter: invert(1) brightness(0.7);
 	}

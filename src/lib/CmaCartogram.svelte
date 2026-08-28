@@ -4,6 +4,7 @@
 	import 'maplibre-gl/dist/maplibre-gl.css';
 	import * as d3 from 'd3';
 	import { base } from '$app/paths';
+	import { UNDER, MID, OVER, SEQ_LO, SEQ_HI } from '$lib/cartogram-colours.js';
 
 	export let rows = [];
 	export let cmaGeojson = null;
@@ -20,6 +21,38 @@
 
 	export let compareRows = [];
 
+	const PROVINCE_ORDER = [
+		'Newfoundland and Labrador',
+		'Prince Edward Island',
+		'Nova Scotia',
+		'New Brunswick',
+		'Quebec',
+		'Ontario',
+		'Manitoba',
+		'Saskatchewan',
+		'Alberta',
+		'British Columbia',
+		'Nunavut',
+		'Northwest Territories',
+		'Yukon'
+	];
+
+	const PROVINCE_RURAL_UID = {
+		'Newfoundland and Labrador': 'RURAL_NL',
+		'Prince Edward Island': 'RURAL_PE',
+		'Nova Scotia': 'RURAL_NS',
+		'New Brunswick': 'RURAL_NB',
+		'Quebec': 'RURAL_QC',
+		'Ontario': 'RURAL_ON',
+		'Manitoba': 'RURAL_MB',
+		'Saskatchewan': 'RURAL_SK',
+		'Alberta': 'RURAL_AB',
+		'British Columbia': 'RURAL_BC',
+		'Nunavut': 'RURAL_NU',
+		'Northwest Territories': 'RURAL_NT',
+		'Yukon': 'RURAL_YT'
+	};
+
 	$: compareLqByUid = (() => {
 		const m = {};
 		compareRows.forEach(r => {
@@ -29,18 +62,15 @@
 		return m;
 	})();
 
-	const UNDER = '#ff6b4a';
-	const MID   = '#CCCCCC';
-	const OVER  = '#4db8ff';
-	const SEQ_LO = '#1a2a4a', SEQ_HI = '#4db8ff';
+	const PIN_ICON = `${base}/img/pin_icon.svg`;
 
-	const MIL_ICONS = {
-		'Canadian Army': `${base}/img/Badge_of_the_Canadian_Army.svg`,
-		'Royal Canadian Airforce': `${base}/img/Badge_of_the_RCAF.svg`,
-		'Royal Canadian Navy': `${base}/img/Badge_of_the_Royal_Canadian_Navy.svg`,
-		'All Services': `${base}/img/Badge_of_the_Canadian_Armed_Forces.png`
-	};
-
+	// const MIL_ICONS = {
+	// 	'Canadian Army': `${base}/img/Badge_of_the_Canadian_Army.svg`,
+	// 	'Royal Canadian Airforce': `${base}/img/Badge_of_the_RCAF.svg`,
+	// 	'Royal Canadian Navy': `${base}/img/Badge_of_the_Royal_Canadian_Navy.svg`,
+	// 	'All Services': `${base}/img/Badge_of_the_Canadian_Armed_Forces.png`
+	// };
+	
 	const RURAL_POINTS = {
 		RURAL_ON: [-84.5, 49.5],
 		RURAL_QC: [-72.0, 52.0],
@@ -191,6 +221,23 @@
 	$: cmaBubbles = bubbles.filter(b => !String(b.uid).startsWith('RURAL_'));
 	$: ruralBubbles = bubbles.filter(b => String(b.uid).startsWith('RURAL_'));
 
+	$: ruralTableRows = PROVINCE_ORDER.map((prov) => {
+		const uid = PROVINCE_RURAL_UID[prov];
+		const match = ruralBubbles.find((b) => b.uid === uid);
+		if (match) {
+			return { ...match, name: prov }; // force the display name to the clean province name
+		}
+		return {
+			uid,
+			name: `${prov}`,
+			lq: null,
+			sales: null,
+			total_jobs: null,
+			n_firms: null,
+			suppressed: false
+		};
+	});
+
 	$: totalMetric = (() => {
 		if (lqBasis === 'sales') return cmaBubbles.map(b => b.sales).filter(Number.isFinite).reduce((s, v) => s + v, 0);
 		if (lqBasis === 'jobs')  return cmaBubbles.map(b => b.total_jobs).filter(Number.isFinite).reduce((s, v) => s + v, 0);
@@ -224,7 +271,7 @@
 	}
 
 	function formatSizeVal(v) {
-		if (colourType === 'totals') return v.toFixed(2) + '×';
+		if (colourType === 'totals') return v.toFixed(2);
 		if (lqBasis === 'sales') return formatSales(v);
 		return Math.round(v).toLocaleString();
 	}
@@ -259,7 +306,7 @@
 
 	function drawMilitaryPoints(g) {
 		if (!showMilitaryBases || !militaryGeojson) return;
-		const ICON_SIZE = 20;
+		const ICON_SIZE = 16;
 		const milNodes = militaryGeojson.features.map(f => {
 			const p = map.project(f.geometry.coordinates);
 			return { x: p.x, y: p.y, name: f.properties.Name, type: f.properties.Type };
@@ -269,9 +316,9 @@
 			.data(milNodes)
 			.join('image')
 			.attr('class', 'mil-marker')
-			.attr('href', d => MIL_ICONS[d.type] || MIL_ICONS['All Services'])
+			.attr('href', d => PIN_ICON)
 			.attr('x', d => d.x - ICON_SIZE / 2)
-			.attr('y', d => d.y - ICON_SIZE / 2)
+			.attr('y', d => d.y - ICON_SIZE)
 			.attr('width', ICON_SIZE)
 			.attr('height', ICON_SIZE)
 			.style('cursor', 'pointer')
@@ -338,7 +385,7 @@
 
 	function showPopup(d) {
 		if (popup) popup.remove();
-		const yoyTxt = d.lqDiff == null ? 'N/A' : (d.lqDiff >= 0 ? '+' : '') + d.lqDiff.toFixed(2) + '×';
+		const yoyTxt = d.lqDiff == null ? 'N/A' : (d.lqDiff >= 0 ? '+' : '') + d.lqDiff.toFixed(2);
 
 		function firmsTxt(n_firms) {
 			if (n_firms === '0' || n_firms == null) return 'No firms';
@@ -347,7 +394,7 @@
 		}
 
 		const noData = (d.n_firms === '0' || d.n_firms == null);
-		const lqTxt = noData ? 'No data' : d.lq == null ? 'Suppressed' : d.lq.toFixed(2) + '×';
+		const lqTxt = noData ? 'No data' : d.lq == null ? 'Suppressed' : d.lq.toFixed(2);
 
 		let rows;
 		if (lqBasis === 'firms') {
@@ -465,6 +512,10 @@
 	</div>
 </div>
 
+<div class="under-map">
+	Note: All dollar amounts are displayed in constant dollars (2025)
+</div>
+
 <div class="legend-bar">
 	<div class="legend-inner">
    	{#if colourType === 'totals'}
@@ -472,9 +523,9 @@
 		<div class="ramp-wrap">
 			<div class="ramp" style="background: linear-gradient(to right, {SEQ_LO} 0%, {SEQ_HI} 100%)"></div>
 			<div class="ticks">
-				<span style="left:0%">{(1/lqClamp).toFixed(2)}×</span>
-				<span style="left:50%" class="tick-strong">1.0×</span>
-				<span style="left:100%">{lqClamp.toFixed(1)}×</span>
+				<span style="left:0%">{lqBasis === 'sales' ? formatSales(0) : '0'}</span>
+				<span style="left:50%">{lqBasis === 'sales' ? formatSales(absClamp / 2) : Math.round(absClamp / 2).toLocaleString()}</span>
+				<span style="left:100%">{lqBasis === 'sales' ? formatSales(absClamp) : Math.round(absClamp).toLocaleString()}+</span>
 			</div>
 		</div>
 	{:else if colourType === 'yoy'}
@@ -482,9 +533,9 @@
 		<div class="ramp-wrap">
 			<div class="ramp" style="background: linear-gradient(to right, {UNDER} 0%, {MID} 50%, {OVER} 100%)"></div>
 			<div class="ticks">
-				<span style="left:0%">−{yoyClamp.toFixed(2)}×</span>
+				<span style="left:0%">−{yoyClamp.toFixed(2)}</span>
 				<span style="left:50%" class="tick-strong">0</span>
-				<span style="left:100%">+{yoyClamp.toFixed(2)}×</span>
+				<span style="left:100%">+{yoyClamp.toFixed(2)}</span>
 			</div>
 		</div>
 		<div class="legend-note">Positive = LQ increased between the two selected years</div>
@@ -493,9 +544,9 @@
 		<div class="ramp-wrap">
 			<div class="ramp" style="background: linear-gradient(to right, {UNDER} 0%, {MID} 50%, {OVER} 100%)"></div>
 			<div class="ticks">
-				<span style="left:0%">{(1/lqClamp).toFixed(2)}×</span>
-				<span style="left:50%" class="tick-strong">1.0×</span>
-				<span style="left:100%">{lqClamp.toFixed(1)}×</span>
+				<span style="left:0%">{(1/lqClamp).toFixed(2)}</span>
+				<span style="left:50%" class="tick-strong">1.0</span>
+				<span style="left:100%">{lqClamp.toFixed(1)}</span>
 			</div>
 		</div>
 		<div class="legend-note">1.0× = national average</div>
@@ -508,42 +559,40 @@
     <div class="legend-inner">
         <div class="legend-title">Canadian Forces Base (CFB)</div>
         <div class="mil-legend-row">
-			{#each Object.entries(MIL_ICONS) as [type, icon]}
-				<div class="mil-legend-item">
-					<img src={icon} alt={type} class="mil-icon" />{type}
-				</div>
-			{/each}
+			<div class="mil-legend-item">
+				<img src={PIN_ICON} alt="DND Facility" class="mil-icon" />
+			</div>
 		</div>
     </div>
 </div>
 {/if}
 
 <!-- Rural table -->
-{#if ruralBubbles.length}
+{#if ruralTableRows.length}
 <div class="rural-table">
-    <div class="rural-title">Rural regions</div>
+    <div class="rural-title">Rural regions (not shown on map)</div>
     <table>
         <thead>
             <tr>
-                <th>Region</th>
+                <th>Rural portion of province</th>
                 <th>LQ ({lqBasis})</th>
                 <th>{lqBasis === 'jobs' ? 'Jobs' : lqBasis === 'sales' ? 'Sales' : 'Firms'}</th>
                 <th>Firms</th>
             </tr>
         </thead>
         <tbody>
-            {#each ruralBubbles.sort((a,b) => (b.lq ?? -1) - (a.lq ?? -1)) as b}
-            <tr>
-                <td>{b.name}</td>
-                <td>{b.lq == null ? 'N/A' : b.lq.toFixed(2) + '×'}</td>
-                <td>
-                    {#if lqBasis === 'jobs'}{b.total_jobs == null ? 'N/A' : Number(b.total_jobs).toLocaleString()}
-                    {:else if lqBasis === 'sales'}{b.suppressed ? 'Suppressed' : formatSales(b.sales)}
-                    {:else}{b.n_firms ?? 'N/A'}{/if}
-                </td>
-                <td>{b.n_firms ?? 'N/A'}</td>
-            </tr>
-            {/each}
+           {#each ruralTableRows as b}
+			<tr>
+				<td>{b.name}</td>
+				<td>{b.lq == null ? 'N/A' : b.lq.toFixed(2)}</td>
+				<td>
+					{#if lqBasis === 'jobs'}{b.total_jobs == null ? 'N/A' : Number(b.total_jobs).toLocaleString()}
+					{:else if lqBasis === 'sales'}{b.sales == null ? 'N/A' : (b.suppressed ? 'Suppressed' : formatSales(b.sales))}
+					{:else}{b.n_firms ?? 'N/A'}{/if}
+				</td>
+				<td>{b.n_firms ?? 'N/A'}</td>
+			</tr>
+			{/each}
         </tbody>
     </table>
 </div>
@@ -557,6 +606,7 @@
 	.mil-legend-row { display: flex; gap: 16px; flex-wrap: wrap; }
 	.mil-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
 	.mil-icon { width: 16px; height: 16px; object-fit: contain; }
+	.under-map { display: flex; font-family: OpenSans; font-size: 12px; color: var(--brandWhite); padding-top: 3px; }
 
 	.map-row {
 		display: flex;

@@ -99,19 +99,6 @@
 		console.log('SRI LANKA 2021 RAW ROWS:', rawRows);
 	}
 
-	$: sizeBins =
-		metric === 'count' ? computeSizeBins(filteredAllYears, 'n_contracts')
-		: metric === 'vendors' ? computeSizeBins(filteredAllYears, 'n_vendors')
-		: computeSizeBins(filteredAllYears, 'total_value');
-
-	$: sizeBinsAllYearsView =
-		metric === 'count' ? computeSizeBins(activeRows, 'n_contracts')
-		: metric === 'vendors' ? computeSizeBins(activeRows, 'n_vendors')
-		: computeSizeBins(activeRows, 'total_value');
-
-	$: effectiveSizeBins = selectedYear === 'ALL' ? sizeBinsAllYearsView : sizeBins;
-
-
 	let usGeojson = null;
 	let darkMode = true;
 
@@ -154,13 +141,6 @@
 		}));
 	}
 
-	function roundToSigFigs(num, sig = 3) {
-		if (!num) return 0;
-		const magnitude = Math.pow(10, sig - Math.ceil(Math.log10(Math.abs(num))));
-		return Math.round(num * magnitude) / magnitude;
-	}
-
-	
 	$: filteredAllYears = (currentAggData || []).filter((r) => {
 		const tierMatch = selectedTier === NO_FILTER ? r.tier === 'ALL' : r.tier === selectedTier;
 		const sectorMatch = selectedCluster === NO_FILTER ? r.object_sector === 'ALL' : r.object_sector === selectedCluster;
@@ -185,37 +165,6 @@
 	// $: filteredAllYears = (aggData[selectedGeometry] || []).filter(
 	// 	(r) => r.tier === selectedTier && r.object_sector === selectedCluster
 	// );
-
-	function computeSizeBins(rows, field) {
-		const vals = rows
-			.map((r) => r[field])
-			.filter((v) => Number.isFinite(v) && v > 0)
-			.sort((a, b) => a - b);
-
-		if (!vals.length) return { thresholds: [1], radii: [3, 25] };
-
-		const quantile = (p) => {
-			const idx = (vals.length - 1) * p;
-			const lo = Math.floor(idx), hi = Math.ceil(idx);
-			if (lo === hi) return vals[lo];
-			return vals[lo] + (vals[hi] - vals[lo]) * (idx - lo);
-		};
-
-		// 4 cut points -> up to 5 bins
-		const raw = [0.50, 0.70, 0.90, 0.99].map(quantile);
-		const thresholds = [...new Set(raw.map((v) => roundToSigFigs(v, 2)))].sort((a, b) => a - b);
-
-		const allRadii = [4, 10, 17, 24, 32];
-		const radii = allRadii.slice(0, thresholds.length + 1);
-
-		return { thresholds, radii };
-	}
-
-	// direct reference to filteredAllYears so Svelte tracks the dependency correctly
-	// $: sizeBins =
-	// 	metric === 'count' ? computeSizeBins(filteredAllYears, 'n_contracts')
-	// 	: metric === 'vendors' ? computeSizeBins(filteredAllYears, 'n_vendors')
-	// 	: computeSizeBins(filteredAllYears, 'total_value_real_real');
 
 	async function ensureGeojson(file) {
 		if (geojsonCache[file]) return geojsonCache[file];
@@ -450,7 +399,7 @@
 	<div class="text">
 		<AuthorDate
 			authors="<a href='https://schoolofcities.utoronto.ca/people/karen-chapple/' target='_blank'>Karen Chapple</a>, <a href='https://discover.research.utoronto.ca/8035-tara-vinodrai' target='_blank'>Tara Vinodrai</a>, <a href='https://www.linkedin.com/in/sarahbridgetgibbons/'>Sarah Gibbons</a>, <a href='https://www.linkedin.com/in/yihoi-jung-0b95351b5/' target='_blank'>Yihoi Jung</a>, <a href='https://www.linkedin.com/in/andrewwfeng/' target='_blank'>Andrew Feng</a>"
-			date="Last updated August 18th, 2026."
+			date="Last updated August 28th, 2026."
 		/>
 		<p>
 			Department of National Defence (DND) contract disclosures show who the federal government pays for
@@ -540,7 +489,7 @@
 				<div class="filter-group">
 					<span class="filter-label">Metric</span>
 					<select class="year-select" bind:value={metric}>
-						<option value="value">Contract value (adjusted to CAD 2025)</option>
+						<option value="value">Contract value</option>
 						<option value="count">Number of contracts</option>
 						<option value="vendors">Number of vendors</option>
 					</select>
@@ -567,7 +516,6 @@
 					{darkMode}
 					{militaryGeojson}
 					{showMilitaryBases}
-					sizeBins = {effectiveSizeBins}
 				/>
 			{:else if selectedGeometry === 'prov'}
 				<ContractsProvinceCartogram
@@ -579,7 +527,6 @@
 					{darkMode}
 					{militaryGeojson}
 					{showMilitaryBases}
-					sizeBins = {effectiveSizeBins}
 				/>
 			{:else if selectedGeometry === 'world'}
 				<ContractsWorldCartogram
@@ -590,7 +537,6 @@
 					{darkMode}
 					{militaryGeojson}
 					{showMilitaryBases}
-					sizeBins = {effectiveSizeBins}
 				/>
 			{/if}
 		</section>

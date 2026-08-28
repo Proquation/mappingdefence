@@ -5,6 +5,7 @@
 	import { Protocol } from 'pmtiles';
 	import { base } from '$app/paths';
 	import * as d3 from 'd3';
+	import { UNDER, MID, OVER, SEQ_LO, SEQ_HI } from '$lib/cartogram-colours.js';
 
 	const protocol = new Protocol();
 	maplibregl.addProtocol('pmtiles', protocol.tile);
@@ -35,19 +36,14 @@
 		'All Services': '#573F3E'           
 	};
 
-	const MIL_ICONS = {
-		'Canadian Army': `${base}/img/Badge_of_the_Canadian_Army.svg`,
-		'Royal Canadian Airforce': `${base}/img/Badge_of_the_RCAF.svg`,
-		'Royal Canadian Navy': `${base}/img/Badge_of_the_Royal_Canadian_Navy.svg`,
-		'All Services': `${base}/img/Badge_of_the_Canadian_Armed_Forces.png`
-	};
-	const SEQ_LO = '#1a2a4a', SEQ_HI = '#4db8ff';
+	const PIN_ICON = `${base}/img/pin_icon.svg`;
 
-
-	let UNDER = '#ff6b4a';
-	let MID   = '#CCCCCC';
-	let OVER  = '#4db8ff';
-
+	// const MIL_ICONS = {
+	// 	'Canadian Army': `${base}/img/Badge_of_the_Canadian_Army.svg`,
+	// 	'Royal Canadian Airforce': `${base}/img/Badge_of_the_RCAF.svg`,
+	// 	'Royal Canadian Navy': `${base}/img/Badge_of_the_Royal_Canadian_Navy.svg`,
+	// 	'All Services': `${base}/img/Badge_of_the_Canadian_Armed_Forces.png`
+	// };
 	let map, mapContainer, mapLoaded = false, popup;
 
 	$: mapBg    = darkMode ? '#333333' : '#e8e8e8';
@@ -195,7 +191,7 @@
 		d3svg.selectAll('*').remove();
 		if (!showMilitaryBases || !militaryGeojson) return;
 
-		const ICON_SIZE = 20;
+		const ICON_SIZE = 16;
 		const milNodes = militaryGeojson.features.map(f => {
 			const p = map.project(f.geometry.coordinates);
 			return { x: p.x, y: p.y, name: f.properties.Name, type: f.properties.Type };
@@ -205,9 +201,9 @@
 			.data(milNodes)
 			.join('image')
 			.attr('class', 'mil-marker')
-			.attr('href', d => MIL_ICONS[d.type] || MIL_ICONS['All Services'])
+			.attr('href', d => PIN_ICON)
 			.attr('x', d => d.x - ICON_SIZE / 2)
-			.attr('y', d => d.y - ICON_SIZE / 2)
+			.attr('y', d => d.y - ICON_SIZE)
 			.attr('width', ICON_SIZE)
 			.attr('height', ICON_SIZE)
 			.style('cursor', 'pointer')
@@ -281,7 +277,7 @@
 
 				const compareLq = recordByUidCompare[uid]?.lq ?? null;
 				const lqDiff = (Number.isFinite(rec.lq) && Number.isFinite(compareLq)) ? rec.lq - compareLq : null;
-				const yoyTxt = lqDiff == null ? 'N/A' : (lqDiff >= 0 ? '+' : '') + lqDiff.toFixed(2) + '×';
+				const yoyTxt = lqDiff == null ? 'N/A' : (lqDiff >= 0 ? '+' : '') + lqDiff.toFixed(2);
 
 				map.getCanvas().style.cursor = 'pointer';
 
@@ -291,7 +287,7 @@
 					return `${Number(n).toLocaleString()} firms`;
 				}
 				const noData = (rec.n_firms === '0' || rec.n_firms == null);
-				const lqTxt = noData ? 'No data' : Number.isFinite(rec.lq) ? rec.lq.toFixed(2) + '×' : 'Suppressed';
+				const lqTxt = noData ? 'No data' : Number.isFinite(rec.lq) ? rec.lq.toFixed(2) : 'Suppressed';
 
 				let rows;
 				if (lqBasis === 'firms') {
@@ -343,6 +339,10 @@
 	</div>
 </div>
 
+<div class="under-map">
+	Note: All dollar amounts are displayed in constant dollars (2025)
+</div>
+
 <div class="legend-bar">
 	<div class="legend-inner">
 		{#if colourType === 'totals'}
@@ -351,7 +351,8 @@
 				<div class="ramp" style="background: linear-gradient(to right, {SEQ_LO} 0%, {SEQ_HI} 100%)"></div>
 				<div class="ticks">
 					<span style="left:0%">{lqBasis === 'sales' ? formatSales(0) : '0'}</span>
-					<span style="left:100%">{lqBasis === 'sales' ? formatSales(absClamp) : Math.round(absClamp).toLocaleString()}</span>
+					<span style="left:50%">{lqBasis === 'sales' ? formatSales(absClamp / 2) : Math.round(absClamp / 2).toLocaleString()}</span>
+					<span style="left:100%">{lqBasis === 'sales' ? formatSales(absClamp) : Math.round(absClamp).toLocaleString()}+</span>
 				</div>
 			</div>
 		{:else if colourType === 'yoy'}
@@ -359,9 +360,9 @@
 			<div class="ramp-wrap">
 				<div class="ramp" style="background: linear-gradient(to right, {UNDER} 0%, {MID} 50%, {OVER} 100%)"></div>
 				<div class="ticks">
-					<span style="left:0%">−{yoyClamp.toFixed(2)}×</span>
+					<span style="left:0%">−{yoyClamp.toFixed(2)}</span>
 					<span style="left:50%" class="tick-strong">0</span>
-					<span style="left:100%">+{yoyClamp.toFixed(2)}×</span>
+					<span style="left:100%">+{yoyClamp.toFixed(2)}</span>
 				</div>
 			</div>
 			<div class="legend-note">Positive = LQ increased between the two selected years</div>
@@ -370,12 +371,12 @@
 			<div class="ramp-wrap">
 				<div class="ramp" style="background: linear-gradient(to right, {UNDER} 0%, {MID} 50%, {OVER} 100%)"></div>
 				<div class="ticks">
-					<span style="left:0%">{(1/lqClamp).toFixed(2)}×</span>
-					<span style="left:50%" class="tick-strong">1.0×</span>
-					<span style="left:100%">{lqClamp.toFixed(1)}×</span>
+					<span style="left:0%">{(1/lqClamp).toFixed(2)}</span>
+					<span style="left:50%" class="tick-strong">1.0</span>
+					<span style="left:100%">{lqClamp.toFixed(1)}</span>
 				</div>
 			</div>
-			<div class="legend-note">1.0× = national average</div>
+			<div class="legend-note">1.0 = national average</div>
 		{/if}
 		<div class="legend-note"><span class="swatch-grey"></span> No data / suppressed</div>
 	</div>
@@ -386,11 +387,9 @@
     <div class="legend-inner">
         <div class="legend-title">Military bases (CFB)</div>
         <div class="mil-legend-row">
-			{#each Object.entries(MIL_ICONS) as [type, icon]}
-				<div class="mil-legend-item">
-					<img src={icon} alt={type} class="mil-icon" />{type}
-				</div>
-			{/each}
+			<div class="mil-legend-item">
+				<img src={PIN_ICON} alt="DND Facility" class="mil-icon" />
+			</div>
 		</div>
     </div>
 </div>
@@ -405,6 +404,7 @@
 	.mil-legend-row { display: flex; gap: 16px; flex-wrap: wrap; }
 	.mil-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
 	.mil-icon { width: 16px; height: 16px; object-fit: contain; }
+	.under-map { display: flex; font-family: OpenSans; font-size: 12px; color: var(--brandWhite); padding-top: 3px; }
 	.total-overlay {
 		position: absolute; top: 12px; left: 12px;
 		border-radius: 6px; padding: 8px 12px; font-family: OpenSans; border: 1px solid;

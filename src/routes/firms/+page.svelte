@@ -30,7 +30,7 @@
 	let selectedMode = 'PRIMARY';
 	let selectedYear = null;
 	let yearOptions = [];
-	let naicsOptions = []; // [{code, desc}] of individual NAICS codes
+	
 
 	let lqBasis = 'jobs'; // sales vs. firms vs. jobs
 	let colourType = 'lq';   // 'lq' | 'totals'
@@ -130,15 +130,6 @@
 			yearOptions = [...new Set(allRows.map((r) => r.year))].sort((a, b) => a - b);
 			yearIndex = yearOptions.length - 1;
  
-			const naicsMap = new Map();
-			allRows.forEach((r) => {
-				if (!['ALL', 'PRIMARY', 'SECONDARY'].includes(r.NAICS6) && !naicsMap.has(r.NAICS)) {
-					naicsMap.set(r.NAICS, { desc: r.NAICSD, type: r.defence_type });
-				}
-			});
-			naicsOptions = [...naicsMap.entries()]
-				.map(([code, { desc, type }]) => ({ code, desc, type }))
-				.sort((a, b) => (a.type !== b.type ? (a.type === 'primary' ? -1 : 1) : a.code.localeCompare(b.code)));
 		} catch (err) {
 			console.error(err);
 			loadError = 'Unable to load aggregated defence data.';
@@ -211,6 +202,13 @@
 		return lookup;
 	})();
 
+	$: {
+		if (recordByUid) {
+			const vals = Object.values(recordByUid).map(r => r.absVal).filter(v => Number.isFinite(v));
+			console.log('absVal sample:', vals.slice(0, 5), 'clamp:', Math.max(...vals));
+		}
+	}
+
 	onMount(() => {
 		mounted = true;
 		loadData();
@@ -226,7 +224,7 @@
 	<div class="text">
 		<AuthorDate
 			authors="<a href='https://schoolofcities.utoronto.ca/people/karen-chapple/' target='_blank'>Karen Chapple</a>, <a href='https://discover.research.utoronto.ca/8035-tara-vinodrai' target='_blank'>Tara Vinodrai</a>, <a href='https://www.linkedin.com/in/sarahbridgetgibbons/'>Sarah Gibbons</a>, <a href='https://www.linkedin.com/in/yihoi-jung-0b95351b5/' target='_blank'>Yihoi Jung</a>, <a href='https://www.linkedin.com/in/andrewwfeng/' target='_blank'>Andrew Feng</a>"
-			date="Last updated August 18th, 2026."
+			date="Last updated August 28th, 2026."
 		/>
 		<p>
 			Defence spending in Canada has historically been difficult to gather. Canada has historically kept
@@ -272,16 +270,6 @@
 						<option value="ALL">All defence</option>
 						<option value="PRIMARY">Core defence only</option>
 						<option value="SECONDARY">Defence related only</option>
-						<optgroup label="Core Defence Companies">
-							{#each naicsOptions.filter((n) => n.type === 'primary') as n}
-								<option value={n.code}>{n.code} — {n.desc}</option>
-							{/each}
-						</optgroup>
-						<optgroup label="Defence Related Companies">
-							{#each naicsOptions.filter((n) => n.type === 'secondary') as n}
-								<option value={n.code}>{n.code} — {n.desc}</option>
-							{/each}
-						</optgroup>
 					</select>
 				</div>
  
@@ -329,7 +317,7 @@
 					</div>
 
 					<div class="filter-group">
-						<span class="filter-label">Military bases</span>
+						<span class="filter-label">DND Facilities</span>
 						<button class="toggle-btn" on:click={toggleMilitaryBases}>
 							{showMilitaryBases ? 'Hide' : 'Show'}
 						</button>

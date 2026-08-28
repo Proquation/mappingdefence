@@ -18,16 +18,32 @@
 	let map, mapContainer, mapLoaded = false, popup, markerLayer;
 
 	// Sequential ramp only — no LQ / diverging scale for contracts
-	const SEQ_LO = '#a8d4f5', SEQ_HI = '#4db8ff';
+	const PIN_ICON = `${base}/img/pin_icon.svg`;
 
-	const MIL_ICONS = {
-		'Canadian Army': `${base}/img/Badge_of_the_Canadian_Army.svg`,
-		'Royal Canadian Airforce': `${base}/img/Badge_of_the_RCAF.svg`,
-		'Royal Canadian Navy': `${base}/img/Badge_of_the_Royal_Canadian_Navy.svg`,
-		'All Services': `${base}/img/Badge_of_the_Canadian_Armed_Forces.png`
-	};
+	// const MIL_ICONS = {
+	// 	'Canadian Army': `${base}/img/Badge_of_the_Canadian_Army.svg`,
+	// 	'Royal Canadian Airforce': `${base}/img/Badge_of_the_RCAF.svg`,
+	// 	'Royal Canadian Navy': `${base}/img/Badge_of_the_Royal_Canadian_Navy.svg`,
+	// 	'All Services': `${base}/img/Badge_of_the_Canadian_Armed_Forces.png`
+	// };
 
 	let centroidByUid = {};
+
+	const PROVINCE_ORDER = [
+		'Newfoundland and Labrador',
+		'Prince Edward Island',
+		'Nova Scotia',
+		'New Brunswick',
+		'Quebec',
+		'Ontario',
+		'Manitoba',
+		'Saskatchewan',
+		'Alberta',
+		'British Columbia',
+		'Nunavut',
+		'Northwest Territories',
+		'Yukon'
+	];
 
 	$: mapBg      = darkMode ? '#333333' : '#e8e8e8';
 	$: provFill   = darkMode ? '#1a1a1a' : '#F2F2F2';
@@ -134,9 +150,7 @@
 	
 
 	function colorFor(b) {
-		if (!(b.colorVal > 0)) return noDataColor;
-		const t = Math.min(1, b.colorVal / Math.max(1, effectiveClamp));
-		return d3.interpolateRgb(SEQ_LO, SEQ_HI)(t);
+		return darkMode ? '#ffffff' : '#000000';
 	}
 
 	// Contracts have no "rural" concept the way company LQ data does, but
@@ -144,6 +158,19 @@
 	// ever added back to contracts_cma_agg.csv later.
 	$: cmaBubbles = bubbles.filter(b => !String(b.uid).startsWith('RURAL_'));
 	$: ruralBubbles = bubbles.filter(b => String(b.uid).startsWith('RURAL_'));
+
+	$: ruralTableRows = PROVINCE_ORDER.map((prov) => {
+		// Match loosely — handles "Rural Quebec", "Quebec (Rural)", etc. without needing to know the exact naming convention in your CSV
+		const match = ruralBubbles.find((b) => b.name && b.name.includes(prov));
+		if (match) return match;
+		return {
+			uid: `RURAL_${prov}`,
+			name: `${prov}`,
+			value: null,
+			count: null,
+			vendors: null
+		};
+	});
 
 	$: totalMetric = (() => {
 		if (metric === 'count')   return cmaBubbles.map(b => b.count).reduce((s, v) => s + v, 0);
@@ -157,29 +184,18 @@
 	$: totalDisplay = metric === 'value' ? formatValue(totalMetric) : totalMetric.toLocaleString();
 
 
-	export let sizeBins = null; // { thresholds: number[], radii: number[] } from parent, fixed across years for current filter
-
-	const DEFAULT_BINS = { thresholds: [1], radii: [3, 25] };
-	$: effectiveBins = sizeBins && sizeBins.thresholds?.length ? sizeBins : DEFAULT_BINS;
-	$: effectiveClamp = effectiveBins.thresholds[effectiveBins.thresholds.length - 1]; // used only for color gradient normalization
+	$: maxSize = Math.max(1, ...bubbles.map(b => b.sizeVal));
 
 	function radiusForValue(v) {
-		const { thresholds, radii } = effectiveBins;
-		for (let i = 0; i < thresholds.length; i++) {
-			if (v < thresholds[i]) return radii[i];
-		}
-		return radii[radii.length - 1];
+		return 3 + Math.sqrt(Math.min(Math.max(v, 0), maxSize) / maxSize) * 25;
 	}
 
 	$: sizeLegendSteps = (() => {
-		const { thresholds, radii } = effectiveBins;
-		return radii.map((rBase, i) => {
-			const r = Math.min(Math.max(3, rBase * currentZoomScale), MAX_LEGEND_R);
-			let label;
-			if (i === 0) label = `< ${formatSizeVal(thresholds[0])}`;
-			else if (i === radii.length - 1) label = `${formatSizeVal(thresholds[i - 1])}+`;
-			else label = `${formatSizeVal(thresholds[i - 1])}–${formatSizeVal(thresholds[i])}`;
-			return { r, label };
+		if (!maxSize) return [];
+		const steps = [0.05, 0.15, 0.4, 1]; // fractions of maxSize — tune spacing here
+		return steps.map((t) => {
+			const value = maxSize * t;
+			return { r: Math.min(radiusForValue(value), MAX_LEGEND_R), label: formatSizeVal(value) };
 		});
 	})();
 
@@ -209,7 +225,7 @@
 
 	function drawMilitaryPoints(g) {
 		if (!showMilitaryBases || !militaryGeojson) return;
-		const ICON_SIZE = 20;
+		const ICON_SIZE = 16;
 		const milNodes = militaryGeojson.features.map(f => {
 			const p = map.project(f.geometry.coordinates);
 			return { x: p.x, y: p.y, name: f.properties.Name, type: f.properties.Type };
@@ -219,9 +235,9 @@
 			.data(milNodes)
 			.join('image')
 			.attr('class', 'mil-marker')
-			.attr('href', d => MIL_ICONS[d.type] || MIL_ICONS['All Services'])
+			.attr('href', d => PIN_ICON)
 			.attr('x', d => d.x - ICON_SIZE / 2)
-			.attr('y', d => d.y - ICON_SIZE / 2)
+			.attr('y', d => d.y - ICON_SIZE)
 			.attr('width', ICON_SIZE)
 			.attr('height', ICON_SIZE)
 			.style('cursor', 'pointer')
@@ -247,7 +263,7 @@
 		}
 		console.time('drawBubbles');
 		const zoom = map.getZoom();
-		const zoomScale = Math.max(0.1, (zoom - 2) / 2);
+		const zoomScale = Math.max(0.5, Math.min(2.2, (zoom - 1) / 3));
 		const labelMinR = zoom < 2 ? 999 : zoom < 4 ? 18 : zoom < 5.5 ? 12 : 8;
 		const svg = d3.select(markerLayer);
 		currentZoomScale = zoomScale;
@@ -405,31 +421,18 @@
 	</div>
 </div>
 
-<div class="legend-bar">
-	<div class="legend-inner">
-		<div class="legend-title">
-			{metric === 'value' ? 'Total contract value' : metric === 'count' ? 'Number of contracts' : 'Number of vendors'}
-		</div>
-		<div class="ramp-wrap">
-			<div class="ramp" style="background: linear-gradient(to right, {SEQ_LO} 0%, {SEQ_HI} 100%)"></div>
-			<div class="ticks">
-				<span style="left:0%">0</span>
-				<span style="left:100%">{metric === 'value' ? formatValue(effectiveClamp) : Math.round(effectiveClamp).toLocaleString()}+</span>
-			</div>
-		</div>
-	</div>
+<div class="under-map">
+	Note: All dollar amounts are displayed in constant dollars (2025)
 </div>
 
 {#if showMilitaryBases}
 <div class="legend-bar" style="margin-top: 4px;">
 	<div class="legend-inner">
 		<div class="legend-title">Canadian Forces Base (CFB)</div>
-		<div class="mil-legend-row">
-			{#each Object.entries(MIL_ICONS) as [type, icon]}
-				<div class="mil-legend-item">
-					<img src={icon} alt={type} class="mil-icon" />{type}
-				</div>
-			{/each}
+        <div class="mil-legend-row">
+			<div class="mil-legend-item">
+				<img src={PIN_ICON} alt="DND Facility" class="mil-icon" />
+			</div>
 		</div>
 	</div>
 </div>
@@ -441,19 +444,19 @@
 	<table>
 		<thead>
 			<tr>
-				<th>Region</th>
+				<th>Rural portion of province</th>
 				<th>Total value</th>
 				<th>Contracts</th>
 				<th>Vendors</th>
 			</tr>
 		</thead>
 		<tbody>
-			{#each ruralBubbles.sort((a,b) => b.value - a.value) as b}
+			{#each ruralTableRows as b}
 			<tr>
 				<td>{b.name}</td>
-				<td>{formatValue(b.value)}</td>
-				<td>{b.count.toLocaleString()}</td>
-				<td>{b.vendors.toLocaleString()}</td>
+				<td>{b.value == null ? 'N/A' : formatValue(b.value)}</td>
+				<td>{b.count == null ? 'N/A' : b.count.toLocaleString()}</td>
+				<td>{b.vendors == null ? 'N/A' : b.vendors.toLocaleString()}</td>
 			</tr>
 			{/each}
 		</tbody>
@@ -469,6 +472,7 @@
 	.mil-legend-row { display: flex; gap: 16px; flex-wrap: wrap; }
 	.mil-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
 	.mil-icon { width: 16px; height: 16px; object-fit: contain; }
+	.under-map { display: flex; font-family: OpenSans; font-size: 12px; color: var(--brandWhite); padding-top: 3px; }
 
 	.map-row {
 		display: flex;
@@ -547,16 +551,6 @@
 	}
 	.legend-title { font-family: OpenSansBold; margin-bottom: 6px; align-self: flex-start; }
 	.legend-inner { width: 680px; }
-	.ramp-wrap { position: relative; width: 100%; margin: 0 auto; }
-	.ramp { width: 100%; height: 12px; border-radius: 2px; }
-	.ticks { position: relative; height: 18px; margin-top: 2px; }
-	.ticks span {
-		position: absolute; transform: translateX(-50%);
-		font-size: 11px; color: var(--brandWhite); white-space: nowrap;
-	}
-	.ticks span:first-child { transform: none; }
-	.ticks span:last-child  { transform: translateX(-100%); }
-
 	.map-wrapper :global(.maplibregl-ctrl-bottom-left .maplibregl-ctrl) {
 		filter: invert(1) brightness(0.7);
 	}
