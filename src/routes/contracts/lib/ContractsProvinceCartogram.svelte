@@ -58,8 +58,10 @@
 	$: usLine   = darkMode ? '#2a2a2a' : '#a8a8a8';
 	$: noDataColor = darkMode ? '#666666' : '#666666';
 	$: labelColor  = darkMode ? '#ffffff' : '#111111';
-	$: labelShadow = darkMode ? '0 1px 3px rgba(0,0,0,0.8), 0 0 6px rgba(0,0,0,0.6)' : '0 1px 2px rgba(255,255,255,0.8)';
-
+	$: labelShadow = darkMode
+		? '0 1px 3px rgba(0,0,0,0.8), 0 0 6px rgba(0,0,0,0.6)'
+		: '0 1px 3px rgba(255,255,255,0.9), 0 0 6px rgba(255,255,255,0.5)';
+		
 	$: if (mapLoaded) {
 		map.setPaintProperty('background', 'background-color', mapBg);
 		if (map.getLayer('prov-fill')) map.setPaintProperty('prov-fill', 'fill-color', provFill);
@@ -152,6 +154,8 @@
 		return 3 + Math.sqrt(Math.min(Math.max(v, 0), maxSize) / maxSize) * 25;
 	}
 
+	const MAX_LEGEND_R = 40;
+
 	$: sizeLegendSteps = (() => {
 		if (!maxSize) return [];
 		const steps = [0.05, 0.15, 0.4, 1]; // fractions of maxSize — tune spacing here
@@ -160,6 +164,8 @@
 			return { r: Math.min(radiusForValue(value), MAX_LEGEND_R), label: formatSizeVal(value) };
 		});
 	})();
+
+	$: console.log('PROV_POINTS normalized keys:', Object.keys(centroidByUid));
 
 
 	function formatSizeVal(v) {
@@ -229,18 +235,13 @@
 			.attr('fill-opacity', 0.85);
 
 		node.append('text')
-			.attr('text-anchor', 'middle').attr('dy', '-0.1em')
+			.attr('text-anchor', 'middle').attr('dy', '0.2em')
 			.style('font-family', 'OpenSansBold').style('font-size', '11px')
 			.style('fill', labelColor).style('pointer-events', 'none')
 			.style('text-shadow', labelShadow)
 			.text(d => abbrev(d.name));
 
-		node.append('text')
-			.attr('text-anchor', 'middle').attr('dy', '1.1em')
-			.style('font-family', 'OpenSans').style('font-size', '10px')
-			.style('fill', darkMode ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)')
-			.style('pointer-events', 'none')
-			.text(d => formatValue(d.value));
+		
 
 		drawMilitaryPoints(g);
 	}

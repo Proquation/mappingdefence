@@ -1,5 +1,5 @@
 <script>
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount, tick } from 'svelte';
 	import maplibregl from 'maplibre-gl';
 	import 'maplibre-gl/dist/maplibre-gl.css';
 	import * as d3 from 'd3';
@@ -109,6 +109,14 @@
 
 	$: if (mapLoaded && usGeojson) addUsLayer();
 	$: if (mapLoaded && provinceGeojson) addProvinceLayer();
+	
+	let centroidsComputedFor = null;
+
+	$: if (mapLoaded && cmaGeojson && cmaGeojson !== centroidsComputedFor) {
+		computeCentroids();
+		centroidsComputedFor = cmaGeojson;
+		drawBubbles();
+	}
 
 	function addUsLayer() {
 		if (!map) return;
@@ -435,7 +443,7 @@
 		});
 		map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-left');
 
-		map.on('load', () => {
+		map.on('load', async () => {
 			const overlay = document.createElement('div');
 			overlay.style.cssText = 'position:absolute;inset:0;pointer-events:none;';
 			const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -460,8 +468,8 @@
 
 			computeCentroids();
 			mapLoaded = true;
+			await tick(); // let bubbles/cmaBubbles recompute before drawing
 			drawBubbles();
-
 			map.on('move', drawBubbles);
 		});
 

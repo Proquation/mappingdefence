@@ -230,7 +230,13 @@
 		totalRowsForGeometry: (currentAggData || []).length,
 		activeRowsCount: activeRows.length,
 		sampleRow: (currentAggData || [])[0]
+		
 	});
+
+	$: if (selectedGeometry === 'prov') {
+		console.log('PROV region_uids in activeRows:', activeRows.map(r => r.region_uid));
+		console.log('PROV region_names in activeRows:', activeRows.map(r => r.region_name));
+	}
 
 	$: {
 		const numericYears = yearOptions.filter(y => y !== 'ALL');
